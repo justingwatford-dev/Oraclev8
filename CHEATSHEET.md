@@ -7,11 +7,15 @@ lockstep steering/cap/drag, raw-theta tracker diagnostics, and NaN-check gating 
 beta harnesses; `reanalyze_gyre.py` now requires `--tag` when multiple gyre snapshot sets exist and writes
 tagged figures (for example `gyre_precession_v64.png`). Until fresh storm logs are regenerated from these
 cleaned scripts, treat the 3-storm +120 km landfall-fix cluster as **provisional**, not checked-in evidence.
-The checked-in logs still support the older same-latitude rows (Hugo +131.2 km E, Katrina +126.5 km E,
-Ivan +72.8 km E).
+The checked-in logs still support the same-latitude rows for Katrina +126.5 km E and Ivan +72.8 km E;
+**Hugo's same-latitude row is now +102.7 km E / −2.2 h** from the corrected storm-agnostic `run_hugo.py`
+(was +131.2 km E / +1.2 h — the earlier driver was NOT on the Katrina/Ivan storm-agnostic stack; see the
+HURDAT2_VERIFICATION.md scorecard correction).
 
 **Version:** V8.7 (Vmax-dependence test DECISIVE: across a 3× swirl range (Vmax_est 32/19/12) the gyre wind-up (~96-103°) & steering poleward-offset (~+17-23° of canonical NW) are FLAT → the directional bias is INTENSITY-INDEPENDENT → β-Rossby/structural, NOT swirl-shear. Resolves the time-evol tension (direction Vmax-indep, speed ∝ strength). FULL CHAIN: 3-storm +120km E cluster → genuine β-drift → β-gyre equilibrates ~20° too poleward (NNW vs NW) → intensity-independent → eastward track bias. β-drift MECHANISM CHARACTERIZATION COMPLETE. Next = publishability-critical BASELINE + MORE STORMS)
-**Last updated:** V8.7 storm re-runs — Ivan + Hugo run clean (June 14 2026). **Two big shifts since
+**Last updated:** Hugo storm-agnostic rerun (June 19 2026) — the June-14 Hugo run was NOT on the
+storm-agnostic stack (driver settings differed from Katrina/Ivan); corrected and rerun →
+**+102.7 km E / −2.2 h** (same-lat 32.5°N). **Two big shifts since
 V8.7-pre:**
 **(1) The β-drift CALIBRATION is closed** (the *one-knob* result — distinct from the aim-FLOOR
 question, which peer review RE-OPENED; see NOW). Magnitude and aim collapse onto ONE structural control —
@@ -28,9 +32,13 @@ other three were diagnostics lying about a healthy model (see the dedicated sect
 the real bug and the false-alarm collisions are fixed.
 **First clean V8.7 storm results** (`INIT_SOURCE="hurdat2"`): Ivan **+70.4 km E /
 −8.4 h** (over-translates poleward, along +280 km by t42, tracks accelerating ERA5 v_env), Hugo
-**+133 km E / +1.1 h** (under-translates, along −130 km). **Opposite along-track signs ⇒ NO systematic
-poleward model bias**; the **eastward cross-track (~+110–140 km at landfall) IS the systematic β-aim
-residual** (too poleward → westward-deficient → drifts E).
+**+102.7 km E / −2.2 h** (storm-agnostic rerun June 19; over-translates, along +22 km at the landfall
+fix — the earlier +133 km / +1.1 h / −130 km under-translation came from a driver NOT on the
+storm-agnostic stack). ⚠ **TODO (reframe — do not cite as written):** with the corrected Hugo, BOTH
+storms now over-translate (cross early), so the old **"opposite along-track signs ⇒ NO systematic
+poleward bias"** inference is CONTRADICTED — it now reads as a systematic poleward over-translation of
+varying magnitude. The **eastward cross-track (~+110–140 km at landfall) IS the systematic β-aim
+residual** (too poleward → westward-deficient → drifts E) — this part is unaffected.
 **(3) The controlled taper A/B is DONE (Ivan, same hurdat2 init).** The model is **deterministic** —
 taper-start 250 reproduced the original runs BYTE-for-BYTE, so the original "calibrated 200" storm
 set was effectively running **250**, not 200. Clean A/B: **250 → +70.4 / −8.4 h** (cross@landfall
@@ -289,9 +297,9 @@ vortex-region integral.
 | V8.6 Katrina rerun-1 | true init | **−3.2 h early, +126.5 km E** (predicted +80…+130 ✓). Over-translates N late (+95 along @t36); cross grows ~steadily under a persistent ~−2 m/s obs−DLM gap |
 | **V8.7 Ivan** | hurdat2 + proj fix; **taper-start 250** (was mislabeled "200"; A/B-confirmed byte-identical) | **PROVISIONAL until log is checked in:** −8.4 h early, +70.4 km E (threshold; cross@landfall +141.5, along +279.5). OVER-translates poleward: along +280 km by t42, crosses 30°N at t33.6, tracks accelerating ERA5 v_env (3.9→6.6). Cross ~+110–140 at landfall-time. |
 | **V8.7 Ivan (taper A/B)** | hurdat2 + proj fix; **taper-start 200** (true calibrated) | **PROVISIONAL until log is checked in:** −8.1 h, +67.6 km E (cross@landfall +126.3, along +249.2). vs 250: ~15 km W, ~30 km less over-run — predicted direction but ~¼ of harness; eastward residual taper-insensitive. |
-| **V8.7 Hugo** | hurdat2 init + projection fix; **taper-start 200** (frac 0.40, now persisted in script) | **PROVISIONAL until rerun:** +1.1 h late, +133.3 km E (threshold; legacy +158.9). UNDER-translates: along −130 km by t30. Cross +110.5 at landfall-fix (t28). Opposite along sign to Ivan would support no systematic poleward bias; rerun before citing. |
+| **V8.7 Hugo** | hurdat2 init + projection fix; **taper-start 200** (frac 0.40); **storm-agnostic rerun June 19 2026** | **−2.2 h early, +102.7 km E** (same-lat 32.5°N; legacy +128.3). OVER-translates: along +22 km at the landfall fix; cross **+111.3** at landfall-fix (t28). Supersedes the provisional +1.1 h / +133.3 km E / −130 km under-translation run, whose driver was NOT on the storm-agnostic stack. ⚠ Hugo now over-translates like Ivan → the old "opposite along sign ⇒ no systematic poleward bias" argument needs reframing (see header TODO). |
 | **V8.7 Katrina** | hurdat2 init + projection fix; **taper-start 200** (frac 0.40, now persisted in script) | **PROVISIONAL until rerun:** −2.6 h early, +114.3 km E (same-lat, thresh 29.1°N; +124.6 at landfall-fix 29.3°N). MILD over-run (+42→+77). Do not call this 3-for-3 until checked-in logs are regenerated. |
-| **3-storm cross-track cluster** (calibrated taper-start 200 target) | landfall-fix cross-track | **PROVISIONAL until rerun from cleaned scripts:** Hugo +110.5 · Katrina +124.6 · Ivan +126.3 → mean +120 km, all E, span only ~16 km. The code now persists `taper_start_frac=0.40` in all three storm drivers and the testbed also uses taper-start 200, but checked-in logs still show the older same-lat rows (Hugo +131.2, Katrina +126.5, Ivan +72.8). Regenerate logs before citing the +120 km cluster as evidence. |
+| **3-storm cross-track cluster** (calibrated taper-start 200 target) | landfall-fix cross-track | **Hugo regenerated June 19 (storm-agnostic):** Hugo **+111.3** · Katrina +124.6 · Ivan +126.3 → mean +120 km, all E, span only ~16 km. Katrina/Ivan still **PROVISIONAL until their logs are checked in**. The code persists `taper_start_frac=0.40` in all three drivers and the testbed uses taper-start 200; checked-in same-lat rows now Hugo **+102.7** (corrected), Katrina +126.5, Ivan +72.8. |
 | **FORMULATION PROBE** (gate-beta-diffform / -divdamp; in-band, ∇⁴ ref 350°/west+0.42/Vmax42) | mature aim vs operator/damper | **Arm A ∇²:** nu_H 1.2e4→5e4→2e5 = hdg 347/338/318, |drift| 2.30/1.92/1.38, Vmax 35/21/**7** → rotation COLLINEAR w/ Vmax collapse (confound); matched-strength effect only −3°. **Arm B eps** 0.5/0.25/0.1 = hdg 350/350/350 (FLAT), Vmax 42/37/34 (preserved); eps=0 NaN (load-bearing). → **diffusion-form + divergence-damper EXONERATED; aim locked to VORTEX**. Bias = spurious ~NE (1.0 N + 1.0 E vs canonical NW) |
 | **STRUCTURE PROBE** (gate-beta-rmax @nx480 / gate-beta-vmax @nx320, ∇⁴) | aim vs Rmax & init-Vmax | **Rmax** 31/46/75km → hdg 343/347/351, Vend 32/36/42. **Vmax** init 64/50/35/21 → Vend 42/35/27/18, hdg 350/348/344/338 (all DECAYED — leak didn't refill). Both trace the SAME aim=f(Vmax_end) curve → **path-independent**. DECOMP: **WEST≈const 0.41; NORTH∝Vmax (~0.06·Vmax thru origin)** → looked like spurious poleward drift |
 | **f-PLANE DECOMP** (gate-beta-fdecomp; β on vs off × Vmax 64/35/21) | isolate spurious vs true β-drift | **f-plane drift = ZERO** (fp_N/fp_W = 0.02/−0.00/−0.01 — vortex doesn't move with β off!) → drift is **GENUINE β-drift, NOT artifact**. true β-drift (β−f): N 2.43/1.45/0.96, W 0.40/0.42/0.38 → grows AND rotates poleward w/ Vmax (338→351°). → bias is a DIRECTIONAL gyre-orientation error → **β-gyres OVER-ROTATE poleward** (∝Vmax); seat = equilibration. Next: time-evolution + gyre field |
@@ -467,11 +475,14 @@ fine; the cached Thomas (`_solve_batch` / `_get_thomas_cache`) matches the refer
   domain-invariant). Storm fix applied: `TAPER_START_M=200_000` (one shared value). See the
   β-DRIFT CALIBRATION section. **The remaining systematic track error is the cross-track (E) aim
   residual; closing the last ~8° needs the gyre-level probe.**
-- **STORM TRACK STRUCTURE (V8.7, Ivan+Hugo clean):** **cross-track (eastward) is SYSTEMATIC**
-  (~+110–140 km at landfall both storms) = the β-aim residual (too poleward → westward-deficient →
-  drifts E). **Along-track is STORM-SPECIFIC** and opposite-signed — Ivan over-translates (+280 km
-  ahead by t42, −8.4 h early, tracks accelerating ERA5 v_env 3.9→6.6), Hugo under-translates
-  (−130 km behind, +1.1 h late) ⇒ **no systematic poleward model bias.** Open question raised by
+- **STORM TRACK STRUCTURE (V8.7, + Hugo storm-agnostic rerun June 19):** **cross-track (eastward) is
+  SYSTEMATIC** (~+110–140 km at landfall both storms) = the β-aim residual (too poleward →
+  westward-deficient → drifts E). Along-track: Ivan over-translates (+280 km ahead by t42, −8.4 h
+  early, tracks accelerating ERA5 v_env 3.9→6.6); **Hugo now over-translates too** (+22 km ahead,
+  −2.2 h early — corrected storm-agnostic run; the old −130 km / +1.1-h-late under-translation was the
+  non-storm-agnostic driver). ⚠ **TODO (reframe):** with both storms over-translating, the former
+  **"opposite along sign ⇒ no systematic poleward model bias"** conclusion no longer holds — decide
+  how to frame the now-systematic poleward over-translation. Open question raised by
   Ivan: is the ERA5 DLM closer to *storm motion* than *environmental steering*? If so, adding model
   β-drift on top **double-counts** propagation → poleward over-run. Worth testing directly
   (`storm_data` note: fallback steering was "estimated from storm motion vector").

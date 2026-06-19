@@ -11,7 +11,14 @@ With storm initialization drawn directly from HURDAT2 (Section X), Oracle's land
 resolve into two cleanly separable components. The along-track component is storm-specific and
 changes sign and magnitude between cases (Ivan strongly over-translates, Hugo under-translates,
 Katrina mildly over-translates), indicating no systematic
-propagation-speed bias. The cross-track component, by contrast, is the same sign in every case: each
+propagation-speed bias.<!-- ⚠ TODO (2026-06-19, Hugo storm-agnostic rerun): THIS CLAIM NO
+LONGER HOLDS AS WRITTEN. The corrected run_hugo.py (now bit-identical storm-agnostic stack
+to run_katrina/run_ivan) has Hugo crossing 32.5°N 2.2 h EARLY with along-track +22 km AHEAD
+at the landfall fix — i.e. Hugo now OVER-translates, not under-translates. All three storms
+now over-translate (cross early: Hugo −2.2 h, Katrina −3.2 h, Ivan −8.3 h), so "changes sign
+→ no systematic propagation bias" is contradicted; it now reads as a systematic poleward
+over-translation of varying magnitude. The cross-track cluster below is unaffected. REFRAME
+THIS PARAGRAPH before submission. See HURDAT2_VERIFICATION.md scorecard correction note. --> The cross-track component, by contrast, is the same sign in every case: each
 simulated vortex tracks to the right of the observed best track. Evaluated at the observed landfall
 time, the eastward cross-track displacement is +111, +125, and +126 km for Hugo, Katrina, and Ivan
 respectively (mean +120 km) — a tight clustering, same-signed and spanning only 16 km, despite the
@@ -98,8 +105,11 @@ than to conceal them behind compensating errors (Section X).
 - **Section X** cross-refs: (1) HURDAT2 initialization; (2) the landfall track-error table/figure
   for Hugo/Ivan/Katrina; (3) the compensating-errors methodology paragraph. Wire to your actual
   numbers.
-- **Housekeeping (cleanup audit 2026-06-19).** (1) Hugo's landfall-fix cross-track **+110.5 km**
-  is provisional until regenerated from the cleaned script. (2) Taper-start consistency is now
+- **Housekeeping (cleanup audit 2026-06-19).** (1) Hugo's landfall-fix cross-track **+111.3 km**
+  (obs landfall t+28 h) was regenerated 2026-06-19 from the corrected storm-agnostic
+  `run_hugo.py` — confirms the +111 km cited in §results; provisional flag cleared. (NB the same
+  rerun flips Hugo's along-track sign to over-translation — see the ⚠ note at the §results
+  along-track paragraph.) (2) Taper-start consistency is now
   encoded in the scripts: all three storm drivers pass the calibrated **taper-start 200 km**
   (frac 0.40), and the β-drift testbed carries the same outer-structure setting. The checked-in
   logs still need to be replaced before the +120 km three-storm cluster is cited as reproducible

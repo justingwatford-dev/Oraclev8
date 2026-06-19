@@ -169,7 +169,20 @@ something else is in play.
 | storm | predicted | actual | verdict |
 |---|---|---|---|
 | Katrina | +80…+130 km E, timing ≈ −2 ± 1.5 h | **+126.5 km E, −3.2 h** | inside band; timing at the edge |
-| Hugo | +90…+130 km E, timing small | **+131.2 km E, +1.2 h** | 1.2 km over the stated band — boundary hit; ~+110 ± 30 framing contains it |
+| Hugo † | +90…+130 km E, timing small | **+102.7 km E, −2.2 h** | inside the band; timing −2.2 h (early), just beyond the ±1.5 h window |
+
+† **Correction (June 19 2026).** The original Hugo entry (**+131.2 km E, +1.2 h**)
+was scored on a `run_hugo.py` that was NOT on the storm-agnostic stack used by
+`run_katrina.py` / `run_ivan.py`. With the driver corrected (its cap + wind-taper +
+lockstep-steering settings are now bit-identical to run_katrina — see `run_hugo.py`),
+the storm-agnostic rerun gives **+102.7 km E, −2.2 h** (same-latitude 32.5°N; obs
+crossed t+26.9 h / 79.53°W, V8 t+24.7 h / 78.43°W; legacy landfall-point metric
++128.3 km; landfall-fix cross-track +111.3 km at t+28). This moves Hugo from a
+boundary hit to comfortably inside the +90…+130 km band. ⚠ It also **flips the
+along-track sign**: the corrected run crosses 2.2 h *early* (along +22 km at the
+landfall fix) where the old run was +1.2 h late (along −130 km). All three storms
+now over-translate — see the along-track argument in
+`PAPER_track_error_characterization.md` §results, which needs revisiting.
 
 The superposition assumption held: removing the init artifacts exposed the same
 eastward residual in both storms (Δ between storms ≈ 5 km). Segment analysis
