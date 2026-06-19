@@ -1,0 +1,32 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# Local/editor cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local secrets/config
+.env
+*.key
+cds_api*.txt
+
+# Large generated/data artifacts
+*.nc
+gyre_snap*.npz
+
+# Ad-hoc run output
+output.txt
+*_test_*.txt

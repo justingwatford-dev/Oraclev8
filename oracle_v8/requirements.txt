@@ -1,0 +1,20 @@
+# Oracle V8 — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Core numerics ─────────────────────────────────────────────────────────────
+numpy>=1.26
+scipy>=1.12
+
+# ── Atmospheric / geospatial data ─────────────────────────────────────────────
+netCDF4>=1.6          # ERA5 .nc steering files
+
+# ── GPU acceleration (optional) ───────────────────────────────────────────────
+# Uncomment the line matching your CUDA version.
+# Oracle falls back to NumPy automatically if CuPy is not installed.
+# See: https://docs.cupy.dev/en/stable/install.html
+#
+# cupy-cuda12x>=13.0   # CUDA 12.x  (RTX 40-series, RTX 5070, etc.)
+# cupy-cuda11x>=13.0   # CUDA 11.x
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=8.0

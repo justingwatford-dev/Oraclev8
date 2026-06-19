@@ -1,0 +1,59 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ── Distribution / packaging ──────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# ── Run logs (generated output — not source) ──────────────────────────────────
+hugo_test_*.txt
+Katrina_test_*.txt
+*_test_*.txt
+translation_test.txt
+logs/
+runs/output/
+
+# ── ERA5 / NetCDF data files ───────────────────────────────────────────────────
+# Large binary files — obtain via era5_steering.py + CDS API key.
+# To commit them anyway: git add -f hugo_era5_steering.nc
+*.nc
+
+# ── Jupyter ────────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ── OS artifacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Secrets / local config ────────────────────────────────────────────────────
+.env
+*.key
+cds_api*.txt
