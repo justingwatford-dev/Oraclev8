@@ -1,0 +1,4 @@
+# Root dependency entry point.
+# The canonical dependency list lives with the package code.
+
+-r oracle_v8/requirements.txt
