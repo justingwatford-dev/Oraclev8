@@ -27,7 +27,6 @@ cds_api*.txt
 *.nc
 gyre_snap*.npz
 /hurdat2.txt
-/oracle_v8/CHEATSHEET.md
 
 # Ad-hoc run output
 output.txt
