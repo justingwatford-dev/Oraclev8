@@ -1,4 +1,19 @@
 """
+================================================================================
+DEPRECATED — DO NOT USE FOR NEW RUNS.  Retained for provenance only.
+================================================================================
+This per-storm driver predates the V8.7 config unification.  It carries a
+storm-specific configuration that can drift from the shared production config —
+the exact failure mode that left Hugo without newtonian_cooling / surface_drag,
+with a dormant REQUIRE_ERA5 guard and the old one-shot tracker.  It will NOT
+reproduce the storm-agnostic validation and MUST NOT be used for results.
+
+    USE INSTEAD:   python -m oracle_v8.run_storm Katrina
+
+Single source of truth:  oracle_v8/production_config.py  +  oracle_v8/run_storm.py
+Running this script requires the explicit ORACLE_ALLOW_LEGACY=1 override (guard below).
+================================================================================
+
 Oracle V8 — Hurricane Katrina (2005) Track Simulation
 ====================================================
 First historical TC track run.  Initialized from HURDAT2 at
@@ -472,4 +487,14 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    import os
+    if os.environ.get("ORACLE_ALLOW_LEGACY") != "1":
+        sys.stderr.write(
+            "\n  This legacy per-storm driver is DEPRECATED (pre-V8.7 config; can drift).\n"
+            "  It will not reproduce the storm-agnostic results.\n\n"
+            "  Use the unified runner:\n"
+            "      python -m oracle_v8.run_storm Katrina\n\n"
+            "  To run this legacy script anyway, set ORACLE_ALLOW_LEGACY=1.\n\n"
+        )
+        raise SystemExit(2)
     sys.exit(main())
