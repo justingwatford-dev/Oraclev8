@@ -1,0 +1,342 @@
+====================================================================
+ORACLE V8 — HURRICANE IVAN (2004) TRACK  [unified run_storm]
+====================================================================
+  HURDAT2 id:   AL092004   init 2004-09-14 12Z  (source: hurdat2_file)
+  Position:     23.0°N, 86.0°W
+  Vmax:         64.3 m/s (125 kt)   P_min 930.0 mb
+  Rmax run:     75 km (5×dx)   B 1.5 (frozen)
+  Domain:       5000 km, nx=320 (dx=15.625 km) — geometry-derived
+  Wind taper:   ON  R_env=500 km  taper-start frac 0.40
+  Run:          6360 steps = 53 h  (dt 30s, CFL 0.123)
+  Obs landfall: 30.2°N, 87.9°W  t+42.83h   threshold 30.0°N
+
+Loading ERA5 DLM steering winds...
+ERA5Steering loaded [Ivan]: 24 times (-12.0h to +57.0h relative to init), lat 12.0–42.0°N, lon 70.0–105.0°W
+
+ERA5 DLM steering at Ivan HURDAT2 best-track positions:
+   t(h)     lat     lon    u_env    v_env
+   ----     ---     ---   ------   ------
+    0.0   23.00   86.00    -1.06    +3.90
+    6.0   23.70   86.50    -1.38    +4.39
+   12.0   24.70   87.00    -0.92    +4.31
+   18.0   25.60   87.40    -0.84    +5.37
+   24.0   26.70   87.90    -0.26    +5.98
+   30.0   27.90   88.20    +0.60    +6.62
+  ERA5 steering: ACTIVE  (time-varying — init at t=0 DLM u=-1.06 v=+3.90, relax τ=3.0 h)
+
+Initializing vortex...
+  0.2s  HollandVortex: Vmax=64 m/s  Rmax=75 km  B=1.50  f=5.70e-05  R_env=500 km  wind_taper=ON start=200 km (frac=0.40)  P_min~-8603 Pa  z_peak=8 km  sz=4 km  u_env=-1.1  v_env=3.9 m/s
+
+Pre-balancing (5 projection-only iterations)...
+  iter 1: phi_rms=14.07 Pa  max|u|=63.529 m/s
+  iter 2: phi_rms=1.01 Pa  max|u|=63.528 m/s
+  iter 3: phi_rms=0.80 Pa  max|u|=63.527 m/s
+  iter 4: phi_rms=0.65 Pa  max|u|=63.527 m/s
+  iter 5: phi_rms=0.53 Pa  max|u|=63.526 m/s
+  Pre-balance complete — initial divergence removed.
+  Intensity cap: ACTIVE  |V'| → 70 m/s (τ=300s, perturbation-relative)
+
+  Time(h)  Lat(°N)  Lon(°W)     φ_min(Pa)   max|u|(m/s)
+  ------  -------  -------    ----------   -----------
+     0.0    22.90    86.24          -4.4    6.3380e+01 [-1.1,+3.9] [the] [spin-up]  θraw=22.90N/86.24W
+     0.5    22.82    86.21          -2.1    5.9413e+01 [-1.1,+3.9→-1.3,+3.9] [the] [spin-up]  θraw=22.82N/85.79W
+          Vmax'= 59.3@  47km/0.9km  vent=[+12.59,+15.46] gyre=[+13.69,+11.55]  sep=   4km  KE=4
+[prof] 100 steps, sum 16.9s: diag_sync=0.1s(1%)  projection=3.4s(20%)  slow_half_1=4.3s(25%)  slow_half_2=4.2s(25%)  tend_AdvectionComponent=1.7s(10%)  tend_CoriolisComponent=0.2s(1%)  tend_HelmholtzDivergenceDampingComponent=1.5s(9%)  tend_HyperDiffusionComponent=1.1s(7%)  tend_NewtonianCoolingComponent=0.1s(0%)  tend_SurfaceDragComponent=0.2s(1%)
+     1.0    22.92    85.76          -1.2    5.7642e+01 [-1.1,+3.9→-1.3,+4.0] [the]  θraw=22.92N/85.76W
+          Vmax'= 58.0@  70km/0.9km  vent=[+8.53,+16.18] gyre=[+9.67,+12.26]  sep=   2km  KE=4
+     1.5    22.98    85.81          -0.7    5.7434e+01 [-1.2,+3.9→-1.4,+4.0] [the]  θraw=22.98N/85.81W
+          Vmax'= 56.9@ 109km/1.6km  vent=[+11.70,+17.20] gyre=[+12.88,+13.27]  sep=   7km  KE=4
+[prof] 200 steps, sum 33.6s: diag_sync=0.3s(1%)  projection=6.9s(20%)  slow_half_1=8.5s(25%)  slow_half_2=8.4s(25%)  tend_AdvectionComponent=3.4s(10%)  tend_CoriolisComponent=0.3s(1%)  tend_HelmholtzDivergenceDampingComponent=3.1s(9%)  tend_HyperDiffusionComponent=2.2s(7%)  tend_NewtonianCoolingComponent=0.1s(0%)  tend_SurfaceDragComponent=0.5s(1%)
+     2.0    23.09    85.80          -0.5    5.6466e+01 [-1.2,+3.9→-1.4,+4.0] [the]  θraw=23.09N/85.80W
+          Vmax'= 56.1@  70km/1.6km  vent=[+8.07,+18.20] gyre=[+9.28,+14.25]  sep=   4km  KE=4
+[prof] 300 steps, sum 50.4s: diag_sync=0.4s(1%)  projection=10.3s(20%)  slow_half_1=12.8s(25%)  slow_half_2=12.6s(25%)  tend_AdvectionComponent=5.2s(10%)  tend_CoriolisComponent=0.4s(1%)  tend_HelmholtzDivergenceDampingComponent=4.6s(9%)  tend_HyperDiffusionComponent=3.4s(7%)  tend_NewtonianCoolingComponent=0.2s(0%)  tend_SurfaceDragComponent=0.7s(1%)
+     2.5    23.22    85.80          -0.4    5.5911e+01 [-1.2,+4.0→-1.4,+4.0] [the]  θraw=23.23N/85.80W
+          Vmax'= 55.3@ 109km/1.6km  vent=[+11.34,+12.66] gyre=[+12.58,+8.71]  sep=  21km  KE=4
+     3.0    23.22    85.91          -0.3    5.5255e+01 [-1.3,+4.0→-1.5,+4.0] [the]  θraw=23.22N/85.91W
+          Vmax'= 55.0@  88km/1.6km  vent=[+7.78,+13.80] gyre=[+9.06,+9.84]  sep=   1km  KE=4
+[prof] 400 steps, sum 67.2s: diag_sync=0.5s(1%)  projection=13.7s(20%)  slow_half_1=17.0s(25%)  slow_half_2=16.8s(25%)  tend_AdvectionComponent=6.9s(10%)  tend_CoriolisComponent=0.6s(1%)  tend_HelmholtzDivergenceDampingComponent=6.2s(9%)  tend_HyperDiffusionComponent=4.5s(7%)  tend_NewtonianCoolingComponent=0.2s(0%)  tend_SurfaceDragComponent=0.9s(1%)
+     3.5    23.34    85.90          -0.3    5.4699e+01 [-1.3,+4.0→-1.4,+4.1] [the]  θraw=23.34N/85.90W
+          Vmax'= 54.8@  78km/1.6km  vent=[-15.28,+15.00] gyre=[-13.97,+11.01]  sep=  48km  KE=4
+     4.0    23.71    85.97          -0.2    5.5135e+01 [-1.3,+4.0→-1.2,+4.1] [the]  θraw=23.36N/86.53W
+          Vmax'= 54.4@  63km/1.6km  vent=[-11.89,+16.22] gyre=[-10.62,+12.21]  sep=  77km  KE=4
+[prof] 500 steps, sum 83.9s: diag_sync=0.7s(1%)  projection=17.1s(20%)  slow_half_1=21.2s(25%)  slow_half_2=21.0s(25%)  tend_AdvectionComponent=8.6s(10%)  tend_CoriolisComponent=0.7s(1%)  tend_HelmholtzDivergenceDampingComponent=7.7s(9%)  tend_HyperDiffusionComponent=5.6s(7%)  tend_NewtonianCoolingComponent=0.3s(0%)  tend_SurfaceDragComponent=1.1s(1%)
+     4.5    23.74    85.96          -0.1    5.4672e+01 [-1.3,+4.0→-1.2,+4.2] [the]  θraw=23.39N/86.49W
+          Vmax'= 54.1@ 122km/1.6km  vent=[-2.02,-8.67] gyre=[-0.76,-12.71]  sep=  27km  KE=4
+[prof] 600 steps, sum 101.1s: diag_sync=0.8s(1%)  projection=20.6s(20%)  slow_half_1=25.5s(25%)  slow_half_2=25.3s(25%)  tend_AdvectionComponent=10.3s(10%)  tend_CoriolisComponent=0.8s(1%)  tend_HelmholtzDivergenceDampingComponent=9.3s(9%)  tend_HyperDiffusionComponent=6.7s(7%)  tend_NewtonianCoolingComponent=0.3s(0%)  tend_SurfaceDragComponent=1.3s(1%)
+     5.0    23.39    85.98          -0.1    5.4250e+01 [-1.3,+4.1→-1.5,+4.3] [the]  θraw=23.44N/86.57W
+          Vmax'= 53.8@ 126km/1.6km  vent=[+7.86,-7.40] gyre=[+9.17,-11.47]  sep=   7km  KE=4
+     5.5    23.50    85.95          -0.1    5.3356e+01 [-1.3,+4.1→-1.5,+4.3] [the]  θraw=23.50N/85.95W
+          Vmax'= 53.4@ 113km/1.6km  vent=[+11.11,+6.94] gyre=[+12.45,+2.83]  sep=  28km  KE=4
+[prof] 700 steps, sum 118.5s: diag_sync=1.0s(1%)  projection=24.2s(20%)  slow_half_1=30.0s(25%)  slow_half_2=29.6s(25%)  tend_AdvectionComponent=12.1s(10%)  tend_CoriolisComponent=1.0s(1%)  tend_HelmholtzDivergenceDampingComponent=10.8s(9%)  tend_HyperDiffusionComponent=7.9s(7%)  tend_NewtonianCoolingComponent=0.4s(0%)  tend_SurfaceDragComponent=1.6s(1%)
+     6.0    23.60    85.94          -0.1    5.3372e+01 [-1.4,+4.2→-1.5,+4.3] [the]  θraw=24.18N/86.66W
+          Vmax'= 52.7@ 110km/1.6km  vent=[+8.05,+14.68] gyre=[+9.41,+10.53]  sep=  85km  KE=4
+     6.5    24.30    86.66          -0.1    5.2643e+01 [-1.3,+4.2→-0.8,+4.3] [rcq]  θraw=24.30N/86.66W
+          Vmax'= 52.2@  84km/1.6km  vent=[+11.63,+9.59] gyre=[+12.91,+5.41]  sep=  86km  KE=4
+[prof] 800 steps, sum 135.7s: diag_sync=1.2s(1%)  projection=27.6s(20%)  slow_half_1=34.3s(25%)  slow_half_2=33.9s(25%)  tend_AdvectionComponent=13.9s(10%)  tend_CoriolisComponent=1.1s(1%)  tend_HelmholtzDivergenceDampingComponent=12.4s(9%)  tend_HyperDiffusionComponent=9.0s(7%)  tend_NewtonianCoolingComponent=0.4s(0%)  tend_SurfaceDragComponent=1.8s(1%)
+     7.0    24.24    86.86          -0.1    5.1437e+01 [-1.2,+4.2→-0.9,+4.3] [the]  θraw=24.23N/86.87W
+          Vmax'= 52.3@  80km/1.6km  vent=[+8.74,+17.16] gyre=[+9.96,+12.96]  sep=  95km  KE=4
+[prof] 900 steps, sum 152.9s: diag_sync=1.3s(1%)  projection=31.1s(20%)  slow_half_1=38.7s(25%)  slow_half_2=38.2s(25%)  tend_AdvectionComponent=15.6s(10%)  tend_CoriolisComponent=1.3s(1%)  tend_HelmholtzDivergenceDampingComponent=13.9s(9%)  tend_HyperDiffusionComponent=10.2s(7%)  tend_NewtonianCoolingComponent=0.5s(0%)  tend_SurfaceDragComponent=2.1s(1%)
+     7.5    24.29    86.83          -0.1    5.1104e+01 [-1.2,+4.2→-0.9,+4.3] [the]  θraw=23.79N/86.85W
+          Vmax'= 52.0@  91km/1.6km  vent=[-6.71,+18.27] gyre=[-5.55,+14.05]  sep=  91km  KE=4
+     8.0    23.83    86.81          -0.0    5.1420e+01 [-1.2,+4.2→-1.3,+4.4] [the]  θraw=23.82N/86.81W
+          Vmax'= 52.0@  78km/1.6km  vent=[+9.41,+13.16] gyre=[+10.59,+8.92]  sep=  60km  KE=4
+[prof] 1000 steps, sum 170.0s: diag_sync=1.5s(1%)  projection=34.6s(20%)  slow_half_1=43.0s(25%)  slow_half_2=42.5s(25%)  tend_AdvectionComponent=17.4s(10%)  tend_CoriolisComponent=1.4s(1%)  tend_HelmholtzDivergenceDampingComponent=15.5s(9%)  tend_HyperDiffusionComponent=11.3s(7%)  tend_NewtonianCoolingComponent=0.6s(0%)  tend_SurfaceDragComponent=2.3s(1%)
+     8.5    23.90    86.86          -0.1    5.1558e+01 [-1.2,+4.3→-1.3,+4.4] [the]  θraw=23.89N/86.86W
+          Vmax'= 52.0@ 134km/1.6km  vent=[+6.64,-4.76] gyre=[+7.83,-9.02]  sep=  25km  KE=4
+     9.0    24.18    87.00          -0.0    5.1537e+01 [-1.2,+4.3→-1.0,+4.3] [the]  θraw=24.79N/86.73W
+          Vmax'= 51.5@ 134km/1.6km  vent=[+10.26,+2.70] gyre=[+11.42,-1.57]  sep=  84km  KE=4
+[prof] 1100 steps, sum 187.0s: diag_sync=1.7s(1%)  projection=38.0s(20%)  slow_half_1=47.3s(25%)  slow_half_2=46.7s(25%)  tend_AdvectionComponent=19.1s(10%)  tend_CoriolisComponent=1.6s(1%)  tend_HelmholtzDivergenceDampingComponent=17.0s(9%)  tend_HyperDiffusionComponent=12.4s(7%)  tend_NewtonianCoolingComponent=0.6s(0%)  tend_SurfaceDragComponent=2.6s(1%)
+     9.5    24.79    86.89          -0.0    5.1513e+01 [-1.0,+4.3→-0.5,+4.2] [the]  θraw=24.81N/86.89W
+          Vmax'= 50.9@ 114km/1.6km  vent=[+7.67,+16.29] gyre=[+8.72,+12.03]  sep=  96km  KE=4
+[prof] 1200 steps, sum 204.1s: diag_sync=1.8s(1%)  projection=41.5s(20%)  slow_half_1=51.6s(25%)  slow_half_2=51.0s(25%)  tend_AdvectionComponent=20.9s(10%)  tend_CoriolisComponent=1.7s(1%)  tend_HelmholtzDivergenceDampingComponent=18.6s(9%)  tend_HyperDiffusionComponent=13.6s(7%)  tend_NewtonianCoolingComponent=0.7s(0%)  tend_SurfaceDragComponent=2.8s(1%)
+    10.0    24.92    86.87          -0.0    5.1126e+01 [-0.9,+4.3→-0.4,+4.2] [the]  θraw=24.92N/86.87W
+          Vmax'= 50.1@ 110km/1.6km  vent=[+5.22,+17.25] gyre=[+6.16,+12.99]  sep=  92km  KE=4
+    10.5    24.90    86.99          -0.0    4.9796e+01 [-0.9,+4.3→-0.5,+4.2] [the]  θraw=24.90N/86.99W
+          Vmax'= 49.5@ 110km/1.6km  vent=[+9.02,+5.83] gyre=[+9.89,+1.58]  sep=  78km  KE=4
+[prof] 1300 steps, sum 221.4s: diag_sync=2.0s(1%)  projection=45.0s(20%)  slow_half_1=56.0s(25%)  slow_half_2=55.4s(25%)  tend_AdvectionComponent=22.6s(10%)  tend_CoriolisComponent=1.9s(1%)  tend_HelmholtzDivergenceDampingComponent=20.1s(9%)  tend_HyperDiffusionComponent=14.7s(7%)  tend_NewtonianCoolingComponent=0.7s(0%)  tend_SurfaceDragComponent=3.1s(1%)
+    11.0    25.01    86.96          -0.0    4.9052e+01 [-0.8,+4.2→-0.5,+4.2] [the]  θraw=25.01N/86.97W
+          Vmax'= 49.5@  94km/1.6km  vent=[+6.52,+12.96] gyre=[+7.32,+8.71]  sep=  84km  KE=4
+    11.5    25.10    87.05          -0.0    4.8250e+01 [-0.7,+4.2→-0.5,+4.2] [the]  θraw=25.10N/87.05W
+          Vmax'= 49.7@  84km/1.6km  vent=[+4.04,+13.82] gyre=[+4.78,+9.58]  sep=  87km  KE=4
+[prof] 1400 steps, sum 238.7s: diag_sync=2.2s(1%)  projection=48.4s(20%)  slow_half_1=60.3s(25%)  slow_half_2=59.7s(25%)  tend_AdvectionComponent=24.4s(10%)  tend_CoriolisComponent=2.0s(1%)  tend_HelmholtzDivergenceDampingComponent=21.7s(9%)  tend_HyperDiffusionComponent=15.9s(7%)  tend_NewtonianCoolingComponent=0.8s(0%)  tend_SurfaceDragComponent=3.4s(1%)
+    12.0    25.19    87.02          -0.0    4.8117e+01 [-0.7,+4.2→-0.4,+4.2] [the]  θraw=25.19N/87.02W
+          Vmax'= 49.9@ 100km/1.6km  vent=[+7.72,+14.59] gyre=[+8.41,+10.34]  sep=  91km  KE=4
+[prof] 1500 steps, sum 256.1s: diag_sync=2.3s(1%)  projection=52.0s(20%)  slow_half_1=64.7s(25%)  slow_half_2=64.0s(25%)  tend_AdvectionComponent=26.2s(10%)  tend_CoriolisComponent=2.2s(1%)  tend_HelmholtzDivergenceDampingComponent=23.3s(9%)  tend_HyperDiffusionComponent=17.0s(7%)  tend_NewtonianCoolingComponent=0.8s(0%)  tend_SurfaceDragComponent=3.6s(1%)
+    12.5    25.14    87.11          -0.0    4.8599e+01 [-0.7,+4.3→-0.6,+4.3] [the]  θraw=25.13N/87.12W
+          Vmax'= 50.0@ 122km/1.6km  vent=[+11.39,+9.18] gyre=[+12.07,+4.92]  sep=  83km  KE=4
+    13.0    25.25    87.18          -0.0    4.8819e+01 [-0.7,+4.3→-0.6,+4.4] [the]  θraw=25.25N/87.09W
+          Vmax'= 50.1@ 134km/1.6km  vent=[+9.04,+3.80] gyre=[+9.71,-0.49]  sep=  69km  KE=4
+[prof] 1600 steps, sum 273.6s: diag_sync=2.5s(1%)  projection=55.5s(20%)  slow_half_1=69.1s(25%)  slow_half_2=68.4s(25%)  tend_AdvectionComponent=28.0s(10%)  tend_CoriolisComponent=2.3s(1%)  tend_HelmholtzDivergenceDampingComponent=24.8s(9%)  tend_HyperDiffusionComponent=18.1s(7%)  tend_NewtonianCoolingComponent=0.9s(0%)  tend_SurfaceDragComponent=3.9s(1%)
+    13.5    25.36    87.18          -0.0    4.9333e+01 [-0.7,+4.3→-0.6,+4.5] [the]  θraw=25.37N/87.18W
+          Vmax'= 49.9@ 134km/1.6km  vent=[+6.68,+4.60] gyre=[+7.33,+0.28]  sep=  73km  KE=4
+    14.0    25.62    87.02          -0.0    4.8750e+01 [-0.6,+4.3→-0.5,+4.5] [the]  θraw=25.62N/87.02W
+          Vmax'= 49.6@ 147km/1.6km  vent=[+4.39,-0.76] gyre=[+5.01,-5.11]  sep=  67km  KE=4
+[prof] 1700 steps, sum 290.9s: diag_sync=2.7s(1%)  projection=59.0s(20%)  slow_half_1=73.5s(25%)  slow_half_2=72.7s(25%)  tend_AdvectionComponent=29.8s(10%)  tend_CoriolisComponent=2.4s(1%)  tend_HelmholtzDivergenceDampingComponent=26.4s(9%)  tend_HyperDiffusionComponent=19.3s(7%)  tend_NewtonianCoolingComponent=1.0s(0%)  tend_SurfaceDragComponent=4.1s(1%)
+    14.5    25.73    86.98          -0.0    4.8654e+01 [-0.6,+4.4→-0.5,+4.6] [the]  θraw=25.73N/86.98W
+          Vmax'= 49.2@ 134km/1.6km  vent=[+8.26,+6.15] gyre=[+8.86,+1.77]  sep=  83km  KE=4
+[prof] 1800 steps, sum 308.2s: diag_sync=2.8s(1%)  projection=62.5s(20%)  slow_half_1=77.9s(25%)  slow_half_2=77.0s(25%)  tend_AdvectionComponent=31.5s(10%)  tend_CoriolisComponent=2.6s(1%)  tend_HelmholtzDivergenceDampingComponent=28.0s(9%)  tend_HyperDiffusionComponent=20.4s(7%)  tend_NewtonianCoolingComponent=1.0s(0%)  tend_SurfaceDragComponent=4.4s(1%)
+    15.0    25.73    87.11          -0.0    4.8181e+01 [-0.6,+4.4→-0.6,+4.7] [the]  θraw=25.72N/87.12W
+          Vmax'= 48.5@ 148km/1.6km  vent=[+6.06,+6.93] gyre=[+6.66,+2.50]  sep=  75km  KE=4
+    15.5    25.82    87.08          -0.0    4.8033e+01 [-0.6,+4.5→-0.5,+4.7] [the]  θraw=25.82N/87.08W
+          Vmax'= 48.0@ 122km/1.6km  vent=[+3.93,+7.72] gyre=[+4.51,+3.24]  sep=  69km  KE=4
+[prof] 1900 steps, sum 325.4s: diag_sync=3.0s(1%)  projection=66.0s(20%)  slow_half_1=82.2s(25%)  slow_half_2=81.3s(25%)  tend_AdvectionComponent=33.3s(10%)  tend_CoriolisComponent=2.7s(1%)  tend_HelmholtzDivergenceDampingComponent=29.5s(9%)  tend_HyperDiffusionComponent=21.6s(7%)  tend_NewtonianCoolingComponent=1.1s(0%)  tend_SurfaceDragComponent=4.7s(1%)
+    16.0    25.91    87.20          -0.0    4.7011e+01 [-0.6,+4.5→-0.4,+4.9] [the]  θraw=25.92N/87.21W
+          Vmax'= 47.9@ 133km/1.6km  vent=[+7.90,+8.48] gyre=[+8.46,+3.94]  sep=  85km  KE=4
+    16.5    26.02    87.17          -0.0    4.6550e+01 [-0.5,+4.6→-0.3,+5.0] [the]  θraw=25.87N/87.30W
+          Vmax'= 47.8@ 122km/1.6km  vent=[+5.92,+9.28] gyre=[+6.43,+4.66]  sep=  77km  KE=4
+[prof] 2000 steps, sum 342.5s: diag_sync=3.2s(1%)  projection=69.4s(20%)  slow_half_1=86.6s(25%)  slow_half_2=85.6s(25%)  tend_AdvectionComponent=35.0s(10%)  tend_CoriolisComponent=2.9s(1%)  tend_HelmholtzDivergenceDampingComponent=31.1s(9%)  tend_HyperDiffusionComponent=22.7s(7%)  tend_NewtonianCoolingComponent=1.1s(0%)  tend_SurfaceDragComponent=4.9s(1%)
+    17.0    25.98    87.27          -0.0    4.6186e+01 [-0.5,+4.7→-0.4,+5.1] [the]  θraw=25.97N/87.28W
+          Vmax'= 48.0@ 133km/1.6km  vent=[+9.92,+10.00] gyre=[+10.42,+5.30]  sep=  83km  KE=4
+[prof] 2100 steps, sum 359.6s: diag_sync=3.3s(1%)  projection=72.9s(20%)  slow_half_1=90.9s(25%)  slow_half_2=89.8s(25%)  tend_AdvectionComponent=36.8s(10%)  tend_CoriolisComponent=3.0s(1%)  tend_HelmholtzDivergenceDampingComponent=32.6s(9%)  tend_HyperDiffusionComponent=23.9s(7%)  tend_NewtonianCoolingComponent=1.2s(0%)  tend_SurfaceDragComponent=5.2s(1%)
+    17.5    26.08    87.34          -0.0    4.6215e+01 [-0.5,+4.8→-0.3,+5.2] [the]  θraw=26.09N/87.35W
+          Vmax'= 48.4@ 133km/1.6km  vent=[+8.07,+10.77] gyre=[+8.54,+5.98]  sep=  87km  KE=4
+    18.0    26.19    87.33          -0.0    4.5802e+01 [-0.4,+4.9→-0.2,+5.3] [the]  θraw=26.19N/87.34W
+          Vmax'= 48.5@  95km/1.6km  vent=[+6.30,+11.49] gyre=[+6.73,+6.62]  sep=  83km  KE=4
+[prof] 2200 steps, sum 376.7s: diag_sync=3.5s(1%)  projection=76.4s(20%)  slow_half_1=95.2s(25%)  slow_half_2=94.1s(25%)  tend_AdvectionComponent=38.5s(10%)  tend_CoriolisComponent=3.2s(1%)  tend_HelmholtzDivergenceDampingComponent=34.1s(9%)  tend_HyperDiffusionComponent=25.0s(7%)  tend_NewtonianCoolingComponent=1.2s(0%)  tend_SurfaceDragComponent=5.4s(1%)
+    18.5    26.31    87.33          -0.0    4.5997e+01 [-0.4,+4.9→-0.1,+5.3] [the]  θraw=26.31N/87.33W
+          Vmax'= 48.7@ 119km/1.6km  vent=[+10.46,+12.08] gyre=[+10.83,+7.14]  sep=  92km  KE=4
+    19.0    26.44    87.32          -0.0    4.6312e+01 [-0.3,+5.0→+0.1,+5.3] [the]  θraw=26.44N/87.33W
+          Vmax'= 49.2@ 133km/1.6km  vent=[+8.93,+12.67] gyre=[+9.21,+7.68]  sep=  91km  KE=4
+[prof] 2300 steps, sum 393.5s: diag_sync=3.7s(1%)  projection=79.7s(20%)  slow_half_1=99.5s(25%)  slow_half_2=98.3s(25%)  tend_AdvectionComponent=40.3s(10%)  tend_CoriolisComponent=3.3s(1%)  tend_HelmholtzDivergenceDampingComponent=35.7s(9%)  tend_HyperDiffusionComponent=26.1s(7%)  tend_NewtonianCoolingComponent=1.3s(0%)  tend_SurfaceDragComponent=5.7s(1%)
+    19.5    26.58    87.32          -0.0    4.6325e+01 [-0.2,+5.0→+0.3,+5.3] [the]  θraw=26.59N/87.33W
+          Vmax'= 49.0@ 133km/1.6km  vent=[+7.48,+13.20] gyre=[+7.67,+8.16]  sep=  91km  KE=4
+[prof] 2400 steps, sum 410.6s: diag_sync=3.8s(1%)  projection=83.2s(20%)  slow_half_1=103.8s(25%)  slow_half_2=102.6s(25%)  tend_AdvectionComponent=42.0s(10%)  tend_CoriolisComponent=3.4s(1%)  tend_HelmholtzDivergenceDampingComponent=37.2s(9%)  tend_HyperDiffusionComponent=27.2s(7%)  tend_NewtonianCoolingComponent=1.4s(0%)  tend_SurfaceDragComponent=5.9s(1%)
+    20.0    26.72    87.31          -0.0    4.6199e+01 [-0.1,+5.1→+0.4,+5.3] [the]  θraw=26.72N/87.31W
+          Vmax'= 48.8@ 133km/1.6km  vent=[+6.10,+13.66] gyre=[+6.18,+8.58]  sep=  89km  KE=4
+    20.5    26.84    87.29          -0.0    4.5951e+01 [+0.0,+5.1→+0.6,+5.3] [the]  θraw=26.69N/87.41W
+          Vmax'= 48.6@ 133km/1.6km  vent=[+4.79,+14.05] gyre=[+4.76,+8.93]  sep=  86km  KE=4
+[prof] 2500 steps, sum 427.7s: diag_sync=4.0s(1%)  projection=86.7s(20%)  slow_half_1=108.1s(25%)  slow_half_2=106.9s(25%)  tend_AdvectionComponent=43.8s(10%)  tend_CoriolisComponent=3.6s(1%)  tend_HelmholtzDivergenceDampingComponent=38.7s(9%)  tend_HyperDiffusionComponent=28.4s(7%)  tend_NewtonianCoolingComponent=1.4s(0%)  tend_SurfaceDragComponent=6.2s(1%)
+    21.0    26.95    87.27          -0.0    4.5769e+01 [+0.1,+5.1→+0.7,+5.3] [the]  θraw=26.82N/87.39W
+          Vmax'= 48.8@ 155km/1.6km  vent=[+9.35,+8.49] gyre=[+9.21,+3.34]  sep=  81km  KE=4
+    21.5    27.06    87.36          -0.0    4.5851e+01 [+0.2,+5.2→+0.7,+5.4] [the]  θraw=26.90N/87.47W
+          Vmax'= 48.6@ 155km/1.6km  vent=[+8.11,+8.77] gyre=[+7.86,+3.58]  sep=  82km  KE=4
+[prof] 2600 steps, sum 444.7s: diag_sync=4.2s(1%)  projection=90.1s(20%)  slow_half_1=112.4s(25%)  slow_half_2=111.1s(25%)  tend_AdvectionComponent=45.5s(10%)  tend_CoriolisComponent=3.7s(1%)  tend_HelmholtzDivergenceDampingComponent=40.3s(9%)  tend_HyperDiffusionComponent=29.5s(7%)  tend_NewtonianCoolingComponent=1.5s(0%)  tend_SurfaceDragComponent=6.4s(1%)
+    22.0    27.03    87.45          -0.0    4.5123e+01 [+0.3,+5.2→+0.6,+5.5] [the]  θraw=27.02N/87.45W
+          Vmax'= 48.4@ 144km/1.6km  vent=[+6.86,+8.99] gyre=[+6.56,+3.76]  sep=  79km  KE=4
+[prof] 2700 steps, sum 461.8s: diag_sync=4.3s(1%)  projection=93.5s(20%)  slow_half_1=116.7s(25%)  slow_half_2=115.4s(25%)  tend_AdvectionComponent=47.3s(10%)  tend_CoriolisComponent=3.9s(1%)  tend_HelmholtzDivergenceDampingComponent=41.8s(9%)  tend_HyperDiffusionComponent=30.6s(7%)  tend_NewtonianCoolingComponent=1.5s(0%)  tend_SurfaceDragComponent=6.7s(1%)
+    22.5    27.13    87.43          -0.0    4.4923e+01 [+0.3,+5.3→+0.6,+5.5] [the]  θraw=27.13N/87.43W
+          Vmax'= 48.5@ 144km/1.6km  vent=[+5.65,+9.18] gyre=[+5.30,+3.89]  sep=  75km  KE=4
+    23.0    27.23    87.41          -0.0    4.4637e+01 [+0.4,+5.3→+0.5,+5.6] [the]  θraw=27.23N/87.41W
+          Vmax'= 48.8@ 161km/1.6km  vent=[+10.15,+9.30] gyre=[+9.77,+3.96]  sep=  81km  KE=4
+[prof] 2800 steps, sum 478.9s: diag_sync=4.5s(1%)  projection=97.0s(20%)  slow_half_1=121.0s(25%)  slow_half_2=119.6s(25%)  tend_AdvectionComponent=49.1s(10%)  tend_CoriolisComponent=4.0s(1%)  tend_HelmholtzDivergenceDampingComponent=43.3s(9%)  tend_HyperDiffusionComponent=31.8s(7%)  tend_NewtonianCoolingComponent=1.6s(0%)  tend_SurfaceDragComponent=7.0s(1%)
+    23.5    27.33    87.47          -0.0    4.4503e+01 [+0.4,+5.4→+0.5,+5.7] [the]  θraw=27.33N/87.48W
+          Vmax'= 48.6@ 161km/1.6km  vent=[+9.05,+9.45] gyre=[+8.64,+4.05]  sep=  83km  KE=4
+    24.0    27.45    87.46          -0.0    4.4805e+01 [+0.4,+5.5→+0.6,+5.8] [the]  θraw=27.45N/87.46W
+          Vmax'= 48.6@ 144km/1.6km  vent=[+8.00,+9.58] gyre=[+7.57,+4.12]  sep=  81km  KE=4
+[prof] 2900 steps, sum 495.9s: diag_sync=4.6s(1%)  projection=100.5s(20%)  slow_half_1=125.4s(25%)  slow_half_2=123.9s(25%)  tend_AdvectionComponent=50.8s(10%)  tend_CoriolisComponent=4.2s(1%)  tend_HelmholtzDivergenceDampingComponent=44.9s(9%)  tend_HyperDiffusionComponent=32.9s(7%)  tend_NewtonianCoolingComponent=1.6s(0%)  tend_SurfaceDragComponent=7.2s(1%)
+    24.5    27.55    87.45          -0.0    4.4729e+01 [+0.5,+5.5→+0.6,+5.8] [the]  θraw=27.55N/87.45W
+          Vmax'= 49.4@ 144km/1.6km  vent=[+7.00,+9.68] gyre=[+6.54,+4.17]  sep=  77km  KE=4
+[prof] 3000 steps, sum 513.0s: diag_sync=4.8s(1%)  projection=103.9s(20%)  slow_half_1=129.7s(25%)  slow_half_2=128.1s(25%)  tend_AdvectionComponent=52.6s(10%)  tend_CoriolisComponent=4.3s(1%)  tend_HelmholtzDivergenceDampingComponent=46.4s(9%)  tend_HyperDiffusionComponent=34.0s(7%)  tend_NewtonianCoolingComponent=1.7s(0%)  tend_SurfaceDragComponent=7.5s(1%)
+    25.0    27.68    87.44          -0.0    4.4038e+01 [+0.5,+5.6→+0.6,+5.8] [the]  θraw=27.68N/87.45W
+          Vmax'= 50.5@ 147km/1.6km  vent=[+6.06,+9.76] gyre=[+5.57,+4.20]  sep=  76km  KE=4
+    25.5    27.80    87.43          -0.1    4.5602e+01 [+0.5,+5.6→+0.7,+5.8] [the]  θraw=27.81N/87.43W
+          Vmax'= 51.4@ 169km/1.6km  vent=[+5.18,+9.80] gyre=[+4.65,+4.20]  sep=  74km  KE=4
+[prof] 3100 steps, sum 530.0s: diag_sync=5.0s(1%)  projection=107.4s(20%)  slow_half_1=134.0s(25%)  slow_half_2=132.4s(25%)  tend_AdvectionComponent=54.3s(10%)  tend_CoriolisComponent=4.4s(1%)  tend_HelmholtzDivergenceDampingComponent=48.0s(9%)  tend_HyperDiffusionComponent=35.1s(7%)  tend_NewtonianCoolingComponent=1.7s(0%)  tend_SurfaceDragComponent=7.7s(1%)
+    26.0    27.92    87.42          -0.0    4.6124e+01 [+0.6,+5.7→+0.7,+5.9] [the]  θraw=27.93N/87.43W
+          Vmax'= 51.5@ 182km/1.6km  vent=[+9.89,+9.78] gyre=[+9.32,+4.13]  sep=  82km  KE=4
+    26.5    28.05    87.48          -0.1    4.5874e+01 [+0.6,+5.7→+0.8,+5.9] [the]  θraw=28.06N/87.48W
+          Vmax'= 54.6@ 169km/1.6km  vent=[+9.12,+9.76] gyre=[+8.51,+4.06]  sep=  85km  KE=4
+[prof] 3200 steps, sum 547.4s: diag_sync=5.1s(1%)  projection=110.9s(20%)  slow_half_1=138.4s(25%)  slow_half_2=136.7s(25%)  tend_AdvectionComponent=56.1s(10%)  tend_CoriolisComponent=4.6s(1%)  tend_HelmholtzDivergenceDampingComponent=49.5s(9%)  tend_HyperDiffusionComponent=36.3s(7%)  tend_NewtonianCoolingComponent=1.8s(0%)  tend_SurfaceDragComponent=8.0s(1%)
+    27.0    28.16    87.48          -0.1    4.9266e+01 [+0.7,+5.7→+0.9,+6.0] [the]  θraw=28.16N/87.48W
+          Vmax'= 57.5@ 169km/1.6km  vent=[+8.41,+9.70] gyre=[+7.76,+3.96]  sep=  83km  KE=4
+[prof] 3300 steps, sum 564.8s: diag_sync=5.3s(1%)  projection=114.4s(20%)  slow_half_1=142.8s(25%)  slow_half_2=141.1s(25%)  tend_AdvectionComponent=57.9s(10%)  tend_CoriolisComponent=4.7s(1%)  tend_HelmholtzDivergenceDampingComponent=51.1s(9%)  tend_HyperDiffusionComponent=37.4s(7%)  tend_NewtonianCoolingComponent=1.9s(0%)  tend_SurfaceDragComponent=8.2s(1%)
+    27.5    28.28    87.46          -0.2    5.2932e+01 [+0.7,+5.8→+1.0,+6.0] [the]  θraw=28.29N/87.46W
+          Vmax'= 58.2@  16km/1.6km  vent=[-22.98,+24.50] gyre=[-23.69,+18.71]  sep= 169km  KE=4
+    28.0    28.40    87.44          -0.1    5.4558e+01 [+0.8,+5.8→+1.1,+6.1] [the]  θraw=28.40N/87.45W
+          Vmax'= 58.1@  35km/1.6km  vent=[-23.06,+24.26] gyre=[-23.84,+18.43]  sep= 169km  KE=4
+[prof] 3400 steps, sum 582.0s: diag_sync=5.5s(1%)  projection=117.9s(20%)  slow_half_1=147.1s(25%)  slow_half_2=145.4s(25%)  tend_AdvectionComponent=59.6s(10%)  tend_CoriolisComponent=4.9s(1%)  tend_HelmholtzDivergenceDampingComponent=52.7s(9%)  tend_HyperDiffusionComponent=38.6s(7%)  tend_NewtonianCoolingComponent=1.9s(0%)  tend_SurfaceDragComponent=8.5s(1%)
+    28.5    28.52    87.43          -0.2    5.4106e+01 [+0.9,+5.9→+1.3,+6.1] [the]  θraw=28.53N/87.44W
+          Vmax'= 60.1@  22km/1.6km  vent=[-22.24,+24.34] gyre=[-23.10,+18.46]  sep= 191km  KE=4
+    29.0    28.63    87.42          -0.3    5.5752e+01 [+0.9,+5.9→+1.4,+6.2] [the]  θraw=28.64N/87.42W
+          Vmax'= 64.6@  16km/1.6km  vent=[-21.47,+25.89] gyre=[-22.42,+19.96]  sep= 182km  KE=4
+[prof] 3500 steps, sum 599.2s: diag_sync=5.6s(1%)  projection=121.4s(20%)  slow_half_1=151.5s(25%)  slow_half_2=149.7s(25%)  tend_AdvectionComponent=61.4s(10%)  tend_CoriolisComponent=5.0s(1%)  tend_HelmholtzDivergenceDampingComponent=54.2s(9%)  tend_HyperDiffusionComponent=39.7s(7%)  tend_NewtonianCoolingComponent=2.0s(0%)  tend_SurfaceDragComponent=8.7s(1%)
+    29.5    28.75    87.46          -0.4    6.1998e+01 [+1.0,+6.0→+1.5,+6.3] [the]  θraw=28.75N/87.46W
+          Vmax'= 67.8@  16km/1.6km  vent=[-21.52,+25.70] gyre=[-22.56,+19.71]  sep= 188km  KE=4
+[prof] 3600 steps, sum 616.2s: diag_sync=5.8s(1%)  projection=124.8s(20%)  slow_half_1=155.8s(25%)  slow_half_2=153.9s(25%)  tend_AdvectionComponent=63.1s(10%)  tend_CoriolisComponent=5.2s(1%)  tend_HelmholtzDivergenceDampingComponent=55.8s(9%)  tend_HyperDiffusionComponent=40.9s(7%)  tend_NewtonianCoolingComponent=2.0s(0%)  tend_SurfaceDragComponent=9.0s(1%)
+    30.0    28.86    87.45          -0.3    6.7149e+01 [+1.1,+6.0→+1.6,+6.3] [the]  θraw=28.87N/87.45W
+          Vmax'= 70.0@  16km/1.6km  vent=[-21.59,+25.50] gyre=[-22.71,+19.46]  sep= 189km  KE=4
+    30.5    28.98    87.42          -0.3    7.0171e+01 [+1.2,+6.1→+1.8,+6.3] [the]  θraw=29.14N/87.36W
+          Vmax'= 71.9@  16km/1.6km  vent=[-21.65,+25.26] gyre=[-22.89,+19.18]  sep= 172km  KE=4
+[prof] 3700 steps, sum 633.3s: diag_sync=6.0s(1%)  projection=128.3s(20%)  slow_half_1=160.1s(25%)  slow_half_2=158.2s(25%)  tend_AdvectionComponent=64.9s(10%)  tend_CoriolisComponent=5.3s(1%)  tend_HelmholtzDivergenceDampingComponent=57.3s(9%)  tend_HyperDiffusionComponent=42.0s(7%)  tend_NewtonianCoolingComponent=2.1s(0%)  tend_SurfaceDragComponent=9.2s(1%)
+    31.0    29.09    87.41          -0.3    7.1149e+01 [+1.4,+6.1→+2.0,+6.2] [the]  θraw=29.27N/87.33W
+          Vmax'= 72.6@  31km/1.6km  vent=[-20.48,+26.72] gyre=[-21.85,+20.62]  sep= 164km  KE=4
+    31.5    29.35    87.33          -0.5    6.9141e+01 [+1.5,+6.1→+2.3,+6.1] [the]  θraw=29.37N/87.33W
+          Vmax'= 73.9@  22km/1.6km  vent=[-19.95,+26.51] gyre=[-21.48,+20.40]  sep= 186km  KE=4
+[prof] 3800 steps, sum 650.4s: diag_sync=6.1s(1%)  projection=131.7s(20%)  slow_half_1=164.4s(25%)  slow_half_2=162.4s(25%)  tend_AdvectionComponent=66.6s(10%)  tend_CoriolisComponent=5.5s(1%)  tend_HelmholtzDivergenceDampingComponent=58.9s(9%)  tend_HyperDiffusionComponent=43.1s(7%)  tend_NewtonianCoolingComponent=2.2s(0%)  tend_SurfaceDragComponent=9.5s(1%)
+    32.0    29.46    87.30          -0.5    6.6667e+01 [+1.7,+6.1→+2.6,+6.1] [the]  θraw=29.47N/87.30W
+          Vmax'= 72.9@  22km/1.6km  vent=[-20.01,+26.15] gyre=[-21.72,+20.05]  sep= 186km  KE=4
+[prof] 3900 steps, sum 667.5s: diag_sync=6.3s(1%)  projection=135.2s(20%)  slow_half_1=168.7s(25%)  slow_half_2=166.7s(25%)  tend_AdvectionComponent=68.4s(10%)  tend_CoriolisComponent=5.6s(1%)  tend_HelmholtzDivergenceDampingComponent=60.4s(9%)  tend_HyperDiffusionComponent=44.2s(7%)  tend_NewtonianCoolingComponent=2.2s(0%)  tend_SurfaceDragComponent=9.7s(1%)
+    32.5    29.58    87.34          -0.6    6.2674e+01 [+1.9,+6.1→+2.7,+6.0] [the]  θraw=29.59N/87.34W
+          Vmax'= 75.0@ 126km/1.6km  vent=[-18.59,+10.91] gyre=[-20.47,+4.82]  sep=  78km  KE=4
+    33.0    29.68    87.31          -0.8    6.6089e+01 [+2.0,+6.1→+2.9,+6.0] [the]  θraw=29.69N/87.32W
+          Vmax'= 75.8@ 161km/1.6km  vent=[-14.56,+0.31] gyre=[-16.61,-5.76]  sep=  45km  KE=4
+[prof] 4000 steps, sum 684.5s: diag_sync=6.5s(1%)  projection=138.6s(20%)  slow_half_1=173.0s(25%)  slow_half_2=171.0s(25%)  tend_AdvectionComponent=70.1s(10%)  tend_CoriolisComponent=5.7s(1%)  tend_HelmholtzDivergenceDampingComponent=62.0s(9%)  tend_HyperDiffusionComponent=45.4s(7%)  tend_NewtonianCoolingComponent=2.3s(0%)  tend_SurfaceDragComponent=10.0s(1%)
+    33.5    29.78    87.28          -0.5    7.0009e+01 [+2.2,+6.0→+3.0,+5.9] [the]  θraw=29.78N/87.29W
+          Vmax'= 76.0@  49km/1.6km  vent=[-21.56,+23.38] gyre=[-23.77,+17.33]  sep= 180km  KE=4
+    34.0    30.05    87.18          -0.6    7.0625e+01 [+2.4,+6.0→+3.3,+5.9] [the]  θraw=30.09N/87.18W
+          Vmax'= 75.0@  35km/1.6km  vent=[-20.12,+24.84] gyre=[-22.51,+18.82]  sep= 172km  KE=4
+[prof] 4100 steps, sum 701.8s: diag_sync=6.6s(1%)  projection=142.1s(20%)  slow_half_1=177.4s(25%)  slow_half_2=175.3s(25%)  tend_AdvectionComponent=71.9s(10%)  tend_CoriolisComponent=5.9s(1%)  tend_HelmholtzDivergenceDampingComponent=63.5s(9%)  tend_HyperDiffusionComponent=46.5s(7%)  tend_NewtonianCoolingComponent=2.3s(0%)  tend_SurfaceDragComponent=10.3s(1%)
+    34.5    30.18    87.15          -0.4    6.4678e+01 [+2.6,+6.0→+3.4,+5.8] [the]  θraw=30.18N/87.15W
+          Vmax'= 70.0@  22km/1.6km  vent=[-19.32,+24.35] gyre=[-21.88,+18.36]  sep= 194km  KE=4
+[prof] 4200 steps, sum 718.8s: diag_sync=6.8s(1%)  projection=145.6s(20%)  slow_half_1=181.7s(25%)  slow_half_2=179.5s(25%)  tend_AdvectionComponent=73.6s(10%)  tend_CoriolisComponent=6.0s(1%)  tend_HelmholtzDivergenceDampingComponent=65.0s(9%)  tend_HyperDiffusionComponent=47.6s(7%)  tend_NewtonianCoolingComponent=2.4s(0%)  tend_SurfaceDragComponent=10.5s(1%)
+    35.0    30.27    87.16          -0.5    6.5544e+01 [+2.7,+5.9→+3.5,+5.7] [the]  θraw=30.27N/87.17W
+          Vmax'= 73.2@  16km/2.2km  vent=[-19.61,+23.78] gyre=[-22.32,+17.84]  sep= 200km  KE=4
+    35.5    30.36    87.12          -0.5    7.0871e+01 [+2.9,+5.9→+3.6,+5.7] [the]  θraw=30.37N/87.12W
+          Vmax'= 74.2@  35km/1.6km  vent=[-19.19,+24.88] gyre=[-22.06,+18.99]  sep= 190km  KE=4
+[prof] 4300 steps, sum 735.9s: diag_sync=7.0s(1%)  projection=149.0s(20%)  slow_half_1=186.0s(25%)  slow_half_2=183.8s(25%)  tend_AdvectionComponent=75.4s(10%)  tend_CoriolisComponent=6.2s(1%)  tend_HelmholtzDivergenceDampingComponent=66.6s(9%)  tend_HyperDiffusionComponent=48.8s(7%)  tend_NewtonianCoolingComponent=2.5s(0%)  tend_SurfaceDragComponent=10.8s(1%)
+    36.0    30.58    87.07          -0.5    6.6704e+01 [+3.1,+5.8→+4.0,+5.6] [the]  θraw=30.61N/87.02W
+          Vmax'= 72.3@  16km/2.2km  vent=[-19.52,+24.11] gyre=[-22.57,+18.26]  sep= 174km  KE=4
+    36.5    30.69    87.02          -0.7    6.6294e+01 [+3.2,+5.8→+3.9,+5.6] [the]  θraw=30.70N/87.02W
+          Vmax'= 75.0@   0km/2.2km  vent=[-18.16,+25.27] gyre=[-21.37,+19.46]  sep= 191km  KE=4
+[prof] 4400 steps, sum 753.0s: diag_sync=7.1s(1%)  projection=152.5s(20%)  slow_half_1=190.3s(25%)  slow_half_2=188.0s(25%)  tend_AdvectionComponent=77.1s(10%)  tend_CoriolisComponent=6.3s(1%)  tend_HelmholtzDivergenceDampingComponent=68.1s(9%)  tend_HyperDiffusionComponent=49.9s(7%)  tend_NewtonianCoolingComponent=2.5s(0%)  tend_SurfaceDragComponent=11.0s(1%)
+    37.0    30.77    86.98          -0.6    6.7921e+01 [+3.3,+5.8→+3.9,+5.6] [the]  θraw=30.77N/86.99W
+          Vmax'= 72.2@  22km/2.2km  vent=[-18.65,+24.46] gyre=[-21.96,+18.69]  sep= 192km  KE=4
+[prof] 4500 steps, sum 770.0s: diag_sync=7.3s(1%)  projection=155.9s(20%)  slow_half_1=194.6s(25%)  slow_half_2=192.3s(25%)  tend_AdvectionComponent=78.9s(10%)  tend_CoriolisComponent=6.4s(1%)  tend_HelmholtzDivergenceDampingComponent=69.7s(9%)  tend_HyperDiffusionComponent=51.0s(7%)  tend_NewtonianCoolingComponent=2.6s(0%)  tend_SurfaceDragComponent=11.3s(1%)
+    37.5    30.82    86.96          -0.5    6.5152e+01 [+3.4,+5.7→+3.9,+5.5] [the]  θraw=30.81N/86.96W
+          Vmax'= 76.3@  22km/2.2km  vent=[-18.14,+25.25] gyre=[-21.55,+19.53]  sep= 187km  KE=4
+    38.0    31.06    86.86          -0.6    6.4031e+01 [+3.5,+5.7→+4.0,+5.6] [the]  θraw=31.09N/86.86W
+          Vmax'= 73.8@ 221km/2.2km  vent=[+18.47,+29.87] gyre=[+14.97,+24.17]  sep= 171km  KE=4
+[prof] 4600 steps, sum 787.1s: diag_sync=7.5s(1%)  projection=159.4s(20%)  slow_half_1=198.9s(25%)  slow_half_2=196.6s(25%)  tend_AdvectionComponent=80.6s(10%)  tend_CoriolisComponent=6.6s(1%)  tend_HelmholtzDivergenceDampingComponent=71.2s(9%)  tend_HyperDiffusionComponent=52.2s(7%)  tend_NewtonianCoolingComponent=2.6s(0%)  tend_SurfaceDragComponent=11.5s(1%)
+    38.5    31.13    86.83          -0.7    6.3524e+01 [+3.6,+5.7→+4.0,+5.6] [the]  θraw=32.47N/85.47W
+          Vmax'= 74.0@ 206km/2.2km  vent=[+18.57,+29.11] gyre=[+14.99,+23.43]  sep= 233km  KE=4
+    39.0    31.35    86.75          -0.5    6.4746e+01 [+3.7,+5.7→+4.1,+5.6] [the]  θraw=31.41N/86.75W
+          Vmax'= 73.7@ 221km/1.6km  vent=[+13.06,+34.21] gyre=[+9.39,+28.54]  sep= 197km  KE=4
+[prof] 4700 steps, sum 804.2s: diag_sync=7.6s(1%)  projection=162.8s(20%)  slow_half_1=203.2s(25%)  slow_half_2=200.9s(25%)  tend_AdvectionComponent=82.4s(10%)  tend_CoriolisComponent=6.7s(1%)  tend_HelmholtzDivergenceDampingComponent=72.8s(9%)  tend_HyperDiffusionComponent=53.3s(7%)  tend_NewtonianCoolingComponent=2.7s(0%)  tend_SurfaceDragComponent=11.8s(1%)
+    39.5    31.43    86.69          -0.7    6.3512e+01 [+3.7,+5.7→+4.1,+5.6] [the]  θraw=32.73N/85.33W
+          Vmax'= 72.4@ 188km/2.2km  vent=[+13.12,+33.97] gyre=[+9.37,+28.31]  sep= 218km  KE=4
+[prof] 4800 steps, sum 821.5s: diag_sync=7.8s(1%)  projection=166.3s(20%)  slow_half_1=207.6s(25%)  slow_half_2=205.2s(25%)  tend_AdvectionComponent=84.2s(10%)  tend_CoriolisComponent=6.9s(1%)  tend_HelmholtzDivergenceDampingComponent=74.3s(9%)  tend_HyperDiffusionComponent=54.4s(7%)  tend_NewtonianCoolingComponent=2.7s(0%)  tend_SurfaceDragComponent=12.0s(1%)
+    40.0    31.52    86.65          -0.9    6.7929e+01 [+3.8,+5.7→+4.2,+5.7] [the]  θraw=31.52N/86.66W
+          Vmax'= 69.4@ 219km/1.6km  vent=[+16.46,+32.43] gyre=[+12.63,+26.77]  sep= 187km  KE=4
+    40.5    31.73    86.57          -0.5    7.3199e+01 [+3.9,+5.7→+4.3,+5.8] [the]  θraw=31.76N/86.57W
+          Vmax'= 72.0@ 234km/1.6km  vent=[+16.62,+32.02] gyre=[+12.72,+26.34]  sep= 184km  KE=4
+[prof] 4900 steps, sum 838.9s: diag_sync=8.0s(1%)  projection=169.8s(20%)  slow_half_1=212.0s(25%)  slow_half_2=209.5s(25%)  tend_AdvectionComponent=85.9s(10%)  tend_CoriolisComponent=7.0s(1%)  tend_HelmholtzDivergenceDampingComponent=75.9s(9%)  tend_HyperDiffusionComponent=55.6s(7%)  tend_NewtonianCoolingComponent=2.8s(0%)  tend_SurfaceDragComponent=12.3s(1%)
+    41.0    31.80    86.53          -0.8    7.8015e+01 [+4.0,+5.7→+4.4,+5.8] [the]  θraw=33.09N/85.18W
+          Vmax'= 75.4@  31km/1.6km  vent=[-17.03,+24.94] gyre=[-21.01,+19.24]  sep=  40km  KE=4
+    41.5    32.01    86.44          -1.3    7.8623e+01 [+4.1,+5.7→+4.5,+5.9] [the]  θraw=33.20N/85.15W
+          Vmax'= 74.2@ 219km/1.6km  vent=[-16.07,+25.77] gyre=[-20.13,+20.03]  sep=  45km  KE=4
+[prof] 5000 steps, sum 856.2s: diag_sync=8.1s(1%)  projection=173.4s(20%)  slow_half_1=216.4s(25%)  slow_half_2=213.9s(25%)  tend_AdvectionComponent=87.7s(10%)  tend_CoriolisComponent=7.2s(1%)  tend_HelmholtzDivergenceDampingComponent=77.5s(9%)  tend_HyperDiffusionComponent=56.7s(7%)  tend_NewtonianCoolingComponent=2.9s(0%)  tend_SurfaceDragComponent=12.6s(1%)
+    42.0    32.09    86.40          -0.9    7.8859e+01 [+4.1,+5.8→+4.5,+6.0] [the]  θraw=33.32N/85.05W
+          Vmax'= 74.5@ 254km/1.6km  vent=[-19.57,+20.26] gyre=[-23.72,+14.48]  sep=  18km  KE=4
+[prof] 5100 steps, sum 873.7s: diag_sync=8.3s(1%)  projection=176.9s(20%)  slow_half_1=220.8s(25%)  slow_half_2=218.2s(25%)  tend_AdvectionComponent=89.5s(10%)  tend_CoriolisComponent=7.3s(1%)  tend_HelmholtzDivergenceDampingComponent=79.0s(9%)  tend_HyperDiffusionComponent=57.9s(7%)  tend_NewtonianCoolingComponent=2.9s(0%)  tend_SurfaceDragComponent=12.8s(1%)
+    42.5    32.20    86.32          -0.8    8.0345e+01 [+4.2,+5.8→+4.6,+5.9] [the]  θraw=33.37N/85.00W
+          Vmax'= 75.6@  31km/1.6km  vent=[+18.78,+31.41] gyre=[+14.56,+25.61]  sep= 225km  KE=4
+    43.0    32.33    86.26          -1.2    7.8310e+01 [+4.3,+5.8→+4.7,+5.9] [the]  θraw=33.50N/84.88W
+          Vmax'= 73.9@  49km/1.6km  vent=[+19.20,+30.79] gyre=[+14.90,+24.96]  sep= 223km  KE=4
+[prof] 5200 steps, sum 890.9s: diag_sync=8.5s(1%)  projection=180.4s(20%)  slow_half_1=225.2s(25%)  slow_half_2=222.5s(25%)  tend_AdvectionComponent=91.3s(10%)  tend_CoriolisComponent=7.5s(1%)  tend_HelmholtzDivergenceDampingComponent=80.6s(9%)  tend_HyperDiffusionComponent=59.0s(7%)  tend_NewtonianCoolingComponent=3.0s(0%)  tend_SurfaceDragComponent=13.1s(1%)
+    43.5    32.59    86.13          -1.0    7.7525e+01 [+4.4,+5.9→+4.8,+6.0] [the]  θraw=33.70N/85.15W
+          Vmax'= 77.1@ 234km/2.2km  vent=[+19.63,+30.02] gyre=[+15.24,+24.16]  sep= 233km  KE=4
+    44.0    32.69    86.09          -1.0    7.4932e+01 [+4.5,+5.9→+4.9,+5.9] [the]  θraw=33.85N/85.01W
+          Vmax'= 74.6@  44km/1.6km  vent=[+21.38,+29.88] gyre=[+16.90,+24.01]  sep= 250km  KE=4
+[prof] 5300 steps, sum 908.1s: diag_sync=8.6s(1%)  projection=183.8s(20%)  slow_half_1=229.5s(25%)  slow_half_2=226.8s(25%)  tend_AdvectionComponent=93.0s(10%)  tend_CoriolisComponent=7.6s(1%)  tend_HelmholtzDivergenceDampingComponent=82.1s(9%)  tend_HyperDiffusionComponent=60.2s(7%)  tend_NewtonianCoolingComponent=3.0s(0%)  tend_SurfaceDragComponent=13.3s(1%)
+    44.5    32.81    86.00          -1.0    7.5558e+01 [+4.6,+5.9→+5.1,+5.9] [the]  θraw=31.67N/84.10W
+          Vmax'= 75.8@  44km/1.6km  vent=[+21.98,+29.03] gyre=[+17.40,+23.15]  sep=  48km  KE=4
+[prof] 5400 steps, sum 925.2s: diag_sync=8.8s(1%)  projection=187.3s(20%)  slow_half_1=233.8s(25%)  slow_half_2=231.1s(25%)  tend_AdvectionComponent=94.8s(10%)  tend_CoriolisComponent=7.8s(1%)  tend_HelmholtzDivergenceDampingComponent=83.7s(9%)  tend_HyperDiffusionComponent=61.3s(7%)  tend_NewtonianCoolingComponent=3.1s(0%)  tend_SurfaceDragComponent=13.6s(1%)
+    45.0    32.94    85.95          -0.8    7.4261e+01 [+4.7,+5.9→+5.2,+5.9] [the]  θraw=31.82N/84.08W
+          Vmax'= 75.2@  44km/1.6km  vent=[+22.52,+28.02] gyre=[+17.83,+22.14]  sep=  50km  KE=4
+    45.5    33.00    85.91          -1.2    7.9209e+01 [+4.8,+5.9→+5.4,+5.7] [the]  θraw=32.02N/84.07W
+          Vmax'= 76.0@  22km/2.2km  vent=[+23.96,+27.86] gyre=[+19.15,+22.01]  sep=  35km  KE=4
+[prof] 5500 steps, sum 942.3s: diag_sync=9.0s(1%)  projection=190.7s(20%)  slow_half_1=238.2s(25%)  slow_half_2=235.3s(25%)  tend_AdvectionComponent=96.6s(10%)  tend_CoriolisComponent=7.9s(1%)  tend_HelmholtzDivergenceDampingComponent=85.2s(9%)  tend_HyperDiffusionComponent=62.4s(7%)  tend_NewtonianCoolingComponent=3.1s(0%)  tend_SurfaceDragComponent=13.8s(1%)
+    46.0    33.03    85.90          -1.0    8.2670e+01 [+4.9,+5.8→+5.5,+5.5] [the]  θraw=32.19N/84.04W
+          Vmax'= 77.4@ 208km/2.2km  vent=[-15.10,+24.53] gyre=[-20.02,+18.73]  sep= 208km  KE=4
+    46.5    33.11    85.87          -0.9    8.0674e+01 [+5.0,+5.7→+5.7,+5.4] [the]  θraw=32.27N/83.93W
+          Vmax'= 77.4@ 238km/1.6km  vent=[-18.44,+17.37] gyre=[-23.48,+11.64]  sep= 240km  KE=4
+[prof] 5600 steps, sum 959.4s: diag_sync=9.1s(1%)  projection=194.2s(20%)  slow_half_1=242.5s(25%)  slow_half_2=239.6s(25%)  tend_AdvectionComponent=98.3s(10%)  tend_CoriolisComponent=8.0s(1%)  tend_HelmholtzDivergenceDampingComponent=86.8s(9%)  tend_HyperDiffusionComponent=63.6s(7%)  tend_NewtonianCoolingComponent=3.2s(0%)  tend_SurfaceDragComponent=14.1s(1%)
+    47.0    33.17    85.80          -0.8    8.3261e+01 [+5.2,+5.6→+5.8,+5.2] [the]  θraw=32.40N/83.85W
+          Vmax'= 77.6@ 232km/1.6km  vent=[-17.85,+18.40] gyre=[-23.02,+12.75]  sep= 239km  KE=4
+[prof] 5700 steps, sum 976.5s: diag_sync=9.3s(1%)  projection=197.6s(20%)  slow_half_1=246.8s(25%)  slow_half_2=243.9s(25%)  tend_AdvectionComponent=100.1s(10%)  tend_CoriolisComponent=8.2s(1%)  tend_HelmholtzDivergenceDampingComponent=88.3s(9%)  tend_HyperDiffusionComponent=64.7s(7%)  tend_NewtonianCoolingComponent=3.3s(0%)  tend_SurfaceDragComponent=14.3s(1%)
+    47.5    33.34    85.72          -1.2    7.7525e+01 [+5.3,+5.6→+6.0,+5.1] [the]  θraw=32.50N/83.79W
+          Vmax'= 78.6@  44km/2.2km  vent=[+16.07,+31.96] gyre=[+10.76,+26.40]  sep=  48km  KE=4
+    48.0    33.47    85.62          -1.5    8.0565e+01 [+5.5,+5.5→+6.2,+5.0] [the]  θraw=32.63N/83.77W
+          Vmax'= 78.2@ 178km/2.2km  vent=[-5.59,+18.17] gyre=[-11.06,+12.70]  sep= 162km  KE=4
+[prof] 5800 steps, sum 993.6s: diag_sync=9.5s(1%)  projection=201.1s(20%)  slow_half_1=251.1s(25%)  slow_half_2=248.2s(25%)  tend_AdvectionComponent=101.8s(10%)  tend_CoriolisComponent=8.3s(1%)  tend_HelmholtzDivergenceDampingComponent=89.9s(9%)  tend_HyperDiffusionComponent=65.8s(7%)  tend_NewtonianCoolingComponent=3.3s(0%)  tend_SurfaceDragComponent=14.6s(1%)
+    48.5    33.75    85.38          -1.4    8.3730e+01 [+5.6,+5.4→+6.1,+5.2] [the]  θraw=33.09N/83.48W
+          Vmax'= 81.5@ 262km/2.2km  vent=[-17.42,+17.72] gyre=[-23.00,+12.30]  sep= 228km  KE=4
+    49.0    33.84    85.35          -0.9    8.1274e+01 [+5.7,+5.4→+6.1,+5.2] [the]  θraw=33.21N/83.44W
+          Vmax'= 80.2@  49km/2.2km  vent=[+15.74,+32.03] gyre=[+10.07,+26.64]  sep=  24km  KE=4
+[prof] 5900 steps, sum 1010.7s: diag_sync=9.6s(1%)  projection=204.5s(20%)  slow_half_1=255.4s(25%)  slow_half_2=252.4s(25%)  tend_AdvectionComponent=103.6s(10%)  tend_CoriolisComponent=8.5s(1%)  tend_HelmholtzDivergenceDampingComponent=91.4s(9%)  tend_HyperDiffusionComponent=67.0s(7%)  tend_NewtonianCoolingComponent=3.4s(0%)  tend_SurfaceDragComponent=14.8s(1%)
+    49.5    33.99    85.27          -0.7    8.2985e+01 [+5.7,+5.4→+6.1,+5.3] [the]  θraw=33.29N/83.37W
+          Vmax'= 80.3@  31km/1.6km  vent=[+19.09,+30.01] gyre=[+13.35,+24.64]  sep=  28km  KE=4
+[prof] 6000 steps, sum 1027.8s: diag_sync=9.8s(1%)  projection=208.0s(20%)  slow_half_1=259.7s(25%)  slow_half_2=256.7s(25%)  tend_AdvectionComponent=105.3s(10%)  tend_CoriolisComponent=8.6s(1%)  tend_HelmholtzDivergenceDampingComponent=93.0s(9%)  tend_HyperDiffusionComponent=68.1s(7%)  tend_NewtonianCoolingComponent=3.4s(0%)  tend_SurfaceDragComponent=15.1s(1%)
+    50.0    34.07    85.18          -1.6    7.8169e+01 [+5.8,+5.4→+6.1,+5.3] [the]  θraw=33.42N/83.34W
+          Vmax'= 80.6@  31km/1.6km  vent=[+21.01,+29.90] gyre=[+15.21,+24.53]  sep=  17km  KE=4
+    50.5    34.09    85.06          -1.9    7.5277e+01 [+5.8,+5.3→+6.0,+5.3] [the]  θraw=33.56N/83.34W
+          Vmax'= 79.3@  47km/2.2km  vent=[+21.34,+28.86] gyre=[+15.51,+23.51]  sep=  17km  KE=4
+[prof] 6100 steps, sum 1044.9s: diag_sync=10.0s(1%)  projection=211.5s(20%)  slow_half_1=264.1s(25%)  slow_half_2=261.0s(25%)  tend_AdvectionComponent=107.1s(10%)  tend_CoriolisComponent=8.8s(1%)  tend_HelmholtzDivergenceDampingComponent=94.5s(9%)  tend_HyperDiffusionComponent=69.2s(7%)  tend_NewtonianCoolingComponent=3.5s(0%)  tend_SurfaceDragComponent=15.3s(1%)
+    51.0    34.53    84.87          -1.2    7.4282e+01 [+5.9,+5.4→+6.2,+5.6] [the]  θraw=33.57N/83.17W
+          Vmax'= 79.6@  47km/2.2km  vent=[+21.65,+27.48] gyre=[+15.76,+22.09]  sep=  32km  KE=4
+    51.5    34.65    84.77          -1.0    8.0349e+01 [+5.9,+5.4→+6.2,+5.7] [the]  θraw=34.05N/82.98W
+          Vmax'= 77.1@  63km/2.8km  vent=[+11.88,+32.14] gyre=[+5.94,+26.69]  sep=  24km  KE=4
+[prof] 6200 steps, sum 1062.1s: diag_sync=10.1s(1%)  projection=214.9s(20%)  slow_half_1=268.4s(25%)  slow_half_2=265.3s(25%)  tend_AdvectionComponent=108.9s(10%)  tend_CoriolisComponent=8.9s(1%)  tend_HelmholtzDivergenceDampingComponent=96.1s(9%)  tend_HyperDiffusionComponent=70.4s(7%)  tend_NewtonianCoolingComponent=3.6s(0%)  tend_SurfaceDragComponent=15.6s(1%)
+    52.0    34.79    84.72          -1.3    7.9779e+01 [+6.0,+5.5→+6.3,+5.8] [the]  θraw=34.05N/82.89W
+          Vmax'= 76.2@  16km/1.6km  vent=[+15.46,+30.16] gyre=[+9.46,+24.66]  sep=  32km  KE=4
+[prof] 6300 steps, sum 1079.2s: diag_sync=10.3s(1%)  projection=218.4s(20%)  slow_half_1=272.7s(25%)  slow_half_2=269.5s(25%)  tend_AdvectionComponent=110.6s(10%)  tend_CoriolisComponent=9.1s(1%)  tend_HelmholtzDivergenceDampingComponent=97.6s(9%)  tend_HyperDiffusionComponent=71.5s(7%)  tend_NewtonianCoolingComponent=3.6s(0%)  tend_SurfaceDragComponent=15.9s(1%)
+    52.5    34.14    82.88          -1.5    8.2741e+01 [+5.8,+5.8→+4.9,+7.1] [rcq]  θraw=34.14N/82.88W
+          Vmax'= 77.7@  44km/1.6km  vent=[+18.38,+32.20] gyre=[+12.57,+26.43]  sep=  20km  KE=3
+
+Wall time: 699.0s
+
+====================================================================
+LANDFALL VERIFICATION - threshold 30.0 degN
+====================================================================
+  Obs crossed:  30.0 degN at 87.90 degW  t+42.0h
+  V8  crossed:  30.0 degN at 87.20 degW  t+33.9h
+  Timing:       -8.1 h  (early)
+  Cross-track:  +67.6 km  (east)  [same-latitude]
+
+  Track-error decomposition at observed fixes
+  (along + = ahead of obs;  cross + = right of obs motion, approx E here)
+   t(h)      obs (N/W)       V8 (N/W)    total    along    cross
+    0.0   23.00/ 86.00   22.90/ 86.24     27.0     +4.4    -26.6
+    6.0   23.70/ 86.50   23.60/ 85.94     58.2    -36.6    +45.2
+   12.0   24.70/ 87.00   25.19/ 87.02     54.2    +50.6    +19.4
+   18.0   25.60/ 87.40   26.19/ 87.33     65.6    +57.8    +30.8
+   24.0   26.70/ 87.90   27.45/ 87.46     94.0    +66.1    +66.8
+   30.0   27.90/ 88.20   28.86/ 87.45    130.0    +97.3    +86.2
+   36.0   28.90/ 88.20   30.58/ 87.07    217.6   +199.9    +86.1
+   42.0   30.00/ 87.90   32.09/ 86.40    274.3   +257.0    +96.0
+   42.8   30.20/ 87.90   32.28/ 86.28    279.4   +249.3   +126.3
+   48.0   31.40/ 87.70   33.47/ 85.62    304.0   +263.4   +151.9
+
+  Legacy metric - vs landfall point 30.2 degN 87.9 degW t+43h (conflates along+cross):
+    +67.6 km  (east)
+====================================================================

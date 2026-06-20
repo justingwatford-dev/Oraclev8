@@ -8,26 +8,22 @@ manuscript-register; the bracketed author notes at the end are for you, not the 
 ## A structural β-drift aim residual
 
 With storm initialization drawn directly from HURDAT2 (Section X), Oracle's landfall track errors
-resolve into two cleanly separable components. The along-track component is storm-specific and
-changes sign and magnitude between cases (Ivan strongly over-translates, Hugo under-translates,
-Katrina mildly over-translates), indicating no systematic
-propagation-speed bias.<!-- ⚠ TODO (2026-06-19, Hugo storm-agnostic rerun): THIS CLAIM NO
-LONGER HOLDS AS WRITTEN. The corrected run_hugo.py (now bit-identical storm-agnostic stack
-to run_katrina/run_ivan) has Hugo crossing 32.5°N 2.2 h EARLY with along-track +22 km AHEAD
-at the landfall fix — i.e. Hugo now OVER-translates, not under-translates. All three storms
-now over-translate (cross early: Hugo −2.2 h, Katrina −3.2 h, Ivan −8.3 h), so "changes sign
-→ no systematic propagation bias" is contradicted; it now reads as a systematic poleward
-over-translation of varying magnitude. The cross-track cluster below is unaffected. REFRAME
-THIS PARAGRAPH before submission. See HURDAT2_VERIFICATION.md scorecard correction note. --> The cross-track component, by contrast, is the same sign in every case: each
-simulated vortex tracks to the right of the observed best track. Evaluated at the observed landfall
-time, the eastward cross-track displacement is +111, +125, and +126 km for Hugo, Katrina, and Ivan
-respectively (mean +120 km) — a tight clustering, same-signed and spanning only 16 km, despite the
-storms' differing tracks, landfall latitudes (32°, 30°, and 29°N), intensities, and steering
-regimes. All three were initialized with the same outer-vortex configuration; a cross-track error
-this consistent across otherwise disparate cases is evidence of a single systematic source rather
-than three independent errors. A consistent, same-signed cross-track error of this
-kind is the signature of a systematic error in the storm's self-propagation rather than in the
-imposed environmental steering, and we therefore examined the model's β-drift directly.
+resolve into two cleanly separable components. The timing/along-track component varies strongly by
+storm type: Hugo and Katrina are direct landfall cases with modest early arrival (−2.3 and −2.6 h),
+whereas Ivan is a recurver whose observed track stalls and bends while the model continues poleward,
+producing a much larger early-arrival error (−8.1 h). The cross-track component, by contrast, is the
+same sign in every case: each simulated vortex tracks to the right of the observed best track.
+Evaluated at the observed landfall fixes, the eastward cross-track displacement is +110, +125, and
++126 km for Hugo, Katrina, and Ivan respectively (mean +120 km) — a tight clustering, same-signed
+and spanning only 16 km, despite the storms' differing tracks, landfall latitudes (32°, 29°, and
+30°N), intensities, and steering regimes. Scored at same latitude, the direct storms remain close
+to the landfall-fix values (+103 and +114 km), while Ivan drops to +68 km because the landfall-fix
+metric is inflated by its missed recurvature and +249 km along-track error. All three were run under
+one storm-agnostic production configuration; a same-signed cross-track error this consistent across
+otherwise disparate cases is evidence of a systematic source rather than three independent errors.
+A consistent eastward cross-track error of this kind is the signature of a systematic error in the
+storm's self-propagation rather than in the imposed environmental steering, and we therefore
+examined the model's β-drift directly.
 
 We isolated self-propagation using a quiescent-environment testbed: a single balanced vortex
 integrated on a β-plane with no imposed environmental flow, from which the β-drift vector was
@@ -105,17 +101,13 @@ than to conceal them behind compensating errors (Section X).
 - **Section X** cross-refs: (1) HURDAT2 initialization; (2) the landfall track-error table/figure
   for Hugo/Ivan/Katrina; (3) the compensating-errors methodology paragraph. Wire to your actual
   numbers.
-- **Housekeeping (cleanup audit 2026-06-19).** (1) Hugo's landfall-fix cross-track **+111.3 km**
-  (obs landfall t+28 h) was regenerated 2026-06-19 from the corrected storm-agnostic
-  `run_hugo.py` — confirms the +111 km cited in §results; provisional flag cleared. (NB the same
-  rerun flips Hugo's along-track sign to over-translation — see the ⚠ note at the §results
-  along-track paragraph.) (2) Taper-start consistency is now
-  encoded in the scripts: all three storm drivers pass the calibrated **taper-start 200 km**
-  (frac 0.40), and the β-drift testbed carries the same outer-structure setting. The checked-in
-  logs still need to be replaced before the +120 km three-storm cluster is cited as reproducible
-  evidence. The old warning about uploaded `run_hugo/run_katrina` being stale is retired; instead,
-  make sure the explicit `taper_start_frac = 0.40` lines are saved/committed in the live scripts
-  before the new reruns, so a future rerun doesn't silently revert to 250.
+- **Housekeeping (unified run audit 2026-06-20).** `run_storm.py` now supplies the storm-agnostic
+  path used for all three storms: one production config, HURDAT2-derived storm data, geometry-derived
+  domain/run length, ERA5-required steering, cooling, drag, cap, taper, and modern tracker. The
+  regenerated logs are checked in as `*_Agnostic.txt`: Hugo **+102.7 km** same-lat / **+110.2 km**
+  landfall-fix / **−2.3 h**; Katrina **+114.3 / +124.6 / −2.6 h**; Ivan **+67.6 / +126.3 / −8.1 h**.
+  The landfall-fix +120 km cluster is reproducible under the unified config; same-latitude should be
+  the reviewer-facing clean cross-track metric, with Ivan's recurver/timing split called out.
 - **Numbers used:** taper A/B (Ivan) 250→200 km ≈ 15 km shift; ν₄ sweep 3.0e11 (clean, Vmax_end 42)
   → 1.0e11 (contaminated, Vmax_end 82) → ≤3.0e10 (divergent); resolution 350/351/352° at
   2.48/2.37/2.28 m s⁻¹. All from the V8.7 probe series.
