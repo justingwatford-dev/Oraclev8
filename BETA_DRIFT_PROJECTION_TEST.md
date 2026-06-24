@@ -32,20 +32,21 @@ component of ~0.4 m/s vs a canonical ~1.4 m/s — a ~1.0 m/s eastward deficit). 
 movers) is robustly positive ~0.6–1.0 across reasonable canonical-magnitude assumptions, so the
 qualitative result does not hinge on the exact value.
 
-**Observed along/cross — firm.** Control-baseline decompositions from [STRUCTURAL_INIT_RECIPE.md].
+**Observed along/cross and transit times — firm, verified 2026-06-23 against the checked-in
+`*_Agnostic` run logs** (`oracle_v8/Logs/{Storm}/`). Each value is the along/cross decomposition at
+the observed landfall fix; transit T is that fix's time since init.
 
-**Headings and transit times — confirmed by Justin (2026-06-23).** Headings from the track-character
-column in [SIX_STORM_VALIDATION_NOTE.md]; transit times firm for Hugo/Katrina/Ivan, confirmed for
-Fran/Michael/Laura.
+**Headings — confirmed by Justin (2026-06-23)** from the track-character column in
+[SIX_STORM_VALIDATION_NOTE.md].
 
 | Storm   | heading θ        | transit T (h) | observed cross | observed along |
 | ------- | ---------------- | ------------- | -------------- | -------------- |
-| Hugo    | ~325° (NNW–NW)   | 28            | +110           | +23            |
-| Katrina | ~350° (N)        | 35            | +125           | +77            |
-| Ivan    | ~340° (NNW)      | 42            | +126           | +249           |
-| Fran    | ~335° (NNW,fast) | 28            | +8             | −45            |
-| Michael | ~010° (N→NE)     | 36            | −99            | +124           |
-| Laura   | ~350° (→N)       | 30            | −32            | +37            |
+| Hugo    | ~325° (NNW–NW)   | 28.0          | +110.2         | +23.3          |
+| Katrina | ~350° (N)        | 35.2          | +124.6         | +76.5          |
+| Ivan    | ~340° (NNW)      | 42.8          | +126.3         | +249.3         |
+| Fran    | ~335° (NNW,fast) | 24.5          | +7.7           | −45.5          |
+| Michael | ~010° (N→NE)     | 29.5          | −98.7          | +123.8         |
+| Laura   | ~350° (→N)       | 24.0          | −31.9          | +37.4          |
 
 ## Result
 
@@ -55,14 +56,14 @@ Predicted from the single bias vector E = (+1, +1) m/s vs. observed (km):
 | ------- | -------------- | --------- | ---------- | -------------- | --------- | ---------- |
 | Hugo    | **+140**       | +110      | ✓          | **+25**        | +23       | ✓          |
 | Katrina | **+146**       | +125      | ✓          | **+102**       | +77       | ✓          |
-| Ivan    | **+194**       | +126      | ✓          | **+90**        | +249      | ✓          |
-| Fran    | **+134**       | +8        | ✗ (~0)     | **+49**        | −45       | ✗          |
-| Michael | **+105**       | −99       | ✗ (flip)   | **+150**       | +124      | ✓          |
-| Laura   | **+125**       | −32       | ✗ (flip)   | **+88**        | +37       | ✓          |
+| Ivan    | **+198**       | +126      | ✓          | **+93**        | +249      | ✓          |
+| Fran    | **+117**       | +8        | ✗ (~0)     | **+43**        | −45       | ✗          |
+| Michael | **+86**        | −99       | ✗ (flip)   | **+123**       | +124      | ✓          |
+| Laura   | **+100**       | −32       | ✗ (flip)   | **+70**        | +37       | ✓          |
 
 ## Findings
 
-**1. The single bias vector predicts large EAST cross-track for all six storms (+105 to +194 km).**
+**1. The single bias vector predicts EAST cross-track for all six storms (+86 to +198 km).**
 All six head roughly poleward, and a NE bias projects rightward (east) for every poleward heading.
 It matches the in-sample three within ~25%. It is catastrophically wrong for all three
 out-of-sample: Fran (~0 observed), Michael and Laura (observed west).
@@ -77,8 +78,8 @@ flips the sign between them is their *different steering*, not their β-drift.
 
 **3. The bias is real — the test localizes where it lives.** It accounts for the in-sample three
 cleanly, and it predicts the *along-track* of the poleward movers well: Hugo +25 vs +23,
-Michael +150 vs +124. The Michael match confirms the six-storm note's reading that **Michael's −99
-"west" is a metric artifact** — the poleward bias dumps into along-track overshoot, and the
+Michael **+123 vs +124**. The Michael match confirms the six-storm note's reading that **Michael's
+−99 "west" is a metric artifact** — the poleward bias dumps into along-track overshoot, and the
 same-latitude scalar reprojects it as spurious west. The bias is detectable, but as *along-track on
 northward storms*, not as a universal eastward cross-track. (Independent argument for retiring the
 same-latitude scalar in favor of along/cross.)
