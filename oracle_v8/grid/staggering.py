@@ -15,10 +15,18 @@ Concrete subclasses for V8:
       ρ, u, v, φ on full levels. Planned for V8.x if hydrostatic
       adjustment tests reveal Lorenz computational-mode artifacts.
 
-The point of the abstraction: switching staggering is a single object
-swap. The advection, buoyancy, and projection components don't need to
-know which staggering is in use — they just call interpolation and
-derivative methods on the staggering object.
+Scope of the abstraction in V8.0 (honest statement): V8.0 is Lorenz-only.
+The abstraction currently captures exactly two things that are actually on
+the execution path — vertical level placement (`level_type`) and the
+full→half interpolation used by the buoyancy component
+(`interpolate_full_to_half`). The vertical *derivative* stencils are
+implemented directly inside AdvectionComponent and AnelasticProjection
+(hardcoded for the Lorenz grid), NOT routed through this object. So a
+staggering swap is NOT a drop-in today: CharneyPhillipsStaggering is a
+forward-looking placeholder (only `level_type` is meaningful), and actually
+switching to it would require refactoring those components to call the
+staggering's derivative operators. The class is retained as the seam for
+that future work, not as a working swap.
 
 Key references:
     Lorenz, E. N. (1960): Energy and numerical weather prediction.
@@ -30,11 +38,13 @@ Key references:
         primitive equations based on the Charney-Phillips grid in
         hybrid σ-p vertical coordinates. Mon. Wea. Rev., 124, 511-528.
 
-V8 design choice (post-triangulation): start with Lorenz, retain the
-GridStaggering abstraction so CP can replace it if hydrostatic
-adjustment tests show 2Δz computational-mode artifacts in θ. The cost
-of the abstraction is contained; the cost of switching after writing
-non-abstracted code is large.
+V8 design choice (post-triangulation): ship Lorenz, retain a *minimal*
+GridStaggering seam (level placement + full→half interpolation) so the
+later move to CP — if hydrostatic-adjustment tests show 2Δz θ artifacts —
+has a defined entry point. The unimplemented derivative/hydrostatic methods
+that previously lived here were removed: they were never called (the
+components compute Lorenz stencils inline), so keeping them as abstract
+contract overstated what the abstraction delivers.
 """
 
 from __future__ import annotations
@@ -44,6 +54,21 @@ from enum import Enum
 from typing import Literal
 
 import numpy as np
+
+
+def _xp_like(arr):
+    """
+    Return the array module (cupy or numpy) that ``arr`` lives on, so output
+    arrays are allocated on the same device as the input.  Buoyancy fields are
+    device-resident under the GPU backend; allocating the interpolation output
+    with bare numpy and then assigning a cupy slice into it raises
+    "implicit conversion to a NumPy array is not allowed".
+    """
+    try:
+        import cupy
+        return cupy.get_array_module(arr)
+    except ImportError:
+        return np
 
 
 class LevelType(Enum):
@@ -68,15 +93,16 @@ class GridStaggering(abc.ABC):
     """
     Abstract base class for vertical staggering policies.
 
-    A concrete staggering specifies:
-        1. Where each prognostic variable lives (full vs half levels).
-        2. Interpolation operators between full and half levels.
-        3. Vertical derivative operators that respect the staggering.
-        4. The discrete hydrostatic relation specific to this staggering.
+    A concrete staggering specifies, in V8.0:
+        1. Where each prognostic variable lives (full vs half levels)
+           — `level_type`.
+        2. The full→half interpolation used by the buoyancy component
+           — `interpolate_full_to_half`.
 
-    All operators that touch z derivatives interrogate the staggering
-    object. Switching staggering means swapping this object; no other
-    code changes.
+    NOTE: vertical-derivative and discrete-hydrostatic operators are NOT
+    part of this contract in V8.0 — they are implemented inline in the
+    components (AdvectionComponent, AnelasticProjection) for the Lorenz
+    grid. See the module docstring.
     """
 
     name: str = "abstract"
@@ -98,58 +124,6 @@ class GridStaggering(abc.ABC):
 
         The exact dimensionality (nz+1 vs nz-1) is staggering-specific
         and documented in each concrete subclass.
-        """
-
-    @abc.abstractmethod
-    def interpolate_half_to_full(self, field_on_half: np.ndarray) -> np.ndarray:
-        """
-        Interpolate a field from half levels back to full levels
-        (returns nz values).
-        """
-
-    @abc.abstractmethod
-    def vertical_derivative(
-        self,
-        field: np.ndarray,
-        from_level_type: LevelType,
-        to_level_type: LevelType,
-        dz: float,
-    ) -> np.ndarray:
-        """
-        Compute the vertical derivative of a field, transferring it from
-        one level type to another if needed.
-
-        Common cases:
-            ∂(field on full)/∂z → field on half: centered differences
-                between adjacent full levels.
-            ∂(field on half)/∂z → field on full: centered differences
-                between adjacent half levels.
-            ∂(field on full)/∂z → field on full: requires either a
-                wider stencil or interpolation; staggering specifies.
-        """
-
-    @abc.abstractmethod
-    def discrete_hydrostatic_relation(
-        self,
-        rho_bar: np.ndarray,
-        gravity: float,
-        dz: float,
-    ) -> np.ndarray:
-        """
-        Return the discrete vertical pressure increment dp̄ that
-        satisfies hydrostatic balance EXACTLY in this staggering.
-
-        This is the operator the base-state construction uses to
-        produce a base state in V8's notion of discrete hydrostatic
-        balance, replacing the trapezoidal placeholder in
-        base_states.py.
-
-        For Lorenz with ρ on full levels and p on full levels:
-            dp̄_k = -ρ̄_{k+1/2} g dz, integrated upward from p_surface
-            where ρ̄_{k+1/2} is the half-level interpolation of ρ̄.
-
-        For CP, the staggering of p and ρ may differ and the discrete
-        relation has different terms.
         """
 
     def __repr__(self) -> str:
@@ -221,53 +195,17 @@ class LorenzStaggering(GridStaggering):
         operator commute, eliminating spurious entropy production in
         long-time integrations.
         """
-        # Allocate output with nz+1 in the last axis; rest of shape matches input
+        # Allocate output with nz+1 in the last axis; rest of shape matches input.
+        # Use the input's array module so the output lands on the same device
+        # (GPU-safe: b_full is device-resident under the cupy backend).
+        xp = _xp_like(field_on_full)
         out_shape = field_on_full.shape[:-1] + (field_on_full.shape[-1] + 1,)
-        out = np.zeros(out_shape, dtype=field_on_full.dtype)
+        out = xp.zeros(out_shape, dtype=field_on_full.dtype)
         # Interior faces: arithmetic mean of adjacent full levels
         out[..., 1:-1] = 0.5 * (field_on_full[..., :-1] + field_on_full[..., 1:])
         # Surface (out[..., 0]) and lid (out[..., -1]) stay at zero.
         # Callers asserting different boundary behavior must do so explicitly.
         return out
-
-    def interpolate_half_to_full(self, field_on_half: np.ndarray) -> np.ndarray:
-        # Inverse direction: average of adjacent half levels back to full.
-        # Internal full levels k = 1, ..., nz-2 use 0.5*(half[k-1+1/2] + half[k+1/2]).
-        # Boundary full levels (k=0, k=nz-1) use one-sided combinations or
-        # boundary conditions, depending on what's being interpolated.
-        raise NotImplementedError(
-            "Lorenz half-to-full interpolation. Pending implementation; "
-            "boundary handling will be staggering-specific."
-        )
-
-    def vertical_derivative(
-        self,
-        field: np.ndarray,
-        from_level_type: LevelType,
-        to_level_type: LevelType,
-        dz: float,
-    ) -> np.ndarray:
-        # Centered differences across the appropriate level pairs.
-        # FULL → HALF: ∂field/∂z at half-level k+1/2 = (field[k+1] - field[k]) / dz
-        # HALF → FULL: ∂field/∂z at full-level k = (field[k+1/2] - field[k-1/2]) / dz
-        raise NotImplementedError(
-            "Lorenz vertical derivative. Pending implementation; "
-            "boundary stencils will use one-sided differences."
-        )
-
-    def discrete_hydrostatic_relation(
-        self,
-        rho_bar: np.ndarray,
-        gravity: float,
-        dz: float,
-    ) -> np.ndarray:
-        # Lorenz with p, ρ on full levels:
-        # dp̄_{k+1/2} = -ρ̄_{k+1/2} * g * dz where ρ̄_{k+1/2} = 0.5*(ρ̄_k + ρ̄_{k+1})
-        # Integrating: p̄_{k+1} = p̄_k + dp̄_{k+1/2}
-        raise NotImplementedError(
-            "Lorenz discrete hydrostatic relation. Replaces the trapezoidal "
-            "placeholder in base_states.py once this method is implemented."
-        )
 
 
 class CharneyPhillipsStaggering(GridStaggering):
@@ -288,8 +226,11 @@ class CharneyPhillipsStaggering(GridStaggering):
         - Documented improvements in TC eyewall asymmetry (cited in
           Decision 2 architectural review).
 
-    Status: planned for V8.x. V8.0 ships Lorenz as the simpler baseline,
-    swap if hydrostatic adjustment validation shows artifacts.
+    Status: forward-looking placeholder for V8.x. Only `level_type` is
+    implemented (and exercised by the abstractions smoke test); the
+    interpolation is not implemented. V8.0 ships Lorenz; moving to CP is a
+    V8.x task that also requires routing the component vertical stencils
+    through the staggering (see module docstring).
     """
 
     name = "charney_phillips"
@@ -300,24 +241,4 @@ class CharneyPhillipsStaggering(GridStaggering):
         return LevelType.FULL
 
     def interpolate_full_to_half(self, field_on_full: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("Planned for V8.x.")
-
-    def interpolate_half_to_full(self, field_on_half: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("Planned for V8.x.")
-
-    def vertical_derivative(
-        self,
-        field: np.ndarray,
-        from_level_type: LevelType,
-        to_level_type: LevelType,
-        dz: float,
-    ) -> np.ndarray:
-        raise NotImplementedError("Planned for V8.x.")
-
-    def discrete_hydrostatic_relation(
-        self,
-        rho_bar: np.ndarray,
-        gravity: float,
-        dz: float,
-    ) -> np.ndarray:
-        raise NotImplementedError("Planned for V8.x.")
+        raise NotImplementedError("CharneyPhillipsStaggering is a V8.x placeholder.")
