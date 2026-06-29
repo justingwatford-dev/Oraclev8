@@ -25,6 +25,7 @@ from oracle_v8.solver.tendency import (
     HorizontalDiffusionComponent,
     HyperDiffusionComponent,
     NewtonianCoolingComponent,
+    DiabaticHeatingComponent,
     HelmholtzDivergenceDampingComponent
 )
 from oracle_v8.solver.operator_config import OperatorConfig

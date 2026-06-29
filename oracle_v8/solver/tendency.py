@@ -386,8 +386,55 @@ class DiagnosticComponent(StepComponent):
 
 
 # -------------------------------------------------------------------------
-# Shared spatial helper
+# Shared spatial helpers
 # -------------------------------------------------------------------------
+
+
+def anelastic_divergence(u, v, w, rho_bar_full, rho_bar_half, kx, ky, dz):
+    """
+    Discrete d = ∇·(ρ̄ u) on the cell-centered Lorenz grid — the EXACT operator
+    the AnelasticProjection inverts and corrects against.
+
+    Single source of truth: both AnelasticProjection (via
+    _compute_anelastic_divergence) and the validation harness
+    (validation/test_harness.compute_anelastic_residual) call this, so the
+    constraint a test measures is the one the solver enforces — never a
+    re-derived stencil.
+
+    Discretization:
+      - Horizontal ∂(ρ̄u)/∂x + ∂(ρ̄v)/∂y: spectral (multiply by ikx, iky),
+        periodic in x, y.
+      - Vertical ∂(ρ̄w)/∂z: flux form across the Δz half-level stencil,
+        (ρ̄w)_{k+1/2} − (ρ̄w)_{k−1/2}, with w on half levels (length nz+1)
+        and rigid w=0 stored explicitly at the surface/lid faces.
+
+    Parameters
+    ----------
+    u, v : (nx, ny, nz) full-level horizontal velocity.
+    w : (nx, ny, nz+1) half-level vertical velocity.
+    rho_bar_full : (nz,) ρ̄ on full levels.
+    rho_bar_half : (nz+1,) ρ̄ on half levels.
+    kx, ky : wavenumber arrays (2π·fftfreq) matching the grid.
+    dz : vertical spacing.
+
+    Returns d on full levels, shape (nx, ny, nz).
+    """
+    rho_u = rho_bar_full[None, None, :] * u
+    rho_v = rho_bar_full[None, None, :] * v
+
+    ikx = 1j * kx[:, None, None]
+    iky = 1j * ky[None, :, None]
+
+    rho_u_hat = np.fft.fft2(rho_u, axes=(0, 1))
+    rho_v_hat = np.fft.fft2(rho_v, axes=(0, 1))
+    d_hat = ikx * rho_u_hat + iky * rho_v_hat
+    horiz_div = np.real(np.fft.ifft2(d_hat, axes=(0, 1)))
+
+    rho_w_lower = rho_bar_half[None, None, :-1] * w[:, :, :-1]
+    rho_w_upper = rho_bar_half[None, None, 1:] * w[:, :, 1:]
+    vert_div = (rho_w_upper - rho_w_lower) / dz
+
+    return horiz_div + vert_div
 
 
 def _phi_gradient(
@@ -746,36 +793,15 @@ class AnelasticProjection(ProjectionComponent):
         """
         Compute d = ∇·(ρ̄ u) on the cell-centered Lorenz grid.
 
-        Horizontal divergence: spectral via FFT (multiplication by ikx, iky).
-        Vertical divergence of (ρ̄ w): centered difference between half
-        levels, where (ρ̄ w) at the half level uses ρ̄_{k+1/2} and w_{k+1/2}.
-
-        Returns d on full levels, shape (nx, ny, nz).
+        Thin wrapper around the module-level :func:`anelastic_divergence` so
+        the projection and the validation harness share ONE operator (the
+        test suite must never re-derive this stencil).  Returns d on full
+        levels, shape (nx, ny, nz).
         """
-        # Horizontal: ∂(ρ̄ u)/∂x + ∂(ρ̄ v)/∂y, computed on full levels
-        rho_u = rho_bar_full[None, None, :] * u
-        rho_v = rho_bar_full[None, None, :] * v
-
-        ikx = 1j * self._solver.kx[:, None, None]
-        iky = 1j * self._solver.ky[None, :, None]
-
-        rho_u_hat = np.fft.fft2(rho_u, axes=(0, 1))
-        rho_v_hat = np.fft.fft2(rho_v, axes=(0, 1))
-        d_hat = ikx * rho_u_hat + iky * rho_v_hat
-        horiz_div = np.real(np.fft.ifft2(d_hat, axes=(0, 1)))
-
-        # Vertical: d(ρ̄ w)/dz at full level k is
-        #   [ρ̄_{k+1/2} w_{k+1/2} - ρ̄_{k-1/2} w_{k-1/2}] / dz
-        # With cell-centered Lorenz: w[..., 0] is at z=0 (surface, =0
-        # for rigid), w[..., k] is at half-level k-1/2 in our k=1..nz-1
-        # interior, and w[..., nz] is at z=Lz (lid, =0 for rigid).
-        # So the divergence at full level k uses w[..., k+1] (upper face)
-        # and w[..., k] (lower face).
-        rho_w_lower = rho_bar_half[None, None, :-1] * w[:, :, :-1]
-        rho_w_upper = rho_bar_half[None, None, 1:] * w[:, :, 1:]
-        vert_div = (rho_w_upper - rho_w_lower) / self._dz
-
-        return horiz_div + vert_div
+        return anelastic_divergence(
+            u, v, w, rho_bar_full, rho_bar_half,
+            self._solver.kx, self._solver.ky, self._dz,
+        )
 
     def _compute_phi_gradient(self, phi):
         """
@@ -852,7 +878,23 @@ class AdvectionComponent(TendencyComponent):
         Lx: float | None = None,
         Ly: float | None = None,
         Lz: float | None = None,
+        scheme: str = "centered2",
     ) -> None:
+        # scheme selects the HORIZONTAL advection discretization:
+        #   "centered2"  — 2nd-order centred (V8.0 default; bit-identical to the
+        #                  validated runs; no built-in dissipation).
+        #   "upwind5h"   — 5th-order upwind-biased (Wicker-Skamarock 2002) in x,y;
+        #                  carries 4th-order numerical dissipation that damps the
+        #                  nonlinear 2Δx cascade.  Vertical advection stays centred
+        #                  in both modes (w is O(0.1 m/s); the aliasing instability
+        #                  is horizontal).  Advective form — flux form for strict
+        #                  conservation is a follow-up.
+        if scheme not in ("centered2", "upwind5h"):
+            raise ValueError(
+                f"AdvectionComponent scheme must be 'centered2' or 'upwind5h', "
+                f"got {scheme!r}"
+            )
+        self.scheme = scheme
         self._dx: float | None = None
         self._dy: float | None = None
         self._dz: float | None = None
@@ -895,6 +937,27 @@ class AdvectionComponent(TendencyComponent):
         g[:, :, -1]   = (f[:, :, -1] - f[:, :, -2])  / dz
         return g
 
+    @staticmethod
+    def _upwind5(q: np.ndarray, a: np.ndarray, d: float, axis: int) -> np.ndarray:
+        """
+        5th-order upwind-biased first derivative ∂q/∂x_axis (Wicker-Skamarock
+        2002), periodic via np.roll, upwind direction set by the advecting
+        velocity `a` (same shape as q).
+
+        Decomposition: 6th-order centred derivative minus |a|-signed 6th-difference
+        dissipation, so the truncation error is a 5th-order (∝ ∂⁶q) dissipative
+        term — exactly the built-in scale-selective damping that lets the scheme
+        control the nonlinear 2Δx cascade without an external filter.
+
+            a >= 0:  (-2 q_{i-3} +15 q_{i-2} -60 q_{i-1} +20 q_i +30 q_{i+1} -3 q_{i+2})/(60 d)
+            a <  0:  ( 2 q_{i+3} -15 q_{i+2} +60 q_{i+1} -20 q_i -30 q_{i-1} +3 q_{i-2})/(60 d)
+        """
+        qm3 = np.roll(q,  3, axis); qm2 = np.roll(q,  2, axis); qm1 = np.roll(q,  1, axis)
+        qp1 = np.roll(q, -1, axis); qp2 = np.roll(q, -2, axis); qp3 = np.roll(q, -3, axis)
+        d_pos = (-2.0*qm3 + 15.0*qm2 - 60.0*qm1 + 20.0*q + 30.0*qp1 - 3.0*qp2) / (60.0 * d)
+        d_neg = ( 2.0*qp3 - 15.0*qp2 + 60.0*qp1 - 20.0*q - 30.0*qm1 + 3.0*qm2) / (60.0 * d)
+        return np.where(a >= 0.0, d_pos, d_neg)
+
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
@@ -933,6 +996,15 @@ class AdvectionComponent(TendencyComponent):
         v_h[:, :,  0]   = v[:, :,  0]
         v_h[:, :, -1]   = v[:, :, -1]
 
+        # Horizontal advective derivative operators.  Centered ignores the
+        # advecting velocity `a`; upwind5h uses its sign to bias the stencil.
+        if self.scheme == "upwind5h":
+            ddx = lambda q, a: self._upwind5(q, a, dx, 0)
+            ddy = lambda q, a: self._upwind5(q, a, dy, 1)
+        else:
+            ddx = lambda q, a: self._cx(q, dx)
+            ddy = lambda q, a: self._cy(q, dy)
+
         # ------------------------------------------------------------------
         # θ′ advection (full levels)
         #   ∂θ′/∂t = −u·∇θ′ − w_c·∂θ̄/∂z
@@ -944,8 +1016,8 @@ class AdvectionComponent(TendencyComponent):
         dθ0_dz[-1]    = (θ0[-1] - θ0[-2])  / dz
 
         dθp_dt = -(
-            u   * self._cx(θp, dx)
-            + v   * self._cy(θp, dy)
+            u   * ddx(θp, u)
+            + v   * ddy(θp, v)
             + w_c * (self._cz_full(θp, dz) + dθ0_dz[None, None, :])
         )
 
@@ -954,8 +1026,8 @@ class AdvectionComponent(TendencyComponent):
         #   ∂u/∂t = −(u ∂u/∂x + v ∂u/∂y + w_c ∂u/∂z)
         # ------------------------------------------------------------------
         du_dt = -(
-            u   * self._cx(u, dx)
-            + v   * self._cy(u, dy)
+            u   * ddx(u, u)
+            + v   * ddy(u, v)
             + w_c * self._cz_full(u, dz)
         )
 
@@ -963,8 +1035,8 @@ class AdvectionComponent(TendencyComponent):
         # Momentum advection — v (full levels)
         # ------------------------------------------------------------------
         dv_dt = -(
-            u   * self._cx(v, dx)
-            + v   * self._cy(v, dy)
+            u   * ddx(v, u)
+            + v   * ddy(v, v)
             + w_c * self._cz_full(v, dz)
         )
 
@@ -975,8 +1047,8 @@ class AdvectionComponent(TendencyComponent):
         # dw/dt = 0 there too.
         # ------------------------------------------------------------------
         dw_dt = -(
-            u_h * self._cx(w, dx)
-            + v_h * self._cy(w, dy)
+            u_h * ddx(w, u_h)
+            + v_h * ddy(w, v_h)
             + w   * self._cz_half(w, dz)
         )
         dw_dt[:, :,  0] = 0.0    # surface rigid BC
@@ -1591,6 +1663,76 @@ class NewtonianCoolingComponent(TendencyComponent):
 
     def reads(self) -> tuple[StateVar, ...]:
         return (StateVar.THETA_PRIME,)
+
+    def writes(self) -> tuple[StateVar, ...]:
+        return (StateVar.THETA_PRIME,)
+
+
+class DiabaticHeatingComponent(TendencyComponent):
+    """
+    Prescribed annular eyewall heating — an idealized θ′ source (K/s).
+
+    A dry anelastic vortex has no diabatic driver, so a *balanced* warm core is
+    inert: it sits in equilibrium and is eroded by Newtonian cooling, producing
+    no secondary circulation (measured: max|w| ~ 0.1 m/s, θ′ relaxes on τ_cool).
+    This component supplies the missing forcing — a fixed annular heating that
+    mimics eyewall latent-heat release, sustaining θ′ against cooling and
+    driving the overturning circulation (eyewall ascent, compensating
+    subsidence, low-level inflow / upper-level outflow via the projection).
+
+    This is the simplest possible driver: prescribed (state-independent), fixed
+    in space, centered at the domain center.  It is NOT a moist parameterization
+    and NOT in the production (barotropic-track) config — it exists for the
+    buoyancy / eyewall study, where the question is how LH82's small-perturbation
+    assumption fares once θ′ is held at eyewall amplitudes.
+
+    Shape:
+        Q(r, z) = Q_max · exp(−((r − r_eyewall)/w_r)²) · exp(−((z − z_peak)/w_z)²)
+    annular in r (ring at the eyewall radius), mid-tropospheric in z.
+
+    Steady-state estimate (heating ≈ Newtonian cooling): θ′_eq ≈ Q_max · τ_cool,
+    so Q_max ≈ 5e-3 K/s with τ_cool = 1800 s targets θ′_eq ~ 9 K.
+
+    Parameters
+    ----------
+    Q_max : float       peak heating rate (K/s).
+    r_eyewall : float   radius of the heating annulus (m); ~ Rmax.
+    width_r : float     radial half-width of the ring (m).
+    z_peak : float      altitude of peak heating (m); ~ mid-troposphere.
+    width_z : float     vertical half-width (m).
+    nx, ny, nz, Lx, Ly, Lz : grid.
+    x_c, y_c : annulus center (m); defaults to domain center.
+
+    Limitation: the center is fixed.  For a translating vortex (steering on) the
+    annulus would need to track the storm center — a follow-up.
+    """
+    name  = "diabatic_heating"
+    stage = StepStage.SLOW
+
+    def __init__(self, Q_max: float, r_eyewall: float, width_r: float,
+                 z_peak: float, width_z: float,
+                 nx: int, ny: int, nz: int,
+                 Lx: float, Ly: float, Lz: float,
+                 x_c: float | None = None, y_c: float | None = None) -> None:
+        dx, dy, dz = Lx / nx, Ly / ny, Lz / nz
+        x_c = x_c if x_c is not None else Lx / 2.0
+        y_c = y_c if y_c is not None else Ly / 2.0
+        x = (np.arange(nx) + 0.5) * dx
+        y = (np.arange(ny) + 0.5) * dy
+        z = (np.arange(nz) + 0.5) * dz
+        X, Y = np.meshgrid(x, y, indexing="ij")
+        r = np.sqrt((X - x_c) ** 2 + (Y - y_c) ** 2)             # (nx, ny)
+        f_r = np.exp(-((r - r_eyewall) / width_r) ** 2)          # annular ring
+        f_z = np.exp(-((z - z_peak) / width_z) ** 2)             # mid-trop
+        # precompute the static source on the compute device
+        self._Q = float(Q_max) * f_r[:, :, None] * f_z[None, None, :]
+        self._Q_max = float(Q_max)
+
+    def compute_tendency(self, state, equation_set, staggering, base, dt):
+        return Tendency(dtheta_prime_dt=self._Q)
+
+    def reads(self) -> tuple[StateVar, ...]:
+        return ()
 
     def writes(self) -> tuple[StateVar, ...]:
         return (StateVar.THETA_PRIME,)
