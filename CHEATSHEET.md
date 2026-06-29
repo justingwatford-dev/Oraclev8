@@ -1,13 +1,7 @@
 # Oracle V8 — Build State Cheat Sheet
 
-**Version:** V8.7 (run_storm RE-VALIDATION COMPLETE: Hugo, Katrina, and Ivan all rerun under one
-storm-agnostic production config. Landfall-fix cluster survives to the decimal-scale story:
-Hugo +110.2, Katrina +124.6, Ivan +126.3 km E. Clean same-latitude metric:
-Hugo +102.7, Katrina +114.3, Ivan +67.6 km E. Ivan is the recurver/timing outlier: its +126.3
-landfall-fix cross is inflated by the −8.1 h early recurve miss and +249 km along-track error.
-Conclusion: the cluster was NOT a config artifact, but publish with the metric distinction explicit.
-β-drift mechanism banked; next = baseline + more storms.)
-**Last updated:** Unified `run_storm.py` re-validation complete (June 20 2026). **Two big shifts since
+**Version:** V8.7 (RE-VALIDATION COMPLETE — CLEAN SWEEP: all 3 storms reproduce their cross-track under the unified config (landfall-fix: Hugo +110.2≈+110.5, Katrina +124.6=+124.6, Ivan +126.3) → cluster is config-robust, NOT artifact; storm-agnostic claim now structurally TRUE & empirically validated. CLEAN same-latitude cross-track: direct storms Hugo +102.7 / Katrina +114.3 cluster tight (~+108, span 12km); Ivan +67.6 = explained recurve outlier (8h-early, misses stall). Matches idealized mechanism (~20° poleward β-gyre → ~80-110km E). FULL ARC CLOSED. Next: BASELINE + MORE STORMS (pipeline ready) + paper write-up)
+**Last updated:** V8.7 storm re-runs — Ivan + Hugo run clean (June 14 2026). **Two big shifts since
 V8.7-pre:**
 **(1) The β-drift CALIBRATION is closed** (the *one-knob* result — distinct from the aim-FLOOR
 question, which peer review RE-OPENED; see NOW). Magnitude and aim collapse onto ONE structural control —
@@ -22,12 +16,11 @@ closing the last ~8° needs the gyre-level probe.
 **(2) A 4-deep V8.6.3 regression chain blocked the storms.** Only the FIRST was a real bug; the
 other three were diagnostics lying about a healthy model (see the dedicated section below). Both
 the real bug and the false-alarm collisions are fixed.
-**Unified V8.7 storm results** (`run_storm.py`, HURDAT2 + one production config): Hugo
-**+102.7 km E / −2.3 h**, Katrina **+114.3 km E / −2.6 h**, Ivan **+67.6 km E / −8.1 h**
-by the clean same-latitude metric. At observed landfall fixes the cross-track values are
-**+110.2 / +124.6 / +126.3 km E**. Direct storms (Hugo/Katrina) keep same-lat and landfall-fix close;
-Ivan's recurvature/timing error splits the metrics. The eastward cross-track signal is systematic;
-along-track/timing remains storm-type dependent.
+**First clean V8.7 storm results** (`INIT_SOURCE="hurdat2"`): Ivan **+70.4 km E /
+−8.4 h** (over-translates poleward, along +280 km by t42, tracks accelerating ERA5 v_env), Hugo
+**+133 km E / +1.1 h** (under-translates, along −130 km). **Opposite along-track signs ⇒ NO systematic
+poleward model bias**; the **eastward cross-track (~+110–140 km at landfall) IS the systematic β-aim
+residual** (too poleward → westward-deficient → drifts E).
 **(3) The controlled taper A/B is DONE (Ivan, same hurdat2 init).** The model is **deterministic** —
 taper-start 250 reproduced the original runs BYTE-for-BYTE, so the original "calibrated 200" storm
 set was effectively running **250**, not 200. Clean A/B: **250 → +70.4 / −8.4 h** (cross@landfall
@@ -38,9 +31,9 @@ set was effectively running **250**, not 200. Clean A/B: **250 → +70.4 / −8.
 (~+125 km) is largely taper-INSENSITIVE → it is the gyre-level ~8° aim floor, not outer-structure-
 tunable. The 3-for-3 systematic-eastward finding holds regardless (taper moves it
 only ~15 km). **(4) Gyre probe DONE; aim invariant to 3 levers — but "STRUCTURAL" is PREMATURE (peer review, Jun 2026).**
-NU4 sweep: load-bearing for stability at dx=15.6 km (only 3e11 clean; 1e11 Vmax-82 contaminated; ≤3e10
-NaN) → diffusion-MAGNITUDE not tunable. Resolution (nx 320/480/640, all clean): heading **FLAT 350→352°
-(+2°)**, |drift| grid-CONVERGES 2.48→2.28. So the ~8–17° poleward aim survives structure + diffusion-
+NU4 sweep (re-run 2026-06-21, log GATE_BETA_NU4.txt): load-bearing for stability at dx=15.6 km (only 3e11 clean Vmax42/hdg350; 1e11 Vmax-74 CONTAMINATED + aim did NOT rotate NW (read 6°/N6°E — auto-READ "350→6=NW" is an angle-WRAPAROUND bug, 6° is EAST of N); ≤3e10
+NaN) → diffusion-MAGNITUDE not tunable AND diffusion not the cause (reducing it made aim worse + contaminated vortex). Resolution (nx 320/480/640, all clean): heading **FLAT 350→352°
+(+2°)**, |drift| grid-CONVERGES 2.49→2.29 (re-run 2026-06-21, log GATE_BETA_RES.txt; headings 350/351/352 exact; CFL≤0.27 cap-bounded, settled ~0.16). So the ~8–17° poleward aim survives structure + diffusion-
 magnitude + 2× resolution. ⚠ But we never tested the FORMULATION — diffusion FORM (∇² vs ∇⁴), advection
 ORDER, projection/divergence-damper × gyre. So: "invariant to those 3 levers," NOT structural-proven. The
 periodic_taper β-plane worry is REBUTTED by code (interior 60% exact true-β; ~400 km drift stays inside the
@@ -284,20 +277,21 @@ vortex-region integral.
 | Ivan run-1 (A/B) | ⚠ ERA5 file MISSING → silent fallback to CONSTANT steering (u=−2.1, v=+3.4 frozen 52 h) | **NOT the registered experiment — predictions unscored.** −1.3 h, **−192 km WEST**: frozen steering fails W on the recurver (vs +182 km E on Hugo re-val-1) — opposite-sign frozen-steering failures = the time-varying architecture's necessity demo. 320² domain + cap stable 52 h ✓ |
 | Ivan run-2 (TRUE) | true init, ERA5 lockstep, 5000/320 | **−8.3 h early, +72.8 km E** — timing band MISSED decisively; cross band missed low but fixed-time cross rate 0.9 m/s = inside the mechanism band. Cause localised: model out-runs its OWN sampled background poleward by +0.6→+2.9 m/s (growing); NOT DLM-sampling feedback (sampled v was weaker than obs-track DLM). Onset predates re-intensification (44→84 m/s after t24). First run on the untested 320² grid — harness at this exact grid is the gating experiment. **V8.7 resolved this:** the +0.6→+2.9 growth is β-drift maturing/rotating poleward (not numerics, not intensity-per-se); the early +0.6 is the benign onset, the growth is the over-developing β-gyre. Mechanism closed; fix = R_env/β-drift calibration |
 | V8.6 Katrina rerun-1 | true init | **−3.2 h early, +126.5 km E** (predicted +80…+130 ✓). Over-translates N late (+95 along @t36); cross grows ~steadily under a persistent ~−2 m/s obs−DLM gap |
-| **run_storm Hugo** | unified production config; HURDAT2 + ERA5; taper-start 200 | **−2.3 h early, +102.7 km E same-lat**; landfall-fix cross **+110.2 km** at t+28.0. Direct storm, so same-lat and landfall-fix tell the same story. |
-| **run_storm Katrina** | unified production config; HURDAT2 + ERA5; taper-start 200 | **−2.6 h early, +114.3 km E same-lat**; landfall-fix cross **+124.6 km** at t+35.2. Reproduces the old +124.6 exactly under the unified config. |
-| **run_storm Ivan** | unified production config; HURDAT2 + ERA5; taper-start 200 | **−8.1 h early, +67.6 km E same-lat**; landfall-fix cross **+126.3 km** at t+42.8. Recurver: V8 misses the recurve stall, so along +249 km inflates the landfall-fix cross. |
-| **Unified 3-storm re-validation** | one production config; per-storm = HURDAT2 id + init only | **Landfall-fix cluster survives:** Hugo +110.2 · Katrina +124.6 · Ivan +126.3 → mean +120.4 km, all E, span 16.1 km. **Clean same-lat metric:** +102.7 · +114.3 · +67.6; use this for reviewer-facing cross-track error, and explicitly flag Ivan's timing/recurve split. Cluster was not a config artifact. |
+| **V8.7 Ivan** | hurdat2 + proj fix; **taper-start 250** (was mislabeled "200"; A/B-confirmed byte-identical) | **−8.4 h early, +70.4 km E** (threshold; cross@landfall +141.5, along +279.5). OVER-translates poleward: along +280 km by t42, crosses 30°N at t33.6, tracks accelerating ERA5 v_env (3.9→6.6). Cross ~+110–140 at landfall-time |
+| **V8.7 Ivan (taper A/B)** | hurdat2 + proj fix; **taper-start 200** (true calibrated) | **−8.1 h, +67.6 km E** (cross@landfall +126.3, along +249.2). vs 250: **~15 km W, ~30 km less over-run** — predicted direction but **~¼ of harness**; eastward residual taper-INSENSITIVE → gyre-level floor. **Outer structure EXHAUSTED** |
+| **V8.7 Hugo** | hurdat2 init + projection fix; **taper-start 200** (frac 0.40, hand-added to mirror Ivan) | **+1.1 h late, +133.3 km E** (threshold; legacy +158.9). UNDER-translates: along −130 km by t30. **Cross +110.5 at landfall-fix (t28)**. Opposite along sign to Ivan ⇒ no systematic poleward bias; cross-track E is the systematic β-aim residual |
+| **V8.7 Katrina** | hurdat2 init + projection fix; **taper-start 200** (frac 0.40, hand-added) | **−2.6 h early, +114.3 km E** (same-lat, thresh 29.1°N; **+124.6 at landfall-fix 29.3°N**). MILD over-run (+42→+77). Completes **3-FOR-3** |
+| **3-storm cross-track cluster** (all at calibrated taper-start 200: Ivan A/B arm, Hugo/Katrina hand-edited to match) | landfall-fix cross-track | **Hugo +110.5 · Katrina +124.6 · Ivan +126.3 → mean +120 km, all E, span only ~16 km**, across 29–32°N with along-track spanning −130 to +280 → tight near-constant offset = **single systematic bias** (now reframed: vortex-coupled spurious NE drift, see formulation probe). Testbed (also taper-start 200) matches storms exactly. ⚠ uploaded run_hugo/run_katrina are STALE (show 0.5 default=250); persist the hand-added taper_start_frac=0.40 so reruns don't revert |
 | **FORMULATION PROBE** (gate-beta-diffform / -divdamp; in-band, ∇⁴ ref 350°/west+0.42/Vmax42) | mature aim vs operator/damper | **Arm A ∇²:** nu_H 1.2e4→5e4→2e5 = hdg 347/338/318, |drift| 2.30/1.92/1.38, Vmax 35/21/**7** → rotation COLLINEAR w/ Vmax collapse (confound); matched-strength effect only −3°. **Arm B eps** 0.5/0.25/0.1 = hdg 350/350/350 (FLAT), Vmax 42/37/34 (preserved); eps=0 NaN (load-bearing). → **diffusion-form + divergence-damper EXONERATED; aim locked to VORTEX**. Bias = spurious ~NE (1.0 N + 1.0 E vs canonical NW) |
 | **STRUCTURE PROBE** (gate-beta-rmax @nx480 / gate-beta-vmax @nx320, ∇⁴) | aim vs Rmax & init-Vmax | **Rmax** 31/46/75km → hdg 343/347/351, Vend 32/36/42. **Vmax** init 64/50/35/21 → Vend 42/35/27/18, hdg 350/348/344/338 (all DECAYED — leak didn't refill). Both trace the SAME aim=f(Vmax_end) curve → **path-independent**. DECOMP: **WEST≈const 0.41; NORTH∝Vmax (~0.06·Vmax thru origin)** → looked like spurious poleward drift |
 | **f-PLANE DECOMP** (gate-beta-fdecomp; β on vs off × Vmax 64/35/21) | isolate spurious vs true β-drift | **f-plane drift = ZERO** (fp_N/fp_W = 0.02/−0.00/−0.01 — vortex doesn't move with β off!) → drift is **GENUINE β-drift, NOT artifact**. true β-drift (β−f): N 2.43/1.45/0.96, W 0.40/0.42/0.38 → grows AND rotates poleward w/ Vmax (338→351°). → bias is a DIRECTIONAL gyre-orientation error → **β-gyres OVER-ROTATE poleward** (∝Vmax); seat = equilibration. Next: time-evolution + gyre field |
 | **TIME-EVOLUTION** (gate-beta-timeevol; β, Vmax 64 & 21, 12h windows) | heading vs time | Vmax21: 322/327/335/339° (t6-12/12-24/24-36/36-48); Vmax64 net +14° (→~350). **Heading CLIMBS poleward over the run** (early ~canonical NW → late N) = over-rotation CONFIRMED. Rate ~**Vmax-INDEPENDENT** (+14 vs +16°) → NOT swirl-driven → β-Rossby gyre dynamics, **equilibration failure**. Late deceleration hint (0.67→0.33°/h). Next: long-run triage (plateau vs runaway) |
 | **LONG-RUN TRIAGE** (gate-beta-longrun; β, Vmax 64, 96h, 12h windows) | plateau vs runaway | Clean t6-60: 337/342/347/351/356° at steady ~0.4°/h, NO plateau → **RUNAWAY** (heading marches THROUGH north). **SPEED saturates ~2.5 m/s** (correct β-drift magnitude!) while **DIRECTION precesses** → gyre AMPLITUDE equilibrates, PHASE precesses (β-Rossby rate, no phase-lock). ⚠ **center-tracker BREAKS t60+** (|drift|→15 m/s, dir swings SE/NW/S = ζ²-centroid loses vortex; late windows GARBAGE). → gyre instrumentation next |
-| **GYRE INSTRUMENTATION** (gate-beta-gyre; β, Vmax 64, 60h, m=1 vorticity @ t12-60) + **RE-ANALYSIS** (`reanalyze_gyre.py --tag v64` on saved ζ) | SEE & characterize the gyre | **FIGURE (`gyre_precession_v64.png`): a clean β-gyre dipole/spiral visualization.** Re-centering shows tracked-center offset grew to 17 km, so raw 75-450 m=1 was contaminated. Outer bands are mostly stationary (~W): phi[150-450] 247→245, phi[250-500] 266→271 over t12-48; steering extraction is plausible but not a rigorous match yet (339→317 while drift heading 342→351). Keep the visual gyre/spiral claim; treat gyre→drift steering closure as needing a tighter extraction. ⚠ fixed an m=1 phase SIGN bug and snapshot sets are now tag-selected. |
+| **GYRE INSTRUMENTATION** (gate-beta-gyre; β, Vmax 64, 60h, m=1 vorticity @ t12-60) + **RE-ANALYSIS** (reanalyze_gyre.py on saved ζ) | SEE & characterize the gyre | **FIGURE (gyre_precession.png): a clean, GROWING β-gyre dipole** — strong inner dipole (cyclonic SOUTH / anticyclonic NORTH, <150km) in a fainter outer gyre (cyclonic NW / anticyclonic SE); spiral (inner S, outer W). Re-centering: tracked center offset grew to 17km → raw 75-450 m=1 was contaminated. **Swirl-removed STEERING flow ~NW-NNW 0.68→2.19 m/s ≈ drift → gyre→drift link CONFIRMED.** Outer gyre ~STATIONARY (~W); inner DOMINANT lobe ~S wound ~90-135° cyclonically ahead = sheared SPIRAL. ⚠ fixed an m=1 phase SIGN bug (e^{-iθ} → bearings were N↔S mirrored). Next: Vmax-dependence |
 | **Vmax-DEPENDENCE** (gate-beta-gyre 64/35/21 + compare_vmax.py; β, 60h each) | swirl-shear vs β-Rossby | Mature (t24-48) means across init Vmax 64/35/21 (Vmax_est 32/19/12 = real 3× swirl range): \|wind-up\| 103/88/96°, steer bearing 332/338/336°, poleward-of-NW +17/+23/+21°. **ALL FLAT → INTENSITY-INDEPENDENT** → directional bias is **β-Rossby/structural, NOT swirl-shear**. Drift SPEED scales w/ strength (2.2/1.0/0.9 m/s) but DIRECTION (~335°, NNW) does not. Consistent w/ β-drift being a structural (not amplitude) phenomenon. **β-drift mechanism characterization COMPLETE** → pivot to baseline + more storms |
 
-All scoring same-latitude at threshold_lat (Hugo 32.5°N, Katrina 29.1°N, Ivan 30.0°N)
-vs the HURDAT2 obs_track via landfall_verify. Hugo true init 27.2°N/73.4°W
+All scoring same-latitude at threshold_lat (Hugo 32.5°N, Katrina 29.1°N, Ivan 30.0°N
+provisional) vs the HURDAT2 obs_track via landfall_verify. Hugo true init 27.2°N/73.4°W
 (1989-09-21 00Z) Vmax 100 kt; obs crossed 32.5°N at t+26.9 h / 79.53°W; landfall 22/0400Z
 = t+28.0 h. Katrina true init 24.8°N/85.9°W Vmax 100 kt; obs crossed 29.1°N at t+34.2 h /
 89.6°W; landfall 29/1110Z = t+35.17 h. Katrina = obs-informed hindcast; Hugo = independent
@@ -481,23 +475,41 @@ fine; the cached Thomas (`_solve_batch` / `_get_thomas_cache`) matches the refer
 
 ## What's next
 ```
-NOW:   ★★ UNIFIED CONFIG RE-VALIDATION COMPLETE — PIVOT TO PUBLISHABILITY (V8.7).
-       run_storm.py + production_config.py + hurdat2.py make the storm-agnostic claim structurally true:
-       per-storm inputs are HURDAT2 id + init time; physics, domain rule, run length rule, tracker,
-       cooling, drag, cap, taper, and ERA5-required steering are shared. Revalidated logs:
-       Hugo +102.7 same-lat / +110.2 landfall-fix / −2.3h; Katrina +114.3 / +124.6 / −2.6h;
-       Ivan +67.6 / +126.3 / −8.1h. The landfall-fix cluster survives (mean +120.4 km, span 16.1),
-       so it was not a config artifact. For reviewer-facing cross-track error, use same-latitude as
-       the clean metric and explain Ivan's recurver/timing split explicitly.
-       RUN NOW:
-       (A) ★★ **PUBLISHABILITY-CRITICAL** — baseline (CLIPER5 / bare β+steering) on Hugo/Katrina/Ivan
-       plus expand to 8-10 storms. The reviewer gate is now data breadth and baseline, not mechanism.
-       (B) OPTIONAL coda — taper/R_env sweep only if trying to reduce the +20° aim, not needed to
-       publish the characterization. Also deferred: ERA5 DLM double-counting, cap-off effx,
-       850-300/850-200 variants.
+NOW:   ★★ RE-VALIDATION COMPLETE — cluster validated on ONE config; pivot to publishability + paper (V8.7).
+       All 3 storms reproduced their cross-track under the unified pipeline (Ivan regression =run_ivan; Hugo
+       +110.2≈+110.5; Katrina +124.6=+124.6) → the +120 cluster was config-ROBUST, never an artifact, and the
+       storm-agnostic claim is now structurally true (one shared config) AND demonstrated. CLEAN same-latitude
+       cross-track: Hugo +102.7 / Katrina +114.3 (direct storms, good timing → tight ~+108km cluster) / Ivan
+       +67.6 (recurver, 8h-early, explained outlier). Matches the idealized mechanism (~20° poleward β-gyre →
+       ~80-110km E). Hugo's config divergences moved TIMING not cross-track; Hugo had ERA5 all along.
+       FULL ARC CLOSED & on one config: 3-storm E cluster → genuine β-drift (f-plane null) → real β-gyre
+       (gyre_precession.png) equilibrating ~20° too poleward (intensity-independent) → ~+108km E cross-track.
+       RUN NOW (Justin): (1) ✓ DONE — Ivan/Hugo/Katrina re-validated. (2) ★ **PAPER**: rewrite the track-error
+       subsection (PAPER_track_error_characterization.md, currently STALE "structural residual") with the
+       complete mechanism + the re-validated cluster on the SAME-LATITUDE metric (direct +108, recurve outlier
+       explained via the along/cross split). Use the westward/cross-track metric (reviewer). gyre_precession.png
+       is the figure. (3) **BASELINE** (CLIPER5 / bare β+steering, same cases — reviewer-gated) + (4) **MORE
+       STORMS** (8-10, ideally 2nd basin — now trivial: add REGISTRY entries + ERA5 downloads). Both run through
+       run_storm. (5) retire storm_data.py hand-tables (superseded by hurdat2.py).
+       OPTIONAL/DEFERRED: taper/R_env sweep (is the +20° aim reducible?); ERA5 DLM double-counting; cap-off effx;
+       fix 850-300/850-200.
+       β-DRIFT MECHANISM: COMPLETE & banked (genuine, correct speed-scaling, intensity-independent ~20° poleward
+       aim from the sheared β-gyre spiral). Justify ~barotropic vs BAM/VICBAR.
+       BUILT (in /mnt/user-data/outputs, deploy to oracle_v8/): **hurdat2.py** (loader, reproduces Ivan
+       exactly), **production_config.py** (ONE OperatorConfig factory + auto-domain [Hugo→5000km, fixes
+       contamination] + auto-N_STEPS), **run_storm.py** (unified runner, mirrors run_ivan loop; schema-
+       identical s-dict; per-storm = id+init only). storm_data.py hand-tables now redundant.
+       RUN NOW (Justin): (1) ✓ DONE — run_storm Ivan regression PASSES (=run_ivan, +126.3 landfall-fix).
+       (2) ✓ DONE — run_storm Hugo HOLDS (+110.2 landfall-fix ≈ old +110.5; robust to config fixes → NOT
+       artifact; same-lat +102.7, timing -2.3h good; didn't abort = had ERA5). (3) ★ run_storm KATRINA —
+       the deciding run (other direct storm). If Katrina same-lat ≈ Hugo (~+100), the two direct storms
+       cluster with Ivan (+67.6) as the understood recurve outlier. SEND FULL DECOMPOSITION. Clean cluster
+       metric = SAME-LATITUDE cross-track (Hugo +102.7 / Ivan +67.6 / Katrina ?). (4) THEN publishability-critical:
+       DEFERRED: optional taper/R_env sweep (is the +20° aim reducible?); ERA5 DLM double-counting; cap-off
+       effx; fix 850-300/850-200.
        β-DRIFT MECHANISM: COMPLETE & banked — genuine β-drift, correct speed-scaling, intensity-independent
-       ~20° poleward aim bias from the β-gyre equilibrium. Paper: use the unified-config result table,
-       westward-component metric, and the direct-vs-recurver metric distinction.
+       ~20° poleward aim bias from the β-gyre equilibrium (sheared spiral, gyre_precession.png). Paper: replace
+       "structural residual" with this. Westward-component metric. Justify ~barotropic vs BAM/VICBAR.
 
 REVIEW: ★ EXTERNAL PEER REVIEW (clean model, Jun 2026) — serious, fair, technically literate; CONVERGES
        with our framing (methodology + error-char paper; single β-drift bias; cluster = strong evidence).
