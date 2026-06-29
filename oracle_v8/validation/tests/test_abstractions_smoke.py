@@ -184,24 +184,40 @@ def main():
     print("    ✓ Tendency.validate_against_state() catches shape mismatches")
 
     print("\n[9] OperatorConfig composition...")
+    # Production config: PressureGradientComponent is intentionally ABSENT.
+    # The projection directly computes and applies ∇φ — adding PGC would
+    # double-count it.  The __post_init__ guard now enforces this.
     full_config = OperatorConfig(
         equation_set=lh82,
         staggering=lorenz,
         buoyancy=buoy,
-        pressure_gradient=pg,
         projection=proj,
         advection=adv,
         coriolis=cor,
         surface_drag=drag,
         sponge_damping=sponge,
     )
-    assert len(full_config.active_components()) == 7
-    assert len(full_config.fast_components()) == 2
+    assert len(full_config.active_components()) == 6
+    assert len(full_config.fast_components()) == 1       # buoyancy only
     assert len(full_config.projection_components()) == 1
     assert len(full_config.slow_components()) == 4
-    print(f"    ✓ Production config: 7 active "
-          f"(2 PRE_PROJECTION, 1 PROJECTION, 4 SLOW)")
+    print(f"    ✓ Production config: 6 active "
+          f"(1 PRE_PROJECTION, 1 PROJECTION, 4 SLOW)")
 
+    # Verify the PGC + projection guard fires correctly
+    try:
+        OperatorConfig(
+            equation_set=lh82,
+            staggering=lorenz,
+            pressure_gradient=pg,
+            projection=proj,
+        )
+        assert False, "Guard should have raised ValueError"
+    except ValueError as e:
+        assert "double-counts" in str(e)
+    print("    ✓ PGC + projection guard fires correctly (double-count prevented)")
+
+    # Research config: PGC without projection (valid for isolation tests)
     stage1 = OperatorConfig(
         equation_set=lh82,
         staggering=lorenz,
@@ -209,12 +225,12 @@ def main():
         pressure_gradient=PressureGradientComponent(),
     )
     assert len(stage1.active_components()) == 2
-    print(f"    ✓ Stage-1 validation config: 2 active components only")
+    print(f"    ✓ Research config (PGC, no projection): 2 active components")
 
     print("\n[10] Configuration logging...")
     log_dict = full_config.to_log_dict()
     json_str = json.dumps(log_dict, indent=2)
-    assert log_dict["n_pre_projection"] == 2
+    assert log_dict["n_pre_projection"] == 1
     assert log_dict["n_projection"] == 1
     assert log_dict["n_slow"] == 4
     proj_log = next(c for c in log_dict["active_components"]
@@ -238,11 +254,12 @@ def main():
     # everywhere, so φ should be zero (modulo gauge), and velocities
     # should remain zero after projection.
     #
-    # Build a minimal base-state-like object with rho0 = 1.225 everywhere
-    # (constant ρ̄, isothermal trivial atmosphere — sufficient for this
-    # smoke test, which only verifies the projection wiring).
+    # Build a minimal base-state-like object with rho0 = 1.225 and
+    # theta0 = 300 K everywhere — sufficient for all smoke-test wiring
+    # checks (projection + buoyancy).
     class TrivialBase:
-        rho0 = np.full(nz, 1.225)
+        rho0   = np.full(nz, 1.225)
+        theta0 = np.full(nz, 300.0)
 
     proj.apply_projection(state, lh82, lorenz, TrivialBase(), 1.0)
     assert np.all(state.u == 0)
@@ -261,12 +278,12 @@ def main():
           f"{proj.last_solve.compatibility_residual:.2e}, "
           f"disc_op={proj.last_solve.discrete_operator_residual:.2e}")
 
-    try:
-        buoy.compute_tendency(state, lh82, lorenz, None, 1.0)
-        return 1
-    except NotImplementedError:
-        pass
-    print("    ✓ BuoyancyComponent.compute_tendency still stubbed (next pass)")
+    # BuoyancyComponent is now fully wired — verify it computes a tendency
+    # without error and returns a non-trivial dw_dt (buoyancy acts on w).
+    buoy_tend = buoy.compute_tendency(state, lh82, lorenz, TrivialBase(), 1.0)
+    assert buoy_tend is not None
+    assert buoy_tend.dw_dt is not None
+    print("    ✓ BuoyancyComponent.compute_tendency wired up (no longer stubbed)")
 
     print("\n[13] Hardened base_state_compatibility (P1.5)...")
 
