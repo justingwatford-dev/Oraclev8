@@ -94,14 +94,15 @@ def n_steps_for(landfall_time_h: float) -> int:
 def build_base_state(nz: int = NZ, Lz: float = LZ):
     """Return (z_centers, rho0, theta0) for the standard anelastic base state."""
     import numpy as np
+    from oracle_v8.constants import GRAVITY
     dz = Lz / nz
     z_centers = (np.arange(nz) + 0.5) * dz
-    theta0 = 300.0 * np.exp(0.01 ** 2 * z_centers / 9.81)
+    theta0 = 300.0 * np.exp(0.01 ** 2 * z_centers / GRAVITY)
     Pi = np.zeros(nz)
-    Pi[0] = 1.0 - (9.81 / 1004.5) * z_centers[0] / theta0[0]
+    Pi[0] = 1.0 - (GRAVITY / 1004.5) * z_centers[0] / theta0[0]
     for k in range(nz - 1):
         dl = z_centers[k + 1] - z_centers[k]
-        Pi[k + 1] = Pi[k] - (9.81 / 1004.5) * (dl / 2.0) * (
+        Pi[k + 1] = Pi[k] - (GRAVITY / 1004.5) * (dl / 2.0) * (
             1.0 / theta0[k] + 1.0 / theta0[k + 1])
     p0 = 100_000.0 * Pi ** (1004.5 / 287.04)
     rho0 = p0 / (287.04 * theta0 * Pi)

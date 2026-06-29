@@ -69,7 +69,7 @@ from __future__ import annotations
 import numpy as np
 
 # Gravitational acceleration (m/s²)
-_G = 9.81
+from oracle_v8.constants import GRAVITY as _G
 
 
 class HollandVortexInit:
