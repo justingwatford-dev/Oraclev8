@@ -61,9 +61,10 @@ from typing import TYPE_CHECKING
 
 from oracle_v8.backend import xp, to_numpy as to_host
 
-# numpy alias for type annotations only — not used in any computation
-import numpy as _np
-np = _np   # annotation alias; all compute code uses xp
+# numpy is used for host-side scalar work (the singular zero-mode solve runs on
+# the host — see _solve_zero_mode_host) and for type annotations.  Device/batch
+# compute uses xp (CuPy or NumPy via the backend).
+import numpy as np
 
 if TYPE_CHECKING:
     from oracle_v8.reference_state.base_states import DryBaseState
@@ -234,20 +235,27 @@ class VariableCoefficientPoissonSolver:
             if log_diagnostics else 0.0
         )
 
-        # Step 2: solve all wavenumber pairs simultaneously, using cached
-        # rhs-independent Thomas factors (V8.6.3 — built once per run).
+        # Step 2: project the (kx=ky=0) mode onto the compatible subspace, then
+        # solve all wavenumber pairs with cached Thomas factors (V8.6.3).
+        #
+        # The Neumann zero-mode operator d/dz(ρ̄ d/dz) has a constant nullspace
+        # and is solvable only if the column integral of its RHS vanishes.  On a
+        # doubly-periodic rigid-lid domain that integral is already at machine
+        # precision (see compat_residual above), but the residual nullspace
+        # component is amplified by the near-singular reduced system — which is
+        # why the original V8.6.3 code pinned φ(0,0,:)=0 outright to dodge a
+        # ~1e7 → NaN blow-up.  Pinning the whole profile discards the legitimate
+        # mean-flow correction: the RHS ∂z(ρ̄⟨w⟩) is non-zero pointwise in z even
+        # when its integral is zero, so the true zero mode has non-zero ∂zφ.
+        # Measured cost of discarding it: ~5e-5 m/s in the barotropic production
+        # config (negligible — the published fleet is unaffected) but ~12% of
+        # max|w| once buoyancy is active.  Projecting the RHS to sum-zero makes
+        # the reduced solve well-posed (no blow-up) so the real zero mode is
+        # solved rather than thrown away; the gauge constant is fixed inside
+        # _solve_zero_mode_host by pinning φ(0,0,0)=0.
+        d_hat[0, 0, :] -= xp.sum(d_hat[0, 0, :]) / self.nz
         cache   = self._get_thomas_cache(rho_bar_full, rho_bar_half)
         phi_hat = self._solve_batch(d_hat, cache)
-        # Gauge-pin the (kx=ky=0) Neumann mode.  Its RHS is ∂z(ρ̄ w̄); the mean
-        # horizontal divergence is identically 0 on a periodic domain, so the
-        # true zero-mode φ ≈ 0.  The V8.6.3 host reduced-Thomas for this mode is
-        # near-singular (den ~3e-7) and amplifies RHS noise to ~1e7 → NaN.  Pin
-        # it instead of solving the singular system.
-        phi_hat[0, 0, :] = 0.0
-        # print(f"[psn] d_hat_fin={bool(xp.isfinite(d_hat).all())} "
-        #      f"d_hat_max={float(xp.max(xp.abs(d_hat))):.2e} "
-        #     f"phi_hat_fin={bool(xp.isfinite(phi_hat).all())} "
-        #     f"phi_hat_max={float(xp.max(xp.abs(phi_hat))):.2e}", flush=True)
 
         # Step 3: inverse FFT
         phi = xp.real(xp.fft.ifft2(phi_hat, axes=(0, 1)))
@@ -309,19 +317,13 @@ class VariableCoefficientPoissonSolver:
         a0 = rl[1:].copy(); b0 = -(rl[1:] + ru[1:]); c0 = ru[1:].copy()
         a0[0] = 0.0; a0[-1] = rl[-1]; c0[-1] = 0.0; b0[-1] = -rl[-1]
         n0 = nz - 1
-        inv0 = _np.empty(n0); cp0 = _np.empty(n0)
+        inv0 = np.empty(n0); cp0 = np.empty(n0)
         inv0[0] = 1.0 / b0[0]; cp0[0] = c0[0] * inv0[0]
         for k in range(1, n0):
             den      = b0[k] - a0[k] * cp0[k - 1]
             inv0[k]  = 1.0 / den
             cp0[k]   = c0[k] * inv0[k] if k < n0 - 1 else 0.0
 
-        import numpy as _np_dbg
-        #print(f"[psn-cache] BUILD inv_den_fin={bool(xp.isfinite(inv_den).all())} "
-        #      f"c_p_fin={bool(xp.isfinite(c_p).all())} "
-        #      f"inv0_fin={bool(_np_dbg.isfinite(inv0).all())} "
-        #      f"min|b[:,0]|={float(xp.min(xp.abs(b[:,0]))):.2e} "
-        #      f"min|b0|={float(_np_dbg.min(_np_dbg.abs(b0))):.2e}", flush=True)
         self._thomas_cache = dict(
             key=key, a=a, c_p=c_p, inv_den=inv_den,
             a0=a0, cp0=cp0, inv0=inv0,
@@ -368,119 +370,14 @@ class VariableCoefficientPoissonSolver:
         a0, cp0, inv0 = cache["a0"], cache["cp0"], cache["inv0"]
         n0  = len(inv0)
         rhs = dz_h[1:]
-        d_p = _np.empty(n0, dtype=dz_h.dtype)
+        d_p = np.empty(n0, dtype=dz_h.dtype)
         d_p[0] = rhs[0] * inv0[0]
         for k in range(1, n0):
             d_p[k] = (rhs[k] - a0[k] * d_p[k - 1]) * inv0[k]
-        x = _np.empty(n0, dtype=dz_h.dtype)
+        x = np.empty(n0, dtype=dz_h.dtype)
         x[-1] = d_p[-1]
         for k in range(n0 - 2, -1, -1):
             x[k] = d_p[k] - cp0[k] * x[k + 1]
-        out = _np.zeros(len(dz_h), dtype=dz_h.dtype)
+        out = np.zeros(len(dz_h), dtype=dz_h.dtype)
         out[1:] = x
         return xp.asarray(out)
-
-    def _solve_zero_mode(
-        self,
-        d_zero,
-        rho_lower,
-        rho_upper,
-        rho_bar_full,
-    ):
-        """
-        Special-case solver for the singular (kx=0, ky=0) mode.
-
-        Pins the gauge at φ̂(0,0,k=0) = 0 and solves the remaining
-        (nz-1)×(nz-1) tridiagonal system.
-        """
-        nz = len(d_zero)
-        phi_zero = xp.zeros(nz, dtype=d_zero.dtype)
-
-        a_sub  = rho_lower[1:].copy()
-        b_diag = -(rho_lower[1:] + rho_upper[1:]).copy()
-        c_sup  = rho_upper[1:].copy()
-        rhs    = d_zero[1:].copy()
-
-        a_sub[0]  = 0.0          # φ[0] is pinned at 0
-        a_sub[-1] = rho_lower[-1]
-        c_sup[-1] = 0.0
-        b_diag[-1] = -rho_lower[-1]
-
-        phi_zero[1:] = _thomas_scalar(a_sub, b_diag, c_sup, rhs)
-        return phi_zero
-
-
-# ---------------------------------------------------------------------------
-# Module-level solver functions (called by VariableCoefficientPoissonSolver)
-# ---------------------------------------------------------------------------
-
-def _thomas_batch(a, b, c, d):
-    """
-    Vectorised Thomas (tridiagonal) algorithm for n_systems simultaneously.
-
-    Parameters
-    ----------
-    a, b, c, d : arrays of shape (n_systems, nz)
-        Tridiagonal coefficients and RHS.  a[i,0] and c[i,-1] are unused.
-
-    Returns
-    -------
-    x : array of shape (n_systems, nz)
-
-    Complexity
-    ----------
-    2*nz Python iterations, each executing one element-wise operation on
-    n_systems elements — a single GPU kernel per z-level.  The serial
-    equivalent requires n_systems*2*nz kernel launches.
-
-    GPU speedup at 64×64: ~4 095×
-    GPU speedup at 128×128: ~16 383×
-    """
-    nz = d.shape[1]
-
-    c_p = xp.empty_like(c)
-    d_p = xp.empty_like(d)
-
-    # Forward sweep
-    c_p[:, 0] = c[:, 0] / b[:, 0]
-    d_p[:, 0] = d[:, 0] / b[:, 0]
-
-    for k in range(1, nz):
-        denom    = b[:, k] - a[:, k] * c_p[:, k - 1]
-        d_p[:, k] = (d[:, k] - a[:, k] * d_p[:, k - 1]) / denom
-        if k < nz - 1:
-            c_p[:, k] = c[:, k] / denom
-        # else c_p[:,k] stays uninitialised but is never read in back-sub
-
-    # Back substitution
-    x = xp.empty_like(d)
-    x[:, -1] = d_p[:, -1]
-    for k in range(nz - 2, -1, -1):
-        x[:, k] = d_p[:, k] - c_p[:, k] * x[:, k + 1]
-
-    return x
-
-
-def _thomas_scalar(a, b, c, d):
-    """
-    Serial Thomas algorithm for a single tridiagonal system.
-
-    Used for the (kx=0, ky=0) zero mode only (one call per Poisson solve).
-    a[0] and c[-1] are unused but included for indexing consistency.
-    """
-    n = len(d)
-    c_p = xp.zeros(n, dtype=d.dtype)
-    d_p = xp.zeros(n, dtype=d.dtype)
-
-    c_p[0] = c[0] / b[0]
-    d_p[0] = d[0] / b[0]
-    for k in range(1, n):
-        denom   = b[k] - a[k] * c_p[k - 1]
-        c_p[k]  = c[k] / denom if k < n - 1 else 0.0
-        d_p[k]  = (d[k] - a[k] * d_p[k - 1]) / denom
-
-    x = xp.zeros(n, dtype=d.dtype)
-    x[-1] = d_p[-1]
-    for k in range(n - 2, -1, -1):
-        x[k] = d_p[k] - c_p[k] * x[k + 1]
-    return x
