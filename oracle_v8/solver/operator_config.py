@@ -102,6 +102,7 @@ class OperatorConfig:
     horiz_diffusion: "HorizontalDiffusionComponent | None" = None
     newtonian_cooling: "NewtonianCoolingComponent | None" = None
     divergence_damping: "DivergenceDampingComponent | None" = None
+    diabatic_heating: "DiabaticHeatingComponent | None" = None
     # Future: microphysics, radiation, turbulence closure
 
     # Research escape hatch — set True ONLY for diagnostic experiments that
@@ -154,6 +155,7 @@ class OperatorConfig:
             self.horiz_diffusion,
             self.newtonian_cooling,
             self.divergence_damping,
+            self.diabatic_heating,
         ]
         return [c for c in component_slots if c is not None]
 

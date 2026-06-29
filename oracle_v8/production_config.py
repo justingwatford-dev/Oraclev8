@@ -28,7 +28,9 @@ N_PREBAL    = 5             # projection-only pre-balance iterations
 RMAX_RUN_M       = 75_000.0     # 5×dx — numerically representative (obs Rmax dominated by steering+β)
 R_ENV_M          = 500_000.0    # vortex-size knob (with WIND_TAPER)
 TAPER_START_M    = 200_000.0
-TAPER_START_FRAC = TAPER_START_M / R_ENV_M    # = 0.40  (the calibrated landfall value)
+TAPER_START_FRAC = TAPER_START_M / R_ENV_M    # = 0.40 at R_env=500km.  taper-start 200 km is
+# set from β-drift physics (gate-beta testbed: in-band 1.5–2.5 m/s, max westward component before
+# the core limit), NOT from landfall — see run_translation_test.gate_beta_only and legacy/run_katrina.
 WIND_TAPER       = True         # winds → 0 by R_env; sets the real vortex size
 
 NU4         = 3.0e11        # m^4/s — ∇⁴ hyperdiffusion (10× below dx^4/(64 dt) limit)

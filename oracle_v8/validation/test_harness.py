@@ -325,120 +325,80 @@ def compute_anelastic_residual(
     periodic: tuple[bool, bool, bool] = (True, True, False),
 ) -> dict:
     """
-    Compute the anelastic constraint residual ∇·(ρ₀**u**) over the domain.
+    Compute the anelastic constraint residual ∇·(ρ̄ u) using the SOLVER'S
+    discrete operator — not a re-derived stencil.
 
-    The anelastic continuity equation requires:
-        ∂(ρ₀ u)/∂x + ∂(ρ₀ v)/∂y + ∂(ρ₀ w)/∂z = 0
-    everywhere. This function measures how well the velocity field
-    satisfies that constraint at machine precision after each timestep.
-
-    For tests that should preserve a rest state, the residual should remain
-    near zero (machine epsilon). Drift in this quantity is a direct
-    diagnostic that the projection is failing to enforce the constraint.
+    Delegates to ``oracle_v8.solver.tendency.anelastic_divergence``, the exact
+    operator ``AnelasticProjection`` inverts (spectral horizontal divergence +
+    flux-form vertical on the staggered half-level w).  This guarantees the
+    residual a test reports is the constraint the solver actually enforces.
+    The previous implementation re-derived a 2Δz centered stencil that
+    disagreed with the solver by ~50× on the same field and so could mask (or
+    fabricate) constraint error.
 
     Parameters
     ----------
-    u, v, w : ndarray, shape (nx, ny, nz)
-        Velocity components.
-    rho0 : ndarray
-        Base-state density. Shape (nz,) for horizontally homogeneous
-        base state, or (nx, ny, nz) if 3D.
+    u, v : ndarray, shape (nx, ny, nz)
+        Full-level horizontal velocity.
+    w : ndarray
+        Vertical velocity.  Accepts the solver's staggered half-level form
+        (nx, ny, nz+1) directly, or full-level (nx, ny, nz), in which case it
+        is interpolated to half levels (interior 0.5-average; rigid w=0 at the
+        surface and lid faces).
+    rho0 : ndarray, shape (nz,)
+        Base-state density ρ̄(z).  The solver operator assumes a horizontally
+        homogeneous base state; a 3-D rho0 is not supported (raises).
     dx, dy, dz : float
-        Grid spacings. (Currently assumes uniform; nonuniform vertical
-        spacing is a forward-looking dependency.)
+        Grid spacings (uniform).
     periodic : tuple of bool
-        Periodicity in (x, y, z). Vertical defaults to non-periodic
-        (rigid lid / surface).
+        Retained for backward compatibility.  The solver operator is periodic
+        in x, y (spectral) and rigid in z (flux form); this argument does not
+        change the operator.
 
     Returns
     -------
-    dict with keys:
-        max_abs_residual:  max |∇·(ρ₀**u**)|
-        l2_residual:       discrete L2 norm of residual
-        residual_field:    full 3D residual array (for inspection)
+    dict with keys: max_abs_residual, l2_residual, residual_field.
     """
-    if rho0.ndim == 1:
-        # Broadcast 1D ρ₀(z) to 3D
-        rho0_3d = rho0[np.newaxis, np.newaxis, :]
+    from oracle_v8.solver.tendency import anelastic_divergence
+    from oracle_v8.backend import xp, asarray, to_numpy
+
+    nx, ny, nz = u.shape
+    if rho0.ndim != 1:
+        raise ValueError(
+            "compute_anelastic_residual delegates to the solver operator, "
+            "which assumes a horizontally homogeneous base state ρ̄(z); got "
+            f"rho0 with shape {rho0.shape}. Pass the 1-D (nz,) profile."
+        )
+
+    # Wavenumbers in the solver's convention (2π · fftfreq).
+    kx = 2.0 * xp.pi * xp.fft.fftfreq(nx, d=dx)
+    ky = 2.0 * xp.pi * xp.fft.fftfreq(ny, d=dy)
+
+    rho_full = asarray(rho0)
+    rho_half = xp.zeros(nz + 1, dtype=rho_full.dtype)
+    rho_half[1:-1] = 0.5 * (rho_full[:-1] + rho_full[1:])
+    rho_half[0] = rho_full[0]
+    rho_half[-1] = rho_full[-1]
+
+    u_d, v_d = asarray(u), asarray(v)
+    if w.shape[-1] == nz + 1:
+        w_half = asarray(w)
+    elif w.shape[-1] == nz:
+        w_d = asarray(w)
+        w_half = xp.zeros((nx, ny, nz + 1), dtype=w_d.dtype)
+        w_half[:, :, 1:-1] = 0.5 * (w_d[:, :, :-1] + w_d[:, :, 1:])
+        # surface/lid faces stay 0 (rigid)
     else:
-        rho0_3d = rho0
+        raise ValueError(
+            f"w last dimension must be nz ({nz}) or nz+1 ({nz + 1}); got {w.shape}"
+        )
 
-    rho_u = rho0_3d * u
-    rho_v = rho0_3d * v
-    rho_w = rho0_3d * w
-
-    # x-derivative
-    if periodic[0]:
-        d_rho_u_dx = (np.roll(rho_u, -1, axis=0) - np.roll(rho_u, 1, axis=0)) / (2 * dx)
-    else:
-        d_rho_u_dx = np.zeros_like(rho_u)
-        d_rho_u_dx[1:-1, :, :] = (rho_u[2:, :, :] - rho_u[:-2, :, :]) / (2 * dx)
-        d_rho_u_dx[0, :, :] = (rho_u[1, :, :] - rho_u[0, :, :]) / dx
-        d_rho_u_dx[-1, :, :] = (rho_u[-1, :, :] - rho_u[-2, :, :]) / dx
-
-    # y-derivative
-    if periodic[1]:
-        d_rho_v_dy = (np.roll(rho_v, -1, axis=1) - np.roll(rho_v, 1, axis=1)) / (2 * dy)
-    else:
-        d_rho_v_dy = np.zeros_like(rho_v)
-        d_rho_v_dy[:, 1:-1, :] = (rho_v[:, 2:, :] - rho_v[:, :-2, :]) / (2 * dy)
-        d_rho_v_dy[:, 0, :] = (rho_v[:, 1, :] - rho_v[:, 0, :]) / dy
-        d_rho_v_dy[:, -1, :] = (rho_v[:, -1, :] - rho_v[:, -2, :]) / dy
-
-    # z-derivative
-    if periodic[2]:
-        d_rho_w_dz = (np.roll(rho_w, -1, axis=2) - np.roll(rho_w, 1, axis=2)) / (2 * dz)
-    else:
-        d_rho_w_dz = np.zeros_like(rho_w)
-        d_rho_w_dz[:, :, 1:-1] = (rho_w[:, :, 2:] - rho_w[:, :, :-2]) / (2 * dz)
-        d_rho_w_dz[:, :, 0] = (rho_w[:, :, 1] - rho_w[:, :, 0]) / dz
-        d_rho_w_dz[:, :, -1] = (rho_w[:, :, -1] - rho_w[:, :, -2]) / dz
-
-    residual = d_rho_u_dx + d_rho_v_dy + d_rho_w_dz
+    residual = to_numpy(
+        anelastic_divergence(u_d, v_d, w_half, rho_full, rho_half, kx, ky, dz)
+    )
 
     return {
         "max_abs_residual": float(np.max(np.abs(residual))),
         "l2_residual": float(np.sqrt(np.mean(residual**2))),
         "residual_field": residual,
     }
-
-
-def verify_discrete_residual(
-    elliptic_operator_fn,
-    grid: dict,
-    phi_analytical: np.ndarray,
-    f_analytical: np.ndarray,
-) -> float:
-    """
-    Verify that V8's actual discrete elliptic operator, applied to the
-    manufactured analytical φ, produces the manufactured f to within
-    truncation error.
-
-    This is distinct from the run() path's "solver returns φ given f" test:
-    that path measures inversion accuracy, while this path measures forward
-    operator accuracy. The forward operator must be consistent with the PDE
-    *before* the inversion can be trusted.
-
-    Implementation deferred until V8's solver stencil exists. When V8 lands,
-    this function should:
-        1. Call elliptic_operator_fn(phi_analytical, grid) to get the
-           solver's discrete approximation to ∇·(ρ₀∇φ).
-        2. Compare to f_analytical via l2_error.
-        3. Return the relative error; caller decides pass/fail by
-           refinement-order analysis.
-
-    The check is part of Five's Caveat 4: the manufactured-solution test
-    in the harness verifies the analytical math is internally consistent,
-    but it cannot verify that the numerical operator V8 ships with
-    actually computes ∇·(ρ₀∇φ) correctly. That verification requires the
-    solver's stencil and is the right gate before V8's projection is
-    considered load-bearing.
-
-    Raises NotImplementedError until V8's elliptic_operator_fn signature
-    is defined.
-    """
-    raise NotImplementedError(
-        "verify_discrete_residual is a placeholder until V8 ships its "
-        "elliptic operator. Implement when the V8 Poisson stencil is "
-        "available; required before the projection is load-bearing."
-    )

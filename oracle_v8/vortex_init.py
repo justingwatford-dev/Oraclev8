@@ -309,35 +309,43 @@ class HollandVortexInit:
         rho0   = to_numpy(base.rho0)  # (nz,)
         theta0 = to_numpy(base.theta0)  # (nz,)
 
-        # --- Calibrate warm-core buoyancy amplitude from P_min -----------
-        # Five's approach (ensemble review May 2026):
-        #   b(r,z) = b_max · f_r(r) · S(z)
-        #   P_surface′(r) = −∫₀^Lz ρ̄(z)·b(r,z) dz
-        #   θ′(r,z) = θ̄(z)·b(r,z)/g
+        # --- Warm-core θ′ from gradient-wind + hydrostatic balance --------
+        # Implements steps 3-4 of this module's docstring, replacing the
+        # earlier PRESCRIBED Gaussian warm core that did NOT balance the wind
+        # (red-team round 3: the Gaussian core was ~40% too wide radially and
+        # peaked at 8 km vs the balanced ~1 km, so enabling buoyancy with it
+        # would shock the vortex at t=0).
         #
-        # The central surface pressure deficit P_min sets b_max:
-        #   b_max = |P_min| / ∫₀^Lz ρ̄(z)·S(z) dz
+        #   1. P′(r,z): radially integrate the gradient-wind equation
+        #        dP′/dr = ρ̄(z)·(V_t²/r + f·V_t)
+        #      using the SAME tangential wind the u,v field uses
+        #      (Holland × S_wind, including any outer taper).
+        #   2. θ′(r,z) = [θ̄(z)/(ρ̄(z)·g)]·∂P′/∂z   (discrete vertical derivative)
         #
-        # This guarantees θ′ is thermodynamically consistent with the
-        # gradient-wind-balance pressure deficit, with the warm core
-        # correctly placed at z_peak (upper troposphere, ~8 km) rather
-        # than at the surface.
-        S_theta = self.vertical_structure(z)              # (nz,) Gaussian at z_peak
-        S_wind  = self.wind_vertical_structure(z)         # (nz,) exp from surface
-        rho_S_integral = float(np.trapz(rho0 * S_theta, z))  # ∫ρ̄·S_θ dz
+        # The radial AND vertical structure of θ′ thus emerge from the wind;
+        # nothing is prescribed.  Sign: ∂P′/∂z > 0 (deficit weakens with
+        # height) → θ′ > 0 (warm core).
+        S_wind = self.wind_vertical_structure(z)          # (nz,) exp from surface
 
-        P_min = self._pressure_deficit_1d(float(rho0[0]), 1.0)[0]
-        b_max = abs(P_min) / rho_S_integral
+        # P′(r, z_k) at every level on the 1-D radial grid
+        Pp = np.zeros((self.n_radial, nz))
+        for k in range(nz):
+            Pp[:, k] = self._pressure_deficit_1d(float(rho0[k]), float(S_wind[k]))
 
-        r_core = 2.0 * self.Rmax
-        f_r = np.exp(-(R2d / r_core) ** 2)
+        # ∂P′/∂z (centered interior, one-sided at surface/lid; handles non-uniform z)
+        dPp_dz = np.empty_like(Pp)
+        dPp_dz[:, 1:-1] = (Pp[:, 2:] - Pp[:, :-2]) / (z[2:] - z[:-2])[None, :]
+        dPp_dz[:, 0]    = (Pp[:, 1]  - Pp[:, 0])  / (z[1]  - z[0])
+        dPp_dz[:, -1]   = (Pp[:, -1] - Pp[:, -2]) / (z[-1] - z[-2])
 
-        theta_2d = (
-            (theta0[None, None, :] / _G)
-            * b_max
-            * f_r[:, :, None]
-            * S_theta[None, None, :]
-        )
+        # Hydrostatic θ′ on the radial grid, then map to the 2-D grid per level
+        theta_rad = (theta0[None, :] / (rho0[None, :] * _G)) * dPp_dz   # (n_radial, nz)
+        r_flat    = R2d.ravel()
+        theta_2d  = np.empty((nx, ny, nz))
+        for k in range(nz):
+            theta_2d[:, :, k] = np.interp(
+                r_flat, self._r1d, theta_rad[:, k]
+            ).reshape(nx, ny)
 
         # Tangential wind → u, v  (each level independently)
         # u = -Vt·sin(φ) + u_env,  v = +Vt·cos(φ) + v_env  (NH cyclonic)

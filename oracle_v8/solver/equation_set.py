@@ -44,6 +44,12 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+# Standard gravity (m/s²).  Module-level rather than buried in the buoyancy
+# inner loop.  NOTE: the same literal 9.81 is still duplicated across ~16 other
+# modules (vortex_init, tendency, production_config, …); a project-wide
+# constants module is the proper home — see the follow-up cleanup task.
+GRAVITY = 9.81
+
 if TYPE_CHECKING:
     # Forward-declare to avoid circular imports; these will exist
     # in reference_state/ and grid/ when the modules are written.
@@ -248,10 +254,9 @@ class LH82AnelasticEquationSet(EquationSet):
             Suitable for direct assignment to a Tendency's dw_dt field.
         """
         # Step 1: physics on full levels
-        g = 9.81  # m/s²; eventually pull from base or a constants module
         # theta_prime has shape (..., nz); base.theta0 has shape (nz,)
         # numpy broadcasts the 1-D theta0 along the trailing axis of theta_prime
-        b_full = g * theta_prime / base.theta0
+        b_full = GRAVITY * theta_prime / base.theta0
 
         # Step 2: symmetric interpolation to half levels
         b_half = staggering.interpolate_full_to_half(b_full)
