@@ -52,13 +52,14 @@ import numpy as np
 # Standard dry-air thermodynamic constants. Sources:
 #   - Cp, Rd: AMS Glossary of Meteorology, "specific heat" and "gas constant"
 #   - g, p_ref: WMO standard atmosphere
-# GRAVITY now comes from V8's canonical constants module (single source of
-# truth). The dry thermodynamic constants are still local here pending a
-# separate centralization pass.
-from oracle_v8.constants import GRAVITY
-DRY_AIR_CP = 1004.5     # J / (kg K)
-DRY_AIR_RD = 287.04     # J / (kg K)
-P_REFERENCE = 100_000.0 # Pa (standard reference pressure for Π definition)
+# All of these now come from V8's canonical constants module (single source
+# of truth); aliased to the local names this module already uses.
+from oracle_v8.constants import (
+    GRAVITY,
+    C_P as DRY_AIR_CP,
+    R_D as DRY_AIR_RD,
+    P_REF as P_REFERENCE,
+)
 
 
 class GridStaggering(Enum):
