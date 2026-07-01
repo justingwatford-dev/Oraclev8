@@ -44,11 +44,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-# Standard gravity (m/s²).  Module-level rather than buried in the buoyancy
-# inner loop.  NOTE: the same literal 9.81 is still duplicated across ~16 other
-# modules (vortex_init, tendency, production_config, …); a project-wide
-# constants module is the proper home — see the follow-up cleanup task.
-GRAVITY = 9.81
+from oracle_v8.constants import GRAVITY
 
 if TYPE_CHECKING:
     # Forward-declare to avoid circular imports; these will exist

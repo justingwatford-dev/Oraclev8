@@ -51,7 +51,7 @@ import numpy as np
 from oracle_v8.backend import xp as _xp, to_numpy
 
 # ─── constants ────────────────────────────────────────────────────────────────
-_G = 9.81          # m s⁻²
+from oracle_v8.constants import GRAVITY as _G   # m s⁻²
 
 # Gaussian localisation radius (grid cells), shared by the θ′ proxy weight
 # (Layer 1) and the vorticity-CoM fallback (Layer 3) so the two windows can
