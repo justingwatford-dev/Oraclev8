@@ -26,7 +26,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 import math
 
 OMEGA = 7.2921e-5
@@ -111,9 +110,9 @@ def _missing(tok: str) -> float | None:
     return None if v == -999 else v
 
 
-def parse_hurdat2(path: str | Path) -> dict[str, StormTrack]:
+def parse_hurdat2(path: str) -> dict[str, StormTrack]:
     """Parse the whole file into {storm_id: StormTrack}."""
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, "r") as fh:
         lines = [ln.rstrip("\n") for ln in fh if ln.strip()]
     storms: dict[str, StormTrack] = {}
     i = 0
@@ -197,12 +196,36 @@ def storm_init(track: StormTrack, init_date: datetime, *,
 # (+ optional threshold override; defaults to the HURDAT2 landfall latitude)
 # ---------------------------------------------------------------------------
 
-ATLANTIC_FILE = Path(__file__).with_name("hurdat2.txt")
+ATLANTIC_FILE = "hurdat2.txt"   # adjust to your local filename
 
 REGISTRY = {
     "Hugo":    dict(id="AL111989", init="1989-09-21 00Z", threshold_lat=32.5),
     "Katrina": dict(id="AL122005", init="2005-08-28 00Z", threshold_lat=29.1),
     "Ivan":    dict(id="AL092004", init="2004-09-14 12Z", threshold_lat=30.0),
+    # Fran (1996): NNW Carolina mover — a near-twin of Hugo's geometry (forecast for SC, hit
+    # Cape Fear NC ~0030 UTC Sep 6 moving ~north at 15 kt).  Poleward landfall, so the latitude-
+    # threshold cross-track is the CORRECT axis — fits the existing pipeline with no code change,
+    # and gives a 4th point directly comparable to the Hugo/Katrina/Ivan cluster.  init = Sep 5 00Z
+    # (≈peak, ~24.5 h to landfall, ~5000 km/nx320 domain, Hugo-equivalent).  For a longer track
+    # (~36 h, more β-drift integration) use 1996-09-04 12Z (domain grows to ~6000 km/nx384).
+    "Fran":    dict(id="AL061996", init="1996-09-05 00Z", threshold_lat=33.8),
+    # Michael (2018): near-pure-NORTH eastern-Gulf mover, Cat 5, Mexico Beach / Tyndall FL landfall
+    # ~1730 UTC Oct 10 (eye at 30.0°N 85.5°W).  Cleanest poleward geometry in the set — latitude-
+    # threshold cross-track is the correct axis.  Out-of-sample (not in the taper-calibration set).
+    # init = Oct 9 12Z (≈29.5 h to landfall, ~5000 km/nx320 domain).
+    "Michael": dict(id="AL142018", init="2018-10-09 12Z", threshold_lat=30.0),
+    # Laura (2020): WNW→NW→N Gulf mover, Cat 4, Cameron LA landfall ~0600 UTC Aug 27 (29.8°N 93.3°W),
+    # moving ~N (355°/13 kt) at landfall.  Poleward AT landfall so the cross-track axis is valid, but
+    # it has a gentle recurve in the approach (mild Ivan-like along-track component to watch).
+    # Out-of-sample.  init = Aug 26 06Z (≈24 h to landfall, ~4000 km/nx256 domain).
+    "Laura":   dict(id="AL132020", init="2020-08-26 06Z", threshold_lat=29.8),
+    # Andrew (1992): low-latitude near-ZONAL mover (WNW→W).  init = Aug 23 00Z, ~33 h to the
+    # south-Florida (Homestead) landfall ~0905 UTC Aug 24.  threshold_lat auto-derives from the
+    # FL-landfall 'L' record (~25.5°N).  ⚠ The latitude-threshold cross-track is the WRONG AXIS for
+    # a westward mover — it measures along-track, and the track runs near-tangent to 25.5°N so the
+    # crossing is ill-defined.  Use this for the QUALITATIVE track test (does the agnostic config
+    # carry a low-latitude Cat 5 to south Florida) until track-PERPENDICULAR cross-track is wired in.
+    "Andrew":  dict(id="AL041992", init="1992-08-23 00Z"),
     # add storms here: "Michael": dict(id="AL142018", init="2018-10-09 12Z"),
 }
 
