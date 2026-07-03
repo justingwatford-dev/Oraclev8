@@ -42,6 +42,7 @@ from oracle_v8.storm_data import KATRINA, IVAN
 from oracle_v8.solver import (
     LH82AnelasticEquationSet,
     AdvectionComponent,
+    BuoyancyComponent,
     CoriolisComponent,
     SurfaceDragComponent,
     IntensityCapComponent,
@@ -62,8 +63,10 @@ from oracle_v8.backend import xp, to_numpy
 # (cupy ImportError) — the whole stack then runs 5-10x slower on CPU with no
 # warning.  Third silent-fallback found this week (ERA5 constant steering,
 # synthetic obs tracks, now this) — production runs must announce their backend
-# and abort on the wrong one.  Set REQUIRE_GPU=False for a deliberate CPU run.
-REQUIRE_GPU = True
+# and abort on the wrong one.  Set REQUIRE_GPU=False (or env
+# ORACLE_REQUIRE_GPU=0) for a deliberate CPU run (e.g. wiring smoke tests).
+import os as _os
+REQUIRE_GPU = _os.environ.get("ORACLE_REQUIRE_GPU", "1") != "0"
 if xp.__name__ != "cupy":
     if REQUIRE_GPU:
         raise SystemExit(
@@ -167,6 +170,8 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
                     taper_start_frac=0.5, keep_theta=False, steer_ramp=None,
                     Rmax=None, B=None, f_ref=None, snapshot_hours=None,
                     diff_form="hyper", nu_H=2.0e5,
+                    taper_shape="cos", outer_envelope_m=None,
+                    buoyancy_on=False, tau_cool=1800.0,
                     subcell=True, verbose=False):
     """One translation run. f-plane by default (beta=False, β OFF — eff≈1 ⇒
     advection faithful).  beta=True turns on the β-plane Coriolis (with the
@@ -184,7 +189,9 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
     init = HollandVortexInit(Vmax=Vmax, Rmax=rmax, B=bb, f=f0,
                              R_env=renv, u_env=u_env, v_env=v_env,
                              wind_taper=wind_taper,
-                             taper_start_frac=taper_start_frac)
+                             taper_start_frac=taper_start_frac,
+                             taper_shape=taper_shape,
+                             outer_envelope_m=outer_envelope_m)
     state = init.build_state(nx, ny, nz, Lx, Ly, _Base())
     if not keep_theta:
         # historical default: kill the (passive) warm core so eff is pure advection
@@ -215,9 +222,14 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
                          if diff_form == "laplacian" else
                          HyperDiffusionComponent(nu4=NU4, Lx=Lx, Ly=Ly,
                                                  nx=nx, ny=ny)),
-        newtonian_cooling=NewtonianCoolingComponent(tau=1800.0),
         projection=AnelasticProjection(nx=nx, ny=ny, nz=nz, Lx=Lx, Ly=Ly, Lz=Lz),
     )
+    if tau_cool is not None and tau_cool > 0:
+        comps["newtonian_cooling"] = NewtonianCoolingComponent(tau=tau_cool)
+    if buoyancy_on:
+        # Over-rotation Arm C: θ′ feeds back on w (b = g·θ′/θ̄).  Pair with
+        # keep_theta=True so the balanced warm core survives init.
+        comps["buoyancy"] = BuoyancyComponent()
     if epsilon > 0:
         comps["divergence_damping"] = HelmholtzDivergenceDampingComponent(
             epsilon=epsilon, Lx=Lx, Ly=Ly, nx=nx, ny=ny)
@@ -308,6 +320,8 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
     return {"Vmax": Vmax, "u_env": u_env, "v_env": v_env, "eps": epsilon,
             "drag": drag_on, "nx": nx, "eff_x": eff_x, "eff_y": eff_y,
             "vmax_end": vmt[-1], "vmax_max": max(vmt),
+            "max_w_end": float(np.max(np.abs(_to_host(state.w)))),
+            "max_theta_end": float(np.max(np.abs(_to_host(state.theta_prime)))),
             "f_ref": f0,
             "dx_km": dx / 1e3, "dom_km": Lx / 1e3, "r_env_km": renv / 1e3,
             "drift_x": (xt[-1] - xt[0]) / T, "drift_y": (yt[-1] - yt[0]) / T,
@@ -1527,6 +1541,311 @@ def gate_beta_taper():
               "NU4/resolution next.")
     print(f"\nWall time: {time.time()-t0:.0f}s")
 
+def gate_beta_shape():
+    """GATE-BETA RAMP-FORM + NO-CUTOFF SWEEP (over-rotation Arm A, 2026-07) —
+    is the poleward aim floor set by the SHARPNESS (or existence) of the
+    taper's negative-vorticity ring?
+
+    gate-beta-taper swept WHERE the ramp starts; heading bottomed at the ~343
+    floor.  This sweeps the ramp's FORM at the production geometry (onset
+    200 km, R_env 500 km), plus two Gaussian-envelope vortices with NO compact
+    support at all — no cutoff, no ring (paper §5.1, candidates 1 and 3):
+
+        linear     sharpest ring ends (slope kinks at 200 and 500 km)
+        cos        production control
+        smooth5    smoothest compact ramp (zero 1st+2nd derivs at both ends)
+        gauss-420  no cutoff; envelope matched to control V(350km) ~= 15.8 m/s
+        gauss-560  no cutoff, broader (size control WITHIN the envelope family)
+
+    Registered read (OVERROTATION_CANDIDATES.md, written before first run):
+      WEST component is the honest metric (dry model: W ~= 0.41 const vs
+      canonical ~1.4); heading secondary; ALWAYS read against Vmax_end (the
+      formulation-probe lesson: aim rotations collinear with Vmax collapse
+      are confounds, not signals).
+      - ring mechanism  -> monotone west/heading trend linear->cos->smooth5->
+        gauss at preserved Vmax_end
+      - flat (hdg span < ~6 deg AND west span < ~0.15 m/s) -> cutoff + shape
+        EXONERATED -> run gate-beta-baroclinic (Arm C)
+    Usage:  python run_translation_test.py gate-beta-shape
+    """
+    import math
+    t0 = time.time()
+    TH_HDG = (290.0, 335.0)
+    print("=" * 78)
+    print("GATE-BETA RAMP-FORM + NO-CUTOFF SWEEP  (beta-plane, u=v=0, Vmax=64, "
+          "cap 70, 5000km/320, 48h)")
+    print("  fixed geometry: onset 200km / R_env 500km (production); envelopes "
+          "cut nothing")
+    print("  honest metric: WEST component (dry anchor ~0.41; canonical ~1.4); "
+          "guard: Vmax_end")
+    print("=" * 78)
+
+    rows = []
+    for lbl, kw in (
+            ("linear  200->500km", dict(wind_taper=True, taper_start_frac=0.40,
+                                        taper_shape="linear")),
+            ("cos     200->500km (control)", dict(wind_taper=True,
+                                                  taper_start_frac=0.40,
+                                                  taper_shape="cos")),
+            ("smooth5 200->500km", dict(wind_taper=True, taper_start_frac=0.40,
+                                        taper_shape="smooth5")),
+            ("gauss   r_d=420km (no cutoff)", dict(outer_envelope_m=420e3)),
+            ("gauss   r_d=560km (no cutoff)", dict(outer_envelope_m=560e3)),
+    ):
+        d = run_translation(64, u_env=0.0, v_env=0.0, v_cap=70.0, beta=True,
+                            r_env=500e3, nx=320, dom=5_000_000.0, hours=48.0,
+                            f_ref=IVAN_F_REF, **kw)
+        track = d["track"]
+        tt, xs, ys, vmt = track
+        e_spd, e_hdg, e_w = _mature_drift(track, 6.0, 18.0)
+        m_spd, m_hdg, m_w = _mature_drift(track, 30.0, 48.0)
+        rot = ((m_hdg - e_hdg + 180) % 360) - 180
+        rows.append((lbl, m_spd, m_hdg, m_w, rot, d["vmax_end"]))
+        print(f"\n  {lbl}:")
+        pts = []
+        for th in (12, 24, 36, 48):
+            i = min(range(len(tt)), key=lambda k: abs(tt[k] - th * 3600.0))
+            j = max(0, i - max(1, len(tt) // 8))
+            dts = tt[i] - tt[j]
+            s = math.hypot((xs[i] - xs[j]) / dts, (ys[i] - ys[j]) / dts)
+            h = math.degrees(math.atan2((xs[i] - xs[j]) / dts,
+                                        (ys[i] - ys[j]) / dts)) % 360
+            pts.append(f"t{th}:{s:.2f}@{h:.0f}")
+        print("    " + "   ".join(pts))
+        print(f"    early(6-18) {e_hdg:.0f} -> MATURE(30-48) |{m_spd:.2f}| "
+              f"@ {m_hdg:.0f} ({_compass(m_hdg)})  west={m_w:+.2f}  "
+              f"rot={rot:+.0f}  Vmax_end={d['vmax_end']:.1f}")
+
+    print("\n" + "=" * 78)
+    print("SUMMARY (mature 30-48h):")
+    print(f"  {'profile':>30}  {'|drift|':>7}  {'hdg':>5}  {'west':>6}  "
+          f"{'Vmax_end':>8}")
+    for lbl, ms, mh, mw, rot, ve in rows:
+        print(f"  {lbl:>30}  {ms:7.2f}  {mh:5.0f}  {mw:+6.2f}  {ve:8.1f}")
+    hdg_span  = max(r[2] for r in rows) - min(r[2] for r in rows)
+    west_span = max(r[3] for r in rows) - min(r[3] for r in rows)
+    vmax_span = max(r[5] for r in rows) - min(r[5] for r in rows)
+    print("\nREAD:")
+    print(f"  heading span {hdg_span:.0f} deg   west span {west_span:.2f} m/s   "
+          f"Vmax_end span {vmax_span:.1f} m/s")
+    if hdg_span >= 6 or west_span >= 0.15:
+        print("  PROFILE FORM MOVES THE AIM -> the taper ring (or cutoff) is "
+              "implicated; check the trend is monotone in ring sharpness AND "
+              "not collinear with Vmax_end before claiming the mechanism.")
+    else:
+        print("  Aim FLAT across ramp forms and no-cutoff envelopes -> the ring/"
+              "cutoff is EXONERATED (paper candidates 1+3 dead at fixed size); "
+              "next: gate-beta-baroclinic (Arm C).")
+    print(f"\nWall time: {time.time()-t0:.0f}s")
+
+
+def gate_beta_baroclinic():
+    """GATE-BETA BAROCLINIC ARM (over-rotation Arm C, 2026-07) — does giving the
+    vortex a live thermodynamic structure arrest the gyre precession?
+
+    The production track config is barotropic by configuration (theta'=0,
+    buoyancy off — paper §2.1); β-gyre phase-locking in a vortex with vertical
+    structure disperses β-Rossby energy differently (paper §5.1, candidate 2).
+    Ladder, all at the production geometry (taper cos 200->500km, Vmax 64):
+
+        dry control      theta'=0,   buoyancy OFF, tau_cool=30min  (anchor)
+        passive null     theta' kept, buoyancy OFF  (harness integrity: theta'
+                         is passive -> drift MUST match the control)
+        baroclinic 30min theta' kept, buoyancy ON, production cooling (warm
+                         core decays in ~5*tau ~ 2.5h -> near-dry mature drift)
+        baroclinic 6h    theta' kept, buoyancy ON, tau_cool=6h (baroclinicity
+                         persists into the mature window)
+        baroclinic inf   theta' kept, buoyancy ON, cooling OFF (fully
+                         persistent; stability frontier — watch max|w|, theta')
+
+    Registered read (OVERROTATION_CANDIDATES.md):
+      - passive null != control  -> harness bug, stop.
+      - west rises / heading rotates NW monotonically with baroclinicity
+        persistence at a live vortex -> candidate 2 IMPLICATED (the barotropic
+        reduction causes the characterized aim bias — paper-grade finding).
+      - flat -> barotropic configuration EXONERATED within this core; with
+        Arm A also flat, all three §5.1 candidates are dead and the bias is
+        intrinsic to the balanced β-gyre dynamics at this resolution.
+      - blow-up in the no-cooling row is a stability datum, not a failure;
+        the 6h row still reads.
+    Usage:  python run_translation_test.py gate-beta-baroclinic
+    """
+    import math
+    t0 = time.time()
+    print("=" * 78)
+    print("GATE-BETA BAROCLINIC ARM  (beta-plane, u=v=0, Vmax=64, cap 70, "
+          "taper cos 200->500km, 5000km/320, 48h)")
+    print("  ladder: dry -> passive theta' -> buoyancy with cooling 30min / 6h "
+          "/ off")
+    print("  honest metric: WEST component; guards: Vmax_end, max|w|, "
+          "max|theta'|")
+    print("=" * 78)
+
+    rows = []
+    for lbl, kw in (
+            ("dry control (theta'=0)",   dict()),
+            ("passive null (theta' kept)", dict(keep_theta=True)),
+            ("baroclinic tau=30min",     dict(keep_theta=True, buoyancy_on=True,
+                                              tau_cool=1800.0)),
+            ("baroclinic tau=6h",        dict(keep_theta=True, buoyancy_on=True,
+                                              tau_cool=21600.0)),
+            ("baroclinic no cooling",    dict(keep_theta=True, buoyancy_on=True,
+                                              tau_cool=None)),
+    ):
+        d = run_translation(64, u_env=0.0, v_env=0.0, v_cap=70.0, beta=True,
+                            wind_taper=True, taper_start_frac=0.40,
+                            r_env=500e3, nx=320, dom=5_000_000.0, hours=48.0,
+                            f_ref=IVAN_F_REF, **kw)
+        track = d["track"]
+        finite = (np.isfinite(d["vmax_end"]) and np.isfinite(d["max_w_end"])
+                  and d["max_w_end"] < 50.0)
+        if not finite:
+            rows.append((lbl, float("nan"), float("nan"), float("nan"),
+                         d["vmax_end"], d["max_w_end"], d["max_theta_end"]))
+            print(f"\n  {lbl}:  UNSTABLE/blown "
+                  f"(Vmax_end={d['vmax_end']:.1f}, max|w|={d['max_w_end']:.1f}, "
+                  f"max|th'|={d['max_theta_end']:.1f}) — stability datum")
+            continue
+        m_spd, m_hdg, m_w = _mature_drift(track, 30.0, 48.0)
+        rows.append((lbl, m_spd, m_hdg, m_w, d["vmax_end"],
+                     d["max_w_end"], d["max_theta_end"]))
+        print(f"\n  {lbl}:")
+        print(f"    MATURE(30-48) |{m_spd:.2f}| @ {m_hdg:.0f} "
+              f"({_compass(m_hdg)})  west={m_w:+.2f}  "
+              f"Vmax_end={d['vmax_end']:.1f}  max|w|={d['max_w_end']:.2f}  "
+              f"max|th'|={d['max_theta_end']:.1f}K")
+
+    print("\n" + "=" * 78)
+    print("SUMMARY (mature 30-48h):")
+    print(f"  {'config':>28}  {'|drift|':>7}  {'hdg':>5}  {'west':>6}  "
+          f"{'Vmax_end':>8}  {'max|w|':>6}  {'th_max':>6}")
+    for lbl, ms, mh, mw, ve, mwd, mth in rows:
+        print(f"  {lbl:>28}  {ms:7.2f}  {mh:5.0f}  {mw:+6.2f}  {ve:8.1f}  "
+              f"{mwd:6.2f}  {mth:6.1f}")
+    ctrl, null = rows[0], rows[1]
+    if all(np.isfinite([ctrl[2], null[2]])):
+        dnull = abs(((null[2] - ctrl[2] + 180) % 360) - 180)
+        print(f"\n  passive-null check: dheading vs control = {dnull:.1f} deg "
+              f"(expect ~0; larger -> harness bug, stop)")
+    live = [r for r in rows[2:] if np.isfinite(r[2])]
+    if live and np.isfinite(ctrl[3]):
+        dwest = max(r[3] for r in live) - ctrl[3]
+        print(f"  max west gain over dry control = {dwest:+.2f} m/s "
+              f"(canonical deficit ~1.0)")
+        print("  gain grows with cooling timescale at a live vortex -> "
+              "candidate 2 IMPLICATED; flat -> barotropic config EXONERATED.")
+    print(f"\nWall time: {time.time()-t0:.0f}s")
+
+
+def gate_beta_envelope():
+    """GATE-BETA ENVELOPE CALIBRATION (over-rotation follow-up, 2026-07) —
+    calibrate the Gaussian-envelope scale r_d and verify the recovered
+    canonical drift is structural, not tuned.
+
+    gate-beta-shape found the compact-support cutoff causes the poleward aim
+    floor: gauss envelopes lock the gyre phase by t12 and read in-band
+    (420 -> |2.30|@329 west+1.20; 560 -> |2.85|@326 west+1.60).  Three checks
+    before any production change:
+
+      1. r_d SWEEP (350/420/500/560 km, Vmax 64): magnitude vs size; heading
+         should stay NW-band across r_d (the lock must not be r_d-fine-tuned).
+      2. INTENSITY INVARIANCE (Vmax 64/35/21 at r_d=420): canonical structure
+         -> heading ~NW at ALL intensities (the compact family read
+         aim=f(Vmax_end), 338->351).  Heading rotating poleward with Vmax
+         again would mean the lock is amplitude-dependent (partial mechanism).
+      3. f-PLANE NULL (r_d=420, Vmax 64, beta OFF): envelope must not
+         manufacture drift (expect |drift| <~ 0.05 m/s).
+
+    Registered predictions: OVERROTATION_CANDIDATES.md (P-E1..P-E3, written
+    before first run).
+    Usage:  python run_translation_test.py gate-beta-envelope
+    """
+    import math
+    t0 = time.time()
+    TH_SPD = (1.5, 2.5)
+    TH_HDG = (290.0, 335.0)
+    print("=" * 78)
+    print("GATE-BETA ENVELOPE CALIBRATION  (gauss outer envelope, no cutoff; "
+          "cap 70, 5000km/320, 48h)")
+    print(f"  bands: |drift| {TH_SPD[0]}-{TH_SPD[1]} m/s, hdg {TH_HDG[0]:.0f}-"
+          f"{TH_HDG[1]:.0f} (NW); honest metric WEST; guard Vmax_end")
+    print("=" * 78)
+
+    rows = []
+    for lbl, vm, rd, use_beta in (
+            ("r_d=350km  Vmax=64", 64, 350e3, True),
+            ("r_d=420km  Vmax=64", 64, 420e3, True),
+            ("r_d=500km  Vmax=64", 64, 500e3, True),
+            ("r_d=560km  Vmax=64", 64, 560e3, True),
+            ("r_d=420km  Vmax=35", 35, 420e3, True),
+            ("r_d=420km  Vmax=21", 21, 420e3, True),
+            ("r_d=420km  Vmax=64  f-plane NULL", 64, 420e3, False),
+    ):
+        d = run_translation(vm, u_env=0.0, v_env=0.0, v_cap=70.0,
+                            beta=use_beta, outer_envelope_m=rd, r_env=500e3,
+                            nx=320, dom=5_000_000.0, hours=48.0,
+                            f_ref=IVAN_F_REF)
+        track = d["track"]
+        tt, xs, ys, vmt = track
+        m_spd, m_hdg, m_w = _mature_drift(track, 30.0, 48.0)
+        rows.append((lbl, m_spd, m_hdg, m_w, d["vmax_end"], use_beta))
+        print(f"\n  {lbl}:")
+        pts = []
+        for th in (12, 24, 36, 48):
+            i = min(range(len(tt)), key=lambda k: abs(tt[k] - th * 3600.0))
+            j = max(0, i - max(1, len(tt) // 8))
+            dts = tt[i] - tt[j]
+            s = math.hypot((xs[i] - xs[j]) / dts, (ys[i] - ys[j]) / dts)
+            h = math.degrees(math.atan2((xs[i] - xs[j]) / dts,
+                                        (ys[i] - ys[j]) / dts)) % 360
+            pts.append(f"t{th}:{s:.2f}@{h:.0f}")
+        print("    " + "   ".join(pts))
+        if use_beta:
+            mag_v = ("IN" if TH_SPD[0] <= m_spd <= TH_SPD[1]
+                     else ("STRONG" if m_spd > TH_SPD[1] else "WEAK"))
+            hdg_v = ("IN" if TH_HDG[0] <= m_hdg <= TH_HDG[1]
+                     else ("POLEWARD" if (m_hdg > TH_HDG[1] or m_hdg < 90)
+                           else "OFF"))
+            print(f"    MATURE(30-48) |{m_spd:.2f}| @ {m_hdg:.0f} "
+                  f"({_compass(m_hdg)})  west={m_w:+.2f}  "
+                  f"Vmax_end={d['vmax_end']:.1f}   mag {mag_v} / hdg {hdg_v}")
+        else:
+            print(f"    MATURE(30-48) |{m_spd:.2f}| m/s  (f-plane null — "
+                  f"expect <~0.05)  Vmax_end={d['vmax_end']:.1f}")
+
+    print("\n" + "=" * 78)
+    print("SUMMARY (mature 30-48h):")
+    print(f"  {'config':>34}  {'|drift|':>7}  {'hdg':>5}  {'west':>6}  "
+          f"{'Vmax_end':>8}")
+    for lbl, ms, mh, mw, ve, ub in rows:
+        hs = f"{mh:5.0f}" if ub else "   --"
+        print(f"  {lbl:>34}  {ms:7.2f}  {hs}  {mw:+6.2f}  {ve:8.1f}")
+    beta_rd  = [r for r in rows[:4]]
+    hdg_span = max(r[2] for r in beta_rd) - min(r[2] for r in beta_rd)
+    vm_rows  = [rows[1], rows[4], rows[5]]           # r_d=420 at 64/35/21
+    vm_span  = max(r[2] for r in vm_rows) - min(r[2] for r in vm_rows)
+    null_spd = rows[6][1]
+    print("\nREAD:")
+    print(f"  heading span across r_d (350-560) = {hdg_span:.0f} deg "
+          f"(lock r_d-robust if small)")
+    print(f"  heading span across Vmax (64/35/21 at r_d=420) = {vm_span:.0f} "
+          f"deg (structural if small; compact family read 338->351)")
+    print(f"  f-plane null |drift| = {null_spd:.3f} m/s (expect <~0.05)")
+    in_both = [r for r in beta_rd
+               if TH_SPD[0] <= r[1] <= TH_SPD[1]
+               and TH_HDG[0] <= r[2] <= TH_HDG[1]]
+    if in_both:
+        best = min(in_both, key=lambda r: abs(r[1] - 2.0))
+        print(f"  in-band r_d candidates: "
+              f"{', '.join(r[0].split()[0] for r in in_both)}  ->  "
+              f"calibration pick: {best[0].split()[0]} "
+              f"(|{best[1]:.2f}| @ {best[2]:.0f}, west {best[3]:+.2f})")
+    else:
+        print("  no r_d lands in BOTH bands — interpolate and re-run the "
+              "sweet spot before production wiring")
+    print(f"\nWall time: {time.time()-t0:.0f}s")
+
+
 def gate_beta_res():
     """GATE-BETA RESOLUTION SWEEP (V8.7) — is the ~8° aim floor under-RESOLVED or structural?
 
@@ -2206,5 +2525,11 @@ if __name__ == "__main__":
     elif arg in ("gate-beta-gyre", "gbeta-gyre", "gyre", "29"):
         _vm = float(sys.argv[2]) if len(sys.argv) > 2 else 64.0
         gate_beta_gyre(_vm)
+    elif arg in ("gate-beta-shape", "gbeta-shape", "shape", "30"):
+        gate_beta_shape()
+    elif arg in ("gate-beta-baroclinic", "gbeta-baro", "baro", "31"):
+        gate_beta_baroclinic()
+    elif arg in ("gate-beta-envelope", "gbeta-env", "env", "32"):
+        gate_beta_envelope()
     else:
         main()
