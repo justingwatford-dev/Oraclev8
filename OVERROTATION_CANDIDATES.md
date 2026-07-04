@@ -300,3 +300,54 @@ accumulation and intensity-scaling of Δ are both approximate):**
 cross RMS and the same-latitude metric alongside landfall-fix (Ivan/Michael recurve geometry
 inflates landfall-fix); (iv) either H1 or H2 confirms the bias's real-track footprint is
 bounded and now characterized from BOTH sides — the follow-on paper's empirical spine.
+
+### Stage 3 results (appended 2026-07-03; six treatment runs by Justin, logs
+### `Logs/<Storm>/<storm>_gauss_envelope.txt`; scored against the registrations above)
+
+Landfall-fix decomposition, control → treatment (Δ observed vs strong-form central):
+
+| storm | cross c→t | Δcross (pred) | ratio | along c→t | Δalong (pred) | timing c→t | ΔVmax_end |
+|---|---|---|---|---|---|---|---|
+| Hugo | +110.2 → +78.7 | −31.5 (−93) | 0.34 | +23.3 → +39.7 | +16.4 (+5) | −2.3 → −2.1 | **−14.2 ⚠** |
+| Katrina | +124.6 → +78.2 | −46.4 (−108) | 0.43 | +76.5 → +61.4 | −15.1 (−44) | −2.6 → −2.4 | −2.1 |
+| Ivan | +126.3 → +40.2 | −86.1 (−139) | 0.62 | +249.3 → +210.1 | −39.2 (−30) | −8.1 → −7.1 | **−24.6 ⚠** |
+| Fran | +7.7 → −29.9 | −37.6 (−81) | 0.46 | −45.5 → −50.1 | −4.6 (−10) | +1.2 → +1.9 | −2.1 |
+| Michael | −98.7 → −113.2 | −14.5 (−73) | 0.20 | +123.8 → +93.4 | −30.4 (−66) | −5.2 → −5.1 | −1.7 |
+| Laura | −31.9 → −51.8 | −19.9 (−74) | 0.27 | +37.4 → +30.0 | −7.4 (−29) | −1.3 → −1.8 | −1.5 |
+
+Same-latitude: Hugo +102.7→+74.8, Katrina +114.3→+78.2, Ivan +67.6→**+5.7**, Fran +23→−20.7,
+Michael −75→−97.0, Laura −39→−42.0. Aggregates: landfall-fix cross RMS **95.3 → 71.1 (−25%)**;
+clean-four (guard-passing storms) cross RMS 81.2 → 75.0 (−8%); same-lat RMS 77.3 → 62.4; along
+RMS 120.7 → 101.3.
+
+**Prediction scorecard:**
+- **P-S1: PASS on its core clause** — along-track improved on Katrina, Michael, AND Laura (all
+  guard-clean). The Michael-timing sub-clause FAILED (−5.2 → −5.1 h; the along improvement at
+  the landfall fix did not move the threshold-crossing clock).
+- **P-S2 (H1, strong form): FAILED** as registered — observed shifts are far below the
+  centrals; the discovery storms did not land at +0 ± 60 (Hugo +79, Katrina +78).
+- **P-S3 (H2): CONFIRMED** — the sign was right SIX FOR SIX (every storm shifted west), at a
+  mean transmission ratio ≈ 0.34 on the guard-clean four (0.20–0.46; Ivan's 0.62 excluded as
+  confounded). **The lockstep steering relaxation absorbs roughly two-thirds of a
+  self-propagation change over a landfall transit** — a built-in, physical, now-measured
+  buffering pathway, and the quantitative reason the aim bias was subdominant at landfall.
+- **P-S4: the Vmax guard CAUGHT REAL CONFOUNDS** — Hugo (−14.2) and Ivan (−24.6) ran
+  substantially weaker under the envelope (both are the storms with strong barotropic
+  re-intensification phases; the envelope trims the mid-radius angular-momentum reservoir that
+  feeds dry spin-up). Their large improvements (Ivan same-lat +67.6 → +5.7!) are therefore
+  entangled with reduced drift magnitude, not pure re-aim, and are flagged, not headlined.
+  Timing guard passed everywhere (direct storms Δ ≤ 0.2 h).
+
+**Honest bottom line:** the testbed fix propagates to real storms with the predicted sign in
+all six cases; cross-track skill improves modestly on the clean storms (−8% RMS) and more in
+aggregate (−25%) only via the two intensity-confounded storms; along-track improves broadly.
+The paper's steering-dominance claim is doubly confirmed — even *removing* the bias buys only
+modest cross-track change through the steering buffer. New flag for the roadmap: **the envelope
+profile damps barotropic re-intensification** (Hugo/Ivan) — mechanism plausibly the trimmed
+mid-radius wind reservoir; needs its own study if intensity ever becomes a quantity.
+
+**Campaign status: COMPLETE at the testbed-to-storms level.** Mechanism (compact-support
+cutoff → no gyre phase-lock), fix (Gaussian envelope, r_d = 420 km frozen), calibration
+(r_d-robust, intensity-invariant, artifact-free), and real-track validation (sign 6/6,
+transmission ratio ~1/3, guards caught the confounds) — every stage under registered
+predictions. Follow-on paper skeleton is all here.
