@@ -39,7 +39,7 @@ from oracle_v8.landfall_verify import landfall_report
 from oracle_v8 import hurdat2
 from oracle_v8.production_config import (
     DT, DIAG_EVERY, N_PREBAL, NZ, LZ,
-    RMAX_RUN_M, R_ENV_M, TAPER_START_FRAC, WIND_TAPER,
+    RMAX_RUN_M, R_ENV_M, TAPER_START_FRAC, WIND_TAPER, OUTER_ENVELOPE_M,
     VMAX_CAP_MS, TAU_CAP, REQUIRE_ERA5, TIME_VARYING_STEER, TAU_STEER,
     choose_domain, n_steps_for, build_base_state,
     build_prebal_config, build_production_config,
@@ -85,8 +85,12 @@ def main(name: str, init_override: str | None = None) -> int:
     print(f"  Vmax:         {s['Vmax_ms']:.1f} m/s ({s['Vmax_kt']:.0f} kt)   P_min {s['P_min_mb']} mb")
     print(f"  Rmax run:     {RMAX_RUN_M/1000:.0f} km (5×dx)   B {s['B']} (frozen)")
     print(f"  Domain:       {Lx/1e3:.0f} km, nx={nx} (dx={dx/1e3:.3f} km) — geometry-derived")
-    print(f"  Wind taper:   {'ON' if WIND_TAPER else 'OFF'}  R_env={R_ENV_M/1000:.0f} km  "
-          f"taper-start frac {TAPER_START_FRAC:.2f}")
+    if OUTER_ENVELOPE_M is not None:
+        print(f"  Outer profile: GAUSS ENVELOPE r_d={OUTER_ENVELOPE_M/1000:.0f} km "
+              f"(no cutoff; taper superseded — see OVERROTATION_CANDIDATES.md)")
+    else:
+        print(f"  Wind taper:   {'ON' if WIND_TAPER else 'OFF'}  R_env={R_ENV_M/1000:.0f} km  "
+              f"taper-start frac {TAPER_START_FRAC:.2f}")
     print(f"  Run:          {N_STEPS} steps = {N_STEPS*DT/3600:.0f} h  (dt {DT:.0f}s, "
           f"CFL {s['Vmax_ms']*DT/dx:.3f})")
     print(f"  Obs landfall: {s['landfall_lat']}°N, {abs(s['landfall_lon'])}°W  "
@@ -122,6 +126,7 @@ def main(name: str, init_override: str | None = None) -> int:
     init = HollandVortexInit(
         Vmax=s["Vmax_ms"], Rmax=RMAX_RUN_M, B=s["B"], f=s["f"],
         R_env=R_ENV_M, wind_taper=WIND_TAPER, taper_start_frac=TAPER_START_FRAC,
+        outer_envelope_m=OUTER_ENVELOPE_M,
         u_env=u_env_t0, v_env=v_env_t0,
     )
     state = init.build_state(nx, ny, nz, Lx, Ly, Base())

@@ -208,6 +208,95 @@ r_d = 420; f-plane null at r_d = 420. Usage:
 the six-storm re-run (its own registered predictions to be written before that run). P-E2
 fails ⇒ characterize aim = f(Vmax) within the envelope family before any production change.
 
-### Stage 2 results
+### Stage 2 results (appended 2026-07-03, GPU runs by Justin)
 
-*(append after the GPU runs)*
+| config | \|drift\| | hdg | west | Vmax_end |
+|---|---|---|---|---|
+| r_d=350 km, Vmax 64 | 1.99 | 330 | +0.99 | 38.7 |
+| r_d=420 km, Vmax 64 | 2.30 | 329 | +1.20 | 39.7 |
+| r_d=500 km, Vmax 64 | 2.62 | 327 | +1.43 | 40.5 |
+| r_d=560 km, Vmax 64 | 2.85 | 326 | +1.60 | 41.2 |
+| r_d=420 km, Vmax 35 | 1.63 | 326 | +0.92 | 25.7 |
+| r_d=420 km, Vmax 21 | 1.23 | 324 | +0.72 | 17.2 |
+| r_d=420 km, Vmax 64, f-plane | 0.00 | — | −0.00 | 37.4 |
+
+**Scorecard: P-E1 CONFIRMED** (heading span 4° across r_d 350–560; magnitude size-controlled —
+aim and size have decoupled, unlike the compact family where they were entangled to the 343°
+floor). **P-E2 CONFIRMED** (heading span 4° across Vmax 64/35/21 vs the compact family's 13°
+poleward march; note the *kind* of invariance changed — compact was fixed-west/scaling-north
+i.e. direction rotating with intensity; envelope is fixed-direction/scaling-magnitude, west
+0.72→1.20 in proportion — the canonical β-drift structure, recovered whole). **P-E3 CONFIRMED**
+(f-plane null 0.002 m/s; the envelope manufactures nothing). Footnote, not confound: envelope
+equilibrium vortices run slightly weaker (Vmax_end 37–41 vs 42 — envelope trims mid-radius
+wind); P-E2 itself shows aim is Vmax_end-independent.
+
+**Mechanism + fix now validated at testbed level: r_d-robust, intensity-invariant,
+artifact-free phase-lock.**
+
+### The r_d freeze (decision required BEFORE any production run)
+
+Two candidates pass both bands. The choice must be frozen before the six-storm re-run and
+justified by testbed physics only (the no-landfall-tuning discipline):
+
+- **r_d = 350 km** — the mode's auto-pick (band-center magnitude |1.99|); hdg 330, west +0.99.
+- **r_d = 420 km** — recommended (Claude): (i) V(350 km) is matched to the production taper
+  control *by construction*, so the six-storm A/B is maximally "same vortex, plus the tail" —
+  the cleanest attribution; (ii) drift magnitude 2.30 is closest to the compact control's 2.49,
+  minimizing the change attributable to overall drift size rather than aim; (iii) west +1.20
+  sits nearer the canonical ~1.4.
+
+Production wiring is in place and inert: `production_config.OUTER_ENVELOPE_M = None` (None ⇒
+the published cosine-taper profile, bit-identical). Freezing the value + writing the per-storm
+registered predictions is Stage 3's opening move.
+
+### Stage 3 — six-storm re-run: REGISTERED PREDICTIONS (2026-07-03, r_d FROZEN at 420 km,
+### written BEFORE any storm run — do not edit; append results below)
+
+**Configuration:** `production_config.OUTER_ENVELOPE_M = 420_000.0` (frozen; chosen from
+Stage 2 on testbed grounds only — V(350 km) matched to the taper control, |drift| nearest
+control). Treatment = all six storms via `run_storm`, identical everything else; control = the
+checked-in `*_Agnostic` logs. Score with `landfall_verify` (both metrics, all six).
+
+**The treatment's drift delta (testbed, mature, Vmax 64):** control (2.49 m/s @ 350°: west
+0.42, north 2.45) → treatment (2.30 @ 329°: west 1.20, north 1.96), i.e.
+**Δ = (−0.78 east, −0.49 north) m/s.** Projecting Δ through each storm's landfall geometry
+(same headings/transits as the projection test — the *differential* form of that calculation,
+which is better-posed: steering errors cancel in the A/B):
+
+| storm | Δcross (km) | pred cross (obs + Δ) | Δalong (km) | pred along |
+|---|---|---|---|---|
+| Hugo | −93 | +110 → **+17** | +5 | +23 → +28 |
+| Katrina | −108 | +125 → **+17** | −44 | +77 → +33 |
+| Ivan | −139 | +126 → **−13** | −30 | +249 → +219 |
+| Fran | −81 | +8 → **−73** | −10 | −46 → −56 |
+| Michael | −73 | −99 → **−172** | −66 | +124 → +58 |
+| Laura | −74 | −32 → **−106** | −30 | +37 → +7 |
+
+**The honest headline of this table: the strong-form prediction is that the fix TRADES the
+discovery set's eastward errors for test-set westward errors** (six-storm cross RMS 95 → ~87,
+approximately flat) — which is precisely what the paper's steering-dominance verdict implies.
+A physics-correct fix to a subdominant term should not buy much cross-track skill. The robust
+gains are where the bias demonstrably lived: **along-track on the poleward movers.**
+
+**Registered predictions (Claude, 2026-07-03; bands ±50% on all Δ magnitudes — linear
+accumulation and intensity-scaling of Δ are both approximate):**
+- P-S1 (robust, hypothesis-independent): along-track improves on Katrina, Michael, and Laura;
+  Michael's early-arrival timing shrinks by ≥1.5 h. Confidence ~70%.
+- P-S2 (strong form, "bias-additive" H1): per-storm cross-track shifts west by 60–150 km
+  (centrals above); discovery storms land +0 ± 60; Fran and Laura go clearly west. ~45%.
+- P-S3 ("feedback-compensated" H2): the lockstep steering relaxation partially absorbs
+  self-propagation changes (the storm samples the DLM where it actually is), so observed
+  |Δcross| come in at LESS THAN HALF the strong-form centrals, roughly uniformly. ~35%.
+  (H2 would itself be a finding: it quantifies how much the steering architecture buffers
+  self-propagation error — directly relevant to the paper's attribution logic.)
+- P-S4 (guards): no storm's Vmax history changes by more than ~10 m/s (envelope trims
+  mid-radius wind; testbed Vmax_end dropped ~2.5); ERA5/steering path identical; any timing
+  change beyond ±3 h vs control on the direct storms (Hugo, Katrina) is a red flag, not a
+  result. Remaining ~20% mass: something outside H1/H2 (e.g., envelope-altered decay
+  interacting with steering sampling) — decompose per-segment before interpreting.
+
+**Scoring rules:** (i) score P-S1 first — it is the claim the whole campaign stands on;
+(ii) classify H1 vs H2 by the ratio of observed to strong-form Δcross; (iii) report six-storm
+cross RMS and the same-latitude metric alongside landfall-fix (Ivan/Michael recurve geometry
+inflates landfall-fix); (iv) either H1 or H2 confirms the bias's real-track footprint is
+bounded and now characterized from BOTH sides — the follow-on paper's empirical spine.

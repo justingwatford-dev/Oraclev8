@@ -32,6 +32,16 @@ TAPER_START_FRAC = TAPER_START_M / R_ENV_M    # = 0.40 at R_env=500km.  taper-st
 # set from β-drift physics (gate-beta testbed: in-band 1.5–2.5 m/s, max westward component before
 # the core limit), NOT from landfall — see run_translation_test.gate_beta_only and legacy/run_katrina.
 WIND_TAPER       = True         # winds → 0 by R_env; sets the real vortex size
+OUTER_ENVELOPE_M = 420_000.0    # FROZEN 2026-07-03 before any production run (Stage 2
+# calibration: in-band |2.30| m/s @ 329°, west +1.20, phase-locked by t12, intensity-invariant
+# 324–329° across Vmax 21–64, f-plane null 0.002 — OVERROTATION_CANDIDATES.md).  Gaussian
+# outer envelope, no compact support; SUPERSEDES the cosine taper: the taper's hard cutoff
+# was found to cause the poleward β-drift aim bias (it removes the outer flow that
+# phase-locks the β-gyres).  r_d=420 chosen over the also-in-band 350 because V(350 km)
+# matches the taper control by construction (cleanest six-storm A/B) and |drift| 2.30 is
+# nearest the control's 2.49.  Set to None to bit-reproduce the published six-storm
+# campaign (cosine taper at TAPER_START_M).  Calibrated to testbed β-drift physics ONLY —
+# never to any landfall (per-storm registered predictions in OVERROTATION_CANDIDATES.md).
 
 NU4         = 3.0e11        # m^4/s — ∇⁴ hyperdiffusion (10× below dx^4/(64 dt) limit)
 EPSILON     = 0.5           # Helmholtz divergence-damping fraction per SLOW half-step
