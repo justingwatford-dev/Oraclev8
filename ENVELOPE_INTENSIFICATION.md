@@ -81,4 +81,23 @@ python -m oracle_v8.measure_am_budget          # all six rows, ~2.5 h GPU
 
 ## Results
 
-*(append after the GPU runs; predictions above frozen)*
+### Run 1 (2026-07-03): NOT SCORED — instrument fault, caught by the instrument's own books
+
+All six rows integrated stably for 48 h, but the harness's headline metric read
+max speed at **k=0** — the drag-drained surface level — and reported Vmax_end 2.9–5.4
+everywhere. The reservoir column contradicted it: res500 within ~10–20% of initialization in
+every row — the circulations were alive; the metric was measuring the drag layer's local
+equilibrium (τ_drag ≈ 23 h at 5 m/s), which decouples in a quiescent testbed because this model
+has no vertical momentum diffusion. Every prior intensity number (J0's 45→76, gate-beta's 42,
+the LH82 study's 64→48) used different instruments (`low_level_vmax`, max z<3 km; or max|u|).
+**The registered predictions are NOT scored against this run** — they remain frozen; the
+instrument was invalid for them. Qualitative note, explicitly not banked: even the surface
+metric showed the bird-2 ordering (D 2.9 < E 4.0 ≈ F 4.2 < A 5.2, and E ≈ F is the fix's
+signature) — suggestive, unusable at that compression.
+
+**Harness fix (same day):** headline metric replaced with the production instrument
+(`low_level_vmax`), with three instruments now reported side by side (production z<3 km max;
+k=0 surface; max|u| for LH82-study comparability), a BL/above split of res500, and a final
+Vmax(z) profile per row (the decoupling picture). Re-run required; predictions unchanged.
+
+*(append Run 2 below)*

@@ -53,6 +53,7 @@ from types import SimpleNamespace
 
 import numpy as np
 from oracle_v8.backend import xp, to_numpy, wrap_base
+from oracle_v8 import diagnostics as dg
 from oracle_v8.vortex_init import HollandVortexInit
 from oracle_v8.solver import (
     RK3Integrator, AdvectionComponent, CoriolisComponent, SurfaceDragComponent,
@@ -135,14 +136,31 @@ class Grid:
                 xp.sum((self.rho_d * self.r[:, :, None] * cvt)[m5, :]) * dV))
         else:
             out["Tcap"] = 0.0
-        # low-level Vmax + crude center guard (speed-max offset from center)
-        sp0 = xp.sqrt(u[:, :, 0] ** 2 + v[:, :, 0] ** 2)
-        out["vmax"] = float(to_numpy(xp.max(sp0)))
-        ij = int(to_numpy(xp.argmax(sp0)))
-        i, j = divmod(ij, self.ny)
-        out["off_km"] = float(to_numpy(self.r[i, j])) / 1e3    # radius of max ≈ Rmax
-        out["max_w"] = mx(state.w)
+        # BL / above-BL split of the 500-km reservoir (drag lives in the BL)
+        out["res500BL"] = float(to_numpy(
+            xp.sum(rhoM[self._disk[500e3], :self.kbl]) * dV))
+        # intensity — THREE instruments (run-1 lesson: the k=0 metric reads the
+        # drag-drained surface level, not the vortex):
+        #   vmax   = production instrument (low_level_vmax, max |V'| in z<3km)
+        #   v_sfc  = k=0 max speed (the drag layer itself)
+        #   max_u  = max |u-component| anywhere (the LH82-harness instrument,
+        #            for direct comparability to the Phase-3B 64→48 reading)
+        ll = dg.low_level_vmax(state, self.base_w, LX / 2.0, LY / 2.0,
+                               self.dx, self.dx)
+        out["vmax"]   = ll["vmax_lowlvl"]
+        out["z_vmax"] = ll["z_vmax_m"]
+        out["r_vmax"] = ll["r_vmax_km"]                        # center guard ≈ Rmax
+        out["v_sfc"]  = float(to_numpy(xp.max(
+            xp.sqrt(u[:, :, 0] ** 2 + v[:, :, 0] ** 2))))
+        out["max_u"]  = max(mx(u), mx(v))
+        out["max_w"]  = mx(state.w)
         return out
+
+    def profile(self, state):
+        """Final Vmax(z): max horizontal speed per level (decoupling picture)."""
+        sp = xp.sqrt(state.u ** 2 + state.v ** 2)
+        ks = [k for k in (0, 1, 2, 3, 4, 6, 8, 12, 16) if k < self.nz]
+        return [(self.zc[k], float(to_numpy(xp.max(sp[:, :, k])))) for k in ks]
 
 
 def run_row(label, nz, profile_kw, normalized_drag, hours):
@@ -179,14 +197,16 @@ def run_row(label, nz, profile_kw, normalized_drag, hours):
                                 u_env=0.0, v_env=0.0)
 
     print(f"\n=== {label}  (nz={nz}, drag={'NORMALIZED' if normalized_drag else 'historical'}) ===")
-    print(f"  {'t(h)':>5} {'Vmax':>6} {'res500':>10} {'imp500':>10} {'impBL500':>10} "
-          f"{'Tdrag':>10} {'Tcap':>10} {'max|w|':>7} {'rmax(km)':>8}")
+    print(f"  {'t(h)':>5} {'Vmax':>6} {'z_vx':>5} {'v_sfc':>6} {'max|u|':>6} "
+          f"{'res500':>10} {'res500BL':>10} {'imp500':>10} {'impBL500':>10} "
+          f"{'Tdrag':>10} {'Tcap':>10} {'max|w|':>7} {'r_vx':>5}")
     b0 = g.budget(state, drag, cap)
     hist = [(0.0, b0)]
     _p = lambda t, b: print(
-        f"  {t:5.1f} {b['vmax']:6.1f} {b['res500']:10.3e} {b['imp500']:10.3e} "
-        f"{b['impBL500']:10.3e} {b['Tdrag']:10.3e} {b['Tcap']:10.3e} "
-        f"{b['max_w']:7.2f} {b['off_km']:8.0f}", flush=True)
+        f"  {t:5.1f} {b['vmax']:6.1f} {b['z_vmax']:5.0f} {b['v_sfc']:6.1f} "
+        f"{b['max_u']:6.1f} {b['res500']:10.3e} {b['res500BL']:10.3e} "
+        f"{b['imp500']:10.3e} {b['impBL500']:10.3e} {b['Tdrag']:10.3e} "
+        f"{b['Tcap']:10.3e} {b['max_w']:7.2f} {b['r_vmax']:5.0f}", flush=True)
     _p(0.0, b0)
 
     n_steps = int(hours * 3600.0 / DT)
@@ -205,8 +225,11 @@ def run_row(label, nz, profile_kw, normalized_drag, hours):
     vpeak = max(b["vmax"] for _, b in hist)
     vmin  = min(b["vmax"] for _, b in hist)
     final = hist[-1][1]
-    print(f"  END: Vmax {final['vmax']:.1f}  (min {vmin:.1f}, peak {vpeak:.1f})  "
-          f"res500 {final['res500']:.3e}")
+    prof = g.profile(state)
+    print("  Vmax(z) final: " + "  ".join(f"{z/1e3:.1f}km:{s:.0f}" for z, s in prof))
+    print(f"  END: Vmax {final['vmax']:.1f} @z={final['z_vmax']:.0f}m  "
+          f"(min {vmin:.1f}, peak {vpeak:.1f})  v_sfc {final['v_sfc']:.1f}  "
+          f"max|u| {final['max_u']:.1f}  res500 {final['res500']:.3e}")
     return label, hist, final
 
 
@@ -238,12 +261,13 @@ if __name__ == "__main__":
             finals[key] = fin
 
     print("\n" + "=" * 74)
-    print("SUMMARY (final):")
-    print(f"  {'row':>38} {'Vmax_end':>8} {'res500':>11}")
+    print("SUMMARY (final; Vmax = production low_level_vmax, z<3km):")
+    print(f"  {'row':>38} {'Vmax_end':>8} {'v_sfc':>6} {'max|u|':>7} {'res500':>11}")
     for key in "ABCDEF":
         if key in finals and finals[key] is not None:
             f = finals[key]
-            print(f"  {ROWS[key][0]:>38} {f['vmax']:8.1f} {f['res500']:11.3e}")
+            print(f"  {ROWS[key][0]:>38} {f['vmax']:8.1f} {f['v_sfc']:6.1f} "
+                  f"{f['max_u']:7.1f} {f['res500']:11.3e}")
         elif key in finals:
             print(f"  {ROWS[key][0]:>38} {'BLEW':>8}")
     print("\nREAD (see ENVELOPE_INTENSIFICATION.md decision rules):")
