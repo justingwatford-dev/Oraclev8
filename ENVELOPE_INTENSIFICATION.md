@@ -175,6 +175,63 @@ compact taper vs frozen production envelope r_d=420):
 - **Guards:** final y vs the β-taper zone (~4000 km); early-time (t ≤ 24 h) Vmax comparison
   before the profiles' tracks diverge.
 
-### Run 3 results
+### Run 3 results (appended 2026-07-04, GPU runs by Justin; scored vs the frozen registrations)
 
-*(append after the GPU runs; predictions frozen)*
+**Bird 2 (`measure_nz64_drag`, heated Phase-3B regime):**
+
+| row | max\|u\| |
+|---|---|
+| nz=32 historical | 84.3 (recorded ref 84.3 — exact) |
+| nz=32 NORMALIZED | 69.6 |
+| nz=64 historical | 48.1 (recorded ref 48.1 — exact) |
+| nz=64 NORMALIZED | 54.7 |
+
+**P-R3N1 PASS exactly** (both historical rows bit-reproduce the Phase-3B records — also the
+strongest available regression proof that the drag refactor's default is bit-identical).
+**P-R3N2 FAIL** (54.7, not ≥65; +6.6 of the 36.2 gap). **P-R3N3 FAIL by overshoot** (−14.7,
+band was 3–12; the heated regime expresses the column-drag factor at double the predicted
+strength — vs zero in Run 2's decay regime).
+
+**Verdict — the flag splits instead of closing.** Drag-matched (normalized) cross-grid gap:
+69.6 − 54.7 = **14.9 m/s of genuine, drag-independent dz-sensitivity** in heated
+intensification. So: (a) the drag discretization artifact is real, in-regime large, quantified,
+and fixed (`column_normalized`); (b) it is NOT the dominant cause of the NZ=64 spin-down;
+(c) the residual belongs to dz/2 itself — vertical advection and heating-layer resolution
+inherit a better-localized flag. Production note stands: any future buoyancy-on production
+config must decide its drag normalization deliberately (the heated regime is strongly
+sensitive; the barotropic track config is not).
+
+**Bird 1 (`gate-j2-profile`):**
+
+| profile | init | peak | end | y_end |
+|---|---|---|---|---|
+| compact (J2 reference) | 63 | 82 | 76 | 3809 |
+| gauss r_d=420 | 61 | 77 | 73 | 3745 |
+
+**P-J21 PASS** (peak 82; J2 reproduced with the decay-then-reintensify shape). **P-J22 FAIL as
+registered** (peak gap +5.6, end gap +2.8) — and the registered metric asked the wrong
+question. Time-resolved: compact re-intensifies at t≈24–28; the envelope holds 45–49 until
+t≈36–40, then intensifies and converges. Matched-time gaps: **+30 m/s (t32), +28 (t36),
++2.8 (t52)**. **The envelope does not suppress the barotropic re-intensification — it
+POSTPONES it ~10–12 h and then delivers nearly the same storm.** This resolves the Stage-3
+Hugo/Ivan "damping": their runs end at landfall, inside the delay window — a delayed
+intensifier scored at a fixed clock reads as a weakened one. Untested hypothesis for the
+delay, queued for a moving-frame AM budget: reservoir LOCATION (compact holds its relative AM
+at 200–350 km where BL inflow reaches quickly; the envelope's sits at 400–900 km — a longer
+supply chain, same cap-limited equilibrium). Guards: both tracks stayed inside the β-taper
+interior (3809/3745 < ~4000, margin thin — flag for any longer rerun); early-time gaps ≤4 m/s.
+
+**Confidence audit (Run 3):** P-R3N1 90% ✓, P-J21 80% ✓, P-R3N2 60% ✗, P-R3N3 65% ✗
+(direction right, band half the true size), P-J22 55% ✗ (wrong metric — peak/end instead of
+onset time). Recurring lesson now twice-paid: register predictions about TRAJECTORIES, not
+endpoints, when the phenomenon is a feedback with a threshold.
+
+### Study status after Run 3
+
+- **Envelope-intensification (bird 1): mechanism-class RESOLVED at the phenomenon level** —
+  delay, not suppression; paper-2 §6's trade-space paragraph should say "delays dry barotropic
+  re-intensification (~10 h in the J2 testbed)" rather than "damps." Optional next: the
+  moving-frame budget to pin the supply-chain hypothesis.
+- **NZ=64 (bird 2): drag artifact found/fixed/quantified; residual 14.9 m/s dz-sensitivity
+  remains open** (vertical advection / heating-layer resolution) — logged in
+  LH82_SMALL_PERTURBATION_FINDINGS.md caveat 3.

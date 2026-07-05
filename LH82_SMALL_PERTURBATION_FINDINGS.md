@@ -155,11 +155,17 @@ the derivation yet.
    needs PI; the point is that it isn't urgent.
 3. **Numerics strongly shape the circulation** — max|w| ranged 0.32 (ε=0.5) to
    10.7 (ε=0, dt=15) at the *same* forcing (20×), and at NZ=64 the vortex
-   *decays* (64 → 48) where NZ=32 intensifies (→ 74–84) — even the sign of
-   intensification is resolution-sensitive (suspect the H_BL=1000 m drag-layer
-   discretization; unexplained). Phase 3B shows the *diagnostic ratios* are
-   robust to all of this, but updraft strength / intensification must be flagged
-   if either ever becomes a paper quantity.
+   *decays* (64 → 48) where NZ=32 intensifies (→ 74–84). **Resolved in part
+   (2026-07-04, AM-budget study, ENVELOPE_INTENSIFICATION.md):** the surface-drag
+   discretization over-counts the column sink as the vertical grid refines
+   (factor 0.75 at NZ=32 → 1.59 at NZ=64; fix = `column_normalized=True`,
+   integral-preserving on any grid). The fix recovers part of the gap (48.1 →
+   54.7); the drag-matched residual (69.6 vs 54.7 with normalized drag on both
+   grids) is a genuine ~15 m/s dz-sensitivity of heated intensification —
+   suspects: vertical advection and heating-layer resolution; still open.
+   Phase 3B shows the *diagnostic ratios* are robust to all of this, but
+   updraft strength / intensification must be flagged if either ever becomes a
+   paper quantity.
 4. The ~10 % ceiling is numerical, not a proven physical limit: at dt=15 the
    undamped (ε=0) ceiling sits between Q=1.5e-2 and 2e-2, while ε=0.1 holds
    9.3 % in steady state. Finer grid / flux-form conservative advection would
