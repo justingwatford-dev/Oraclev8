@@ -1846,6 +1846,76 @@ def gate_beta_envelope():
     print(f"\nWall time: {time.time()-t0:.0f}s")
 
 
+def gate_j2_profile():
+    """J2 PROFILE A/B (AM-budget study Run 3, bird 1, 2026-07) — does the
+    Gaussian envelope damp the model's emergent β+steering intensification
+    the way it damped Hugo's and Ivan's?
+
+    Run 2 showed the standard quiescent f-plane vortex only DECAYS — the
+    envelope-damping phenomenon (Stage 3: Hugo −14, Ivan −25 m/s) lives in
+    intensifying regimes.  The intensify-ladder's J2 rung (β + ERA5-like
+    steering ramp, Ivan structure) is the harness configuration that
+    demonstrably intensifies ("intensifies to 80").  Reproduce J2 with the
+    compact taper (reference), then swap ONLY the outer profile to the
+    frozen production envelope (r_d=420 km).
+
+    Registered predictions (ENVELOPE_INTENSIFICATION.md Run 3, frozen):
+      P-J21: compact J2 re-intensifies (peak ≥ 75).
+      P-J22: envelope J2 peaks AND ends ≥ 10 m/s below compact — the storm
+             signature reproduced in isolation.  If instead the two match,
+             the storm damping needs the full ERA5 environment (position-
+             dependent steering feedback) — informative either way.
+    Guards: report final y (β-taper zone starts ~4000 km) and net drift; the
+    two profiles drift differently, so late-time environments diverge —
+    compare Vmax at matched EARLY times too, not just at end.
+    Usage:  python run_translation_test.py gate-j2-profile
+    """
+    t0 = time.time()
+    V0 = IVAN["Vmax_ms"]
+    ramp = (-1.1, 3.9, +0.6, 6.6)
+    common = dict(nx=320, dom=5_000_000.0, f_ref=IVAN_F_REF, v_cap=70.0,
+                  r_env=500e3, hours=52.0, Rmax=75_000.0, B=IVAN["B"],
+                  u_env=ramp[0], v_env=ramp[1], beta=True, steer_ramp=ramp)
+    print("=" * 78)
+    print(f"J2 PROFILE A/B  (beta + steering ramp {ramp}, Ivan structure "
+          f"Vmax={V0:.0f} B={IVAN['B']:.2f}, cap 70, 5000km/320, 52h)")
+    print("  ladder reference: J2 compact intensifies to ~80")
+    print("=" * 78)
+
+    rows = []
+    for lbl, kw in (
+            ("compact taper (J2 reference)", dict(wind_taper=True)),
+            ("gauss r_d=420km (production envelope)",
+             dict(outer_envelope_m=420e3))):
+        d = run_translation(V0, **common, **kw)
+        tt, xs, ys, vm = d["track"]
+        print(f"\n  {lbl}:")
+        print(f"  {'t(h)':>5}  {'Vmax':>6}  {'y(km)':>8}")
+        step = max(1, len(tt) // 13)
+        for k in range(step, len(tt), step):
+            print(f"  {tt[k]/3600:5.1f}  {vm[k]:6.1f}  {ys[k]/1e3:8.1f}")
+        print(f"  Vmax: init {vm[0]:.0f} -> end {vm[-1]:.0f} "
+              f"(peak {max(vm):.0f})   final y {ys[-1]/1e3:.0f} km "
+              f"(taper zone > ~4000)")
+        rows.append((lbl, vm[0], max(vm), vm[-1], ys[-1] / 1e3, tt, vm))
+
+    print("\n" + "=" * 78)
+    print("SUMMARY:")
+    print(f"  {'profile':>40} {'init':>5} {'peak':>5} {'end':>5} {'y_end':>7}")
+    for lbl, v0, vp, ve, ye, _, _ in rows:
+        print(f"  {lbl:>40} {v0:5.0f} {vp:5.0f} {ve:5.0f} {ye:7.0f}")
+    if len(rows) == 2:
+        dpk = rows[0][2] - rows[1][2]
+        den = rows[0][3] - rows[1][3]
+        print("\nREAD:")
+        print(f"  peak gap (compact - envelope) = {dpk:+.1f} m/s ; "
+              f"end gap = {den:+.1f} m/s")
+        print("  P-J21: compact peak >= 75 ; P-J22: gaps >= 10 -> storm")
+        print("  damping REPRODUCED (mechanism next: moving-frame AM budget);")
+        print("  gaps ~0 -> damping needs the full ERA5 environment.")
+    print(f"\nWall time: {time.time()-t0:.0f}s")
+
+
 def gate_beta_res():
     """GATE-BETA RESOLUTION SWEEP (V8.7) — is the ~8° aim floor under-RESOLVED or structural?
 
@@ -2531,5 +2601,7 @@ if __name__ == "__main__":
         gate_beta_baroclinic()
     elif arg in ("gate-beta-envelope", "gbeta-env", "env", "32"):
         gate_beta_envelope()
+    elif arg in ("gate-j2-profile", "j2-profile", "j2", "33"):
+        gate_j2_profile()
     else:
         main()
