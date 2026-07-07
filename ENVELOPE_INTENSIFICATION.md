@@ -235,3 +235,42 @@ endpoints, when the phenomenon is a feedback with a threshold.
 - **NZ=64 (bird 2): drag artifact found/fixed/quantified; residual 14.9 m/s dz-sensitivity
   remains open** (vertical advection / heating-layer resolution) — logged in
   LH82_SMALL_PERTURBATION_FINDINGS.md caveat 3.
+
+## Run 4 — the moving-frame budget (registered 2026-07-07, BEFORE any GPU run)
+
+**Question:** what sets the envelope's ~10–12 h re-intensification delay? Hypothesis on the
+table (from Run 3): reservoir LOCATION — the compact profile's relative AM sits at 200–350 km
+where the BL inflow reaches it quickly; the envelope's sits at 400–900 km, a longer supply
+chain to the same cap-limited equilibrium. Alternative: inflow STRENGTH (the profiles drive
+different Ekman pumping; the difference is in how much air flows in, not what it carries).
+
+**Design:** `measure_am_budget.py` rows G/H (`$env:AMB_ROWS="GH"`) — the J2 rung exactly as
+Run 3 ran it (β + ramp, Ivan structure, 52 h, 320²), compact vs frozen envelope-420, with the
+AM budget in the moving frame (vorticity-center tracked, geometry recentered, perturbation-wind
+fields so the steering cannot leak into the rings via gyre asymmetries). New summary metric:
+onset(>60 m/s, post-dip) — a trajectory quantity, per the twice-paid Run-2/3 lesson.
+
+**Registered predictions (Claude, 2026-07-07):**
+- **P-M1 (integrity):** rows G/H reproduce Run 3's trajectories (onsets ≈ 26–30 h and
+  ≈ 38–42 h; peaks within ~3 m/s of 82/77) — the budget is read-only and must not perturb the
+  runs. ~85%.
+- **P-M2 (the hypothesis):** in each row, the rise of impBL300 (BL relative-M import at 300 km)
+  LEADS that row's own Vmax onset by ≤ 6 h; and in the pre-onset window (t = 12–24 h) the
+  compact row's impBL300 exceeds the envelope's by ≥ 2×. ~50% — honest coin-flip; that is why
+  we measure.
+- **P-M3 (the discriminator):** in the same window the BL mass inflow (minBL300) is comparable
+  between rows (within ~30%) while impBL300 differs — the difference is in what the inflow
+  CARRIES (reservoir location), not how much flows (inflow strength). If instead minBL300
+  differs ≥ 2×, the mechanism is inflow strength. ~45% on the location branch.
+- **Decision:** P-M2+P-M3 pass ⇒ supply-chain mechanism confirmed; paper-2 §6 gets one
+  mechanism sentence with a measured lead time. P-M2 passes but P-M3 fails toward
+  inflow-strength ⇒ equally clean, different sentence. Both fail ⇒ the delay is not
+  BL-import-controlled — look at the gyre/asymmetry pathway next (the β-gyres themselves
+  redistribute AM), and say so honestly.
+
+**Cost:** 2 × 52 h × 320² + budget ≈ 25–35 min GPU
+(`$env:AMB_ROWS="GH" ; python -m oracle_v8.measure_am_budget`).
+
+### Run 4 results
+
+*(append after the GPU runs; predictions frozen)*
