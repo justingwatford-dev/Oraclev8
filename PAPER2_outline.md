@@ -110,9 +110,11 @@ MWR-shaped). Length target ~5000–6500 words. Standard sections, no sidebar nee
   Table: Stage 3 six-storm c→t.*
 
 ## §6 Discussion
-- The bounded-vortex trade space: taper → aim error; envelope → damped barotropic
-  re-intensification (Hugo/Ivan, flagged; candidate mechanism: trimmed mid-radius angular-
-  momentum reservoir). No free boundary; characterize the trade.
+- The bounded-vortex trade space: taper → aim error; envelope → DELAYED barotropic
+  re-intensification (~8–12 h; Hugo/Ivan scored mid-delay at landfall). Mechanism measured
+  (AM-budget Run 4): weaker mid-radius Ekman inflow (surface wind at 200–400 km sets BL mass
+  convergence; ×2.5–3 pre-onset), NOT reservoir starvation. No free boundary; characterize
+  the trade.
 - Generality, sharpened from paper 1 §5.4: any model that bounds its initial vortex with
   compact support should check its gyre phase-lock; the diagnostic is an afternoon.
 - What remains: Arm C-v2 (relax-to-θ′_ref); the envelope-intensification study; a second

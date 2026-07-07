@@ -271,6 +271,52 @@ onset(>60 m/s, post-dip) — a trajectory quantity, per the twice-paid Run-2/3 l
 **Cost:** 2 × 52 h × 320² + budget ≈ 25–35 min GPU
 (`$env:AMB_ROWS="GH" ; python -m oracle_v8.measure_am_budget`).
 
-### Run 4 results
+### Run 4 results (appended 2026-07-07, GPU run by Justin; log `AM-budget_gh.txt`)
 
-*(append after the GPU runs; predictions frozen)*
+| row | peak | end | onset(>60) | y_end |
+|---|---|---|---|---|
+| G compact | 80.7 | 80.4 | 24 h | 3758 |
+| H gauss-420 | 78.6 | 73.2 | 32 h | 3867 |
+
+**The delay reproduced (8 h) with near-identical peaks — measured twice now.**
+
+**Scorecard:**
+- **P-M1 PARTIAL:** peaks/ends reproduce Run 3 within ~3 m/s; absolute onsets ran 2–6 h
+  earlier than the registered bands (envelope 32 vs 38–42). Two config seeds are mine — the
+  harness hardcoded F = 5.7e-5 and V0 = 66.9 where the ladder uses IVAN's exact 5.6985e-5 and
+  66.878 (~0.03% each); near a threshold, deterministic chaos amplifies seeds into hours. The
+  A/B *within* Run 4 shares one config exactly, so the 8-h delay is clean.
+- **P-M2 FAIL, instructively:** pre-onset, the BL relative-M flux at 300 km is a net EXPORT in
+  both rows (gyre-asymmetric drainage), flipping to strong import only AT each row's onset
+  (coincident within the 2-h cadence). The M-import does not lead intensification — it is
+  intensification, viewed in the books.
+- **P-M3 RESOLVED — INFLOW-STRENGTH branch:** pre-onset (t = 12–24 h) BL mass inflow
+  (minBL300) is **2.5–3× stronger in the compact row** (t20: 4.2e7 vs 1.5e7; t24: 4.8e7 vs
+  1.8e7), rising steadily from t≈8 (compact) vs t≈12 (envelope). NOT comparable-within-30%;
+  the reservoir-location hypothesis is rejected (consistent with Run 2's total-AM finding).
+
+**MECHANISM (bird 1, closed at phenomenon+mechanism level):** the envelope's re-intensification
+delay traces to weaker drag-driven Ekman pumping at mid-radii — the surface wind the profile
+places at 200–400 km sets the BL mass convergence (compact ~45 m/s at 200 km vs envelope ~36 →
+×2.5–3 inflow), so the core spins up later; once the intensification feedback closes, the same
+cap-limited equilibrium is reached. **Paper-2 §6 sentence: "the envelope delays dry barotropic
+re-intensification (~8–12 h) by weakening mid-radius Ekman inflow, not by starving the
+angular-momentum reservoir."**
+
+**Instrument caveat:** row G's vorticity-center jumps ±200 km post-onset (t26/38/52) with
+budget sign-flips riding along — the known ζ²-centroid fragility at high intensity
+(gate-beta-longrun note). Pre-onset windows (where all scoring above lives) are clean in both
+rows; post-onset G budget lines are not load-bearing.
+
+**Confidence audit:** P-M1 85% → partial; P-M2 50% → fail (export, not import); P-M3 ~45% on
+location → strength branch confirmed. The discriminator design (P-M3) is the win: it was built
+to decide, and it decided.
+
+## Study status — CLOSED (2026-07-07)
+
+Bird 1: envelope delay = weaker mid-radius Ekman inflow (measured, ×2.5–3 pre-onset). Bird 2:
+drag discretization found/fixed/quantified; residual ~15 m/s dz-sensitivity of heated
+intensification remains the one open flag (vertical advection / heating-layer suspects).
+Four runs, twelve registered predictions, five confirmed, six failed-and-reported, one
+unreadable — every failure narrowed the search. Follow-ups live in the resumption menu
+(am-budget-study memory).
