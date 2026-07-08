@@ -1732,7 +1732,8 @@ class DiabaticHeatingComponent(TendencyComponent):
                  z_peak: float, width_z: float,
                  nx: int, ny: int, nz: int,
                  Lx: float, Ly: float, Lz: float,
-                 x_c: float | None = None, y_c: float | None = None) -> None:
+                 x_c: float | None = None, y_c: float | None = None,
+                 z_sample_nz: int | None = None) -> None:
         dx, dy, dz = Lx / nx, Ly / ny, Lz / nz
         x_c = x_c if x_c is not None else Lx / 2.0
         y_c = y_c if y_c is not None else Ly / 2.0
@@ -1742,7 +1743,19 @@ class DiabaticHeatingComponent(TendencyComponent):
         X, Y = np.meshgrid(x, y, indexing="ij")
         r = np.sqrt((X - x_c) ** 2 + (Y - y_c) ** 2)             # (nx, ny)
         f_r = np.exp(-((r - r_eyewall) / width_r) ** 2)          # annular ring
-        f_z = np.exp(-((z - z_peak) / width_z) ** 2)             # mid-trop
+        if z_sample_nz is None:
+            f_z = np.exp(-((z - z_peak) / width_z) ** 2)         # mid-trop
+        else:
+            # Forcing-representation control (dz-sensitivity study, 2026-07):
+            # evaluate the vertical profile at a COARSER grid's cell centers
+            # and inject it piecewise-constant, so a fine-dz run receives the
+            # coarse grid's discrete heating exactly.  Default None is
+            # bit-identical to the historical profile.
+            dzc = Lz / z_sample_nz
+            zc  = (np.arange(z_sample_nz) + 0.5) * dzc
+            fzc = np.exp(-((zc - z_peak) / width_z) ** 2)
+            idx = np.minimum((z / dzc).astype(int), z_sample_nz - 1)
+            f_z = fzc[idx]
         # precompute the static source on the compute device
         self._Q = float(Q_max) * f_r[:, :, None] * f_z[None, None, :]
         self._Q_max = float(Q_max)
