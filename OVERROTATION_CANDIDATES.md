@@ -351,3 +351,31 @@ cutoff → no gyre phase-lock), fix (Gaussian envelope, r_d = 420 km frozen), ca
 (r_d-robust, intensity-invariant, artifact-free), and real-track validation (sign 6/6,
 transmission ratio ~1/3, guards caught the confounds) — every stage under registered
 predictions. Follow-on paper skeleton is all here.
+
+## Arm C-v2 — relax-to-θ′_ref (registered 2026-07-07, BEFORE any GPU run)
+
+The corrected baroclinicity test paper-2 §2.3 awaits: `NewtonianCoolingComponent` gains an
+optional `theta_ref`; `run_translation(cool_to_init=True)` holds θ′ at the post-prebalance
+balanced core, giving persistent BOUNDED baroclinicity with departures damped at τ — the design
+Arm C-v1's runaway demanded. Mode: `gate-beta-baroclinic-v2` (CLI 34; 4 rows × 48 h ≈ 1 h GPU).
+Context: with the cutoff mechanism established, this is a completeness check — "does live
+vertical structure ALSO move the aim," not "which candidate explains the bias."
+
+**Registered predictions (Claude, 2026-07-07):**
+- **P-C2v1 (integrity, ~90%):** passive null v2 (held core, buoyancy OFF) reproduces the dry
+  control's drift (Δheading < 1°, Δwest < 0.03) — θ′ is passive without buoyancy, whatever the
+  cooling target.
+- **P-C2v2 (boundedness, ~75%):** the held baroclinic rows stay bounded — max θ′ within ~2× the
+  balanced core (≈42 K), max|w| < 5 m/s, no cap-pinning — the runaway pathway is closed by
+  construction (departure equilibrium ≈ w·dθ̄/dz·τ ≈ 2 K at τ=30 min).
+- **P-C2v3 (the verdict, ~70% exonerate):** at bounded θ′, the compact-taper aim moves < 5° and
+  west changes < 0.15 m s⁻¹ vs the dry control ⇒ **candidate 2 EXONERATED** — the cutoff owns
+  the whole bias (the envelope already recovered canonical aim with zero baroclinicity, leaving
+  no residual to explain). Larger movement toward NW ⇒ vertical structure contributes
+  independently ⇒ paper-2 §2.3 and §6 get the richer sentence.
+- **Decision:** either branch closes paper-2's §2.3 hook; the τ=6h row checks the verdict is
+  not an artifact of hard anchoring.
+
+### Arm C-v2 results
+
+*(append after the GPU run; predictions frozen)*

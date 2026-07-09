@@ -171,7 +171,7 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
                     Rmax=None, B=None, f_ref=None, snapshot_hours=None,
                     diff_form="hyper", nu_H=2.0e5,
                     taper_shape="cos", outer_envelope_m=None,
-                    buoyancy_on=False, tau_cool=1800.0,
+                    buoyancy_on=False, tau_cool=1800.0, cool_to_init=False,
                     subcell=True, verbose=False):
     """One translation run. f-plane by default (beta=False, β OFF — eff≈1 ⇒
     advection faithful).  beta=True turns on the β-plane Coriolis (with the
@@ -225,7 +225,11 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
         projection=AnelasticProjection(nx=nx, ny=ny, nz=nz, Lx=Lx, Ly=Ly, Lz=Lz),
     )
     if tau_cool is not None and tau_cool > 0:
-        comps["newtonian_cooling"] = NewtonianCoolingComponent(tau=tau_cool)
+        # cool_to_init (Arm C-v2): hold θ′ at the post-prebalance balanced
+        # field instead of relaxing it to zero — pair with keep_theta=True.
+        _tref = state.theta_prime.copy() if cool_to_init else None
+        comps["newtonian_cooling"] = NewtonianCoolingComponent(
+            tau=tau_cool, theta_ref=_tref)
     if buoyancy_on:
         # Over-rotation Arm C: θ′ feeds back on w (b = g·θ′/θ̄).  Pair with
         # keep_theta=True so the balanced warm core survives init.
@@ -1846,6 +1850,91 @@ def gate_beta_envelope():
     print(f"\nWall time: {time.time()-t0:.0f}s")
 
 
+def gate_beta_baroclinic_v2():
+    """ARM C-v2 (2026-07) — the corrected baroclinicity test: relax θ′ toward
+    the INITIAL balanced warm core (cool_to_init) instead of toward zero, so
+    the vortex carries persistent, BOUNDED baroclinicity for the full run —
+    the design that Arm C-v1's runaway (θ′ → 95 K) demanded.
+
+    With the cutoff mechanism established (gate-beta-shape) this is a
+    completeness check on paper-2 §2.3's open candidate: the question is not
+    "which candidate explains the bias" (answered) but "does live vertical
+    structure ALSO move the aim."  Ladder at the production compact taper
+    (the biased profile, so any baroclinic effect has a bias to act on):
+
+        dry control        θ′=0, buoyancy OFF               (anchor: 350°/+0.42)
+        passive null v2    θ′ kept+held, buoyancy OFF        (drift MUST ≡ control)
+        baroclinic HELD    θ′ kept+held, buoyancy ON, τ=30min ← THE row
+        baroclinic HELD    θ′ kept+held, buoyancy ON, τ=6h    (anchoring sweep)
+
+    Registered predictions (OVERROTATION_CANDIDATES.md, Arm C-v2 section).
+    Usage:  python run_translation_test.py gate-beta-baroclinic-v2
+    """
+    t0 = time.time()
+    print("=" * 78)
+    print("ARM C-v2  (beta-plane, u=v=0, Vmax=64, cap 70, compact taper "
+          "200-500km, 5000km/320, 48h)")
+    print("  relax-to-θ′_ref holds the balanced warm core; guards: Vmax_end, "
+          "max|w|, max|θ′|")
+    print("=" * 78)
+
+    rows = []
+    for lbl, kw in (
+            ("dry control (theta'=0)", dict()),
+            ("passive null v2 (held, buoy OFF)",
+             dict(keep_theta=True, cool_to_init=True)),
+            ("baroclinic HELD tau=30min",
+             dict(keep_theta=True, buoyancy_on=True, cool_to_init=True)),
+            ("baroclinic HELD tau=6h",
+             dict(keep_theta=True, buoyancy_on=True, cool_to_init=True,
+                  tau_cool=21600.0)),
+    ):
+        d = run_translation(64, u_env=0.0, v_env=0.0, v_cap=70.0, beta=True,
+                            wind_taper=True, taper_start_frac=0.40,
+                            r_env=500e3, nx=320, dom=5_000_000.0, hours=48.0,
+                            f_ref=IVAN_F_REF, **kw)
+        track = d["track"]
+        ok = (np.isfinite(d["vmax_end"]) and np.isfinite(d["max_w_end"])
+              and d["max_w_end"] < 50.0)
+        if not ok:
+            rows.append((lbl, *(float("nan"),) * 3, d["vmax_end"],
+                         d["max_w_end"], d["max_theta_end"]))
+            print(f"\n  {lbl}:  UNSTABLE "
+                  f"(max|w|={d['max_w_end']:.1f}, max|th'|="
+                  f"{d['max_theta_end']:.1f}) — stability datum")
+            continue
+        m_spd, m_hdg, m_w = _mature_drift(track, 30.0, 48.0)
+        rows.append((lbl, m_spd, m_hdg, m_w, d["vmax_end"],
+                     d["max_w_end"], d["max_theta_end"]))
+        print(f"\n  {lbl}:")
+        print(f"    MATURE(30-48) |{m_spd:.2f}| @ {m_hdg:.0f} "
+              f"({_compass(m_hdg)})  west={m_w:+.2f}  "
+              f"Vmax_end={d['vmax_end']:.1f}  max|w|={d['max_w_end']:.2f}  "
+              f"max|th'|={d['max_theta_end']:.1f}K")
+
+    print("\n" + "=" * 78)
+    print("SUMMARY (mature 30-48h):")
+    print(f"  {'config':>34}  {'|drift|':>7}  {'hdg':>5}  {'west':>6}  "
+          f"{'Vmax_end':>8}  {'max|w|':>6}  {'th_max':>6}")
+    for lbl, ms, mh, mw, ve, mwd, mth in rows:
+        print(f"  {lbl:>34}  {ms:7.2f}  {mh:5.0f}  {mw:+6.2f}  {ve:8.1f}  "
+              f"{mwd:6.2f}  {mth:6.1f}")
+    if len(rows) >= 3 and all(np.isfinite([rows[0][2], rows[1][2]])):
+        dnull = abs(((rows[1][2] - rows[0][2]) + 180) % 360 - 180)
+        print(f"\n  passive-null check: dheading vs control = {dnull:.1f} deg "
+              f"(expect ~0)")
+    live = [r for r in rows[2:] if np.isfinite(r[2])]
+    if live and np.isfinite(rows[0][3]):
+        dwest = max(r[3] for r in live) - rows[0][3]
+        dhdg = min((((r[2] - rows[0][2]) + 180) % 360 - 180) for r in live)
+        print(f"  max west gain over dry control = {dwest:+.2f} m/s ; "
+              f"max NW rotation = {dhdg:+.1f} deg")
+        print("  READ: |gain|<0.15 and |rot|<5 at bounded th' -> candidate 2")
+        print("  EXONERATED (cutoff owns the whole bias); larger -> vertical")
+        print("  structure contributes independently -> paper-2 2.3/6 update.")
+    print(f"\nWall time: {time.time()-t0:.0f}s")
+
+
 def gate_j2_profile():
     """J2 PROFILE A/B (AM-budget study Run 3, bird 1, 2026-07) — does the
     Gaussian envelope damp the model's emergent β+steering intensification
@@ -2603,5 +2692,7 @@ if __name__ == "__main__":
         gate_beta_envelope()
     elif arg in ("gate-j2-profile", "j2-profile", "j2", "33"):
         gate_j2_profile()
+    elif arg in ("gate-beta-baroclinic-v2", "baro2", "34"):
+        gate_beta_baroclinic_v2()
     else:
         main()

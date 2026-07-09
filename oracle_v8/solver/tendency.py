@@ -1674,11 +1674,23 @@ class NewtonianCoolingComponent(TendencyComponent):
     name  = "newtonian_cooling"
     stage = StepStage.SLOW
 
-    def __init__(self, tau: float = 3600.0) -> None:
+    def __init__(self, tau: float = 3600.0, theta_ref=None) -> None:
         self._alpha = 1.0 / float(tau)
+        # Arm C-v2 (2026-07): optional reference field — relax θ′ toward a
+        # HELD state instead of zero.  Relax-to-zero cannot maintain a
+        # balanced warm core (weakening tau invites the adiabatic runaway
+        # that made Arm C-v1 unreadable: θ′ → 95 K); relax-to-θ′_ref holds
+        # persistent, BOUNDED baroclinicity while damping departures at the
+        # same tau.  Caller supplies an array on the compute device with
+        # state.theta_prime's shape (e.g. the post-prebalance balanced core).
+        # Default None is bit-identical to the historical relax-to-zero.
+        self._theta_ref = theta_ref
 
     def compute_tendency(self, state, equation_set, staggering, base, dt):
-        return Tendency(dtheta_prime_dt=-self._alpha * state.theta_prime)
+        if self._theta_ref is None:
+            return Tendency(dtheta_prime_dt=-self._alpha * state.theta_prime)
+        return Tendency(dtheta_prime_dt=-self._alpha
+                        * (state.theta_prime - self._theta_ref))
 
     def reads(self) -> tuple[StateVar, ...]:
         return (StateVar.THETA_PRIME,)
