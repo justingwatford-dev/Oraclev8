@@ -1309,11 +1309,25 @@ class SurfaceDragComponent(TendencyComponent):
     stage = StepStage.SLOW
 
     def __init__(self, Cd: float = 1.5e-3, H_bl: float = 1000.0,
-                 u_env: float = 0.0, v_env: float = 0.0) -> None:
+                 u_env: float = 0.0, v_env: float = 0.0,
+                 column_normalized: bool = False) -> None:
+        # column_normalized (2026-07-03, AM-budget study): the historical
+        # α₀ = Cd·|V'|/dz prefactor is only correct when drag is applied to a
+        # single layer.  Spread over the (1 − z/H_bl) profile it over-counts:
+        # the column-integrated sink scales as Σ_k max(0, 1−z_k/H_bl), which
+        # is 0.75 at nz=32 (dz=625) but 1.59 at nz=64 (dz=312.5) — halving dz
+        # DOUBLES the integrated drag (continuum limit ∝ H_bl/2dz, divergent).
+        # This is the leading suspect for the LH82-study NZ=64 vortex
+        # spin-down.  column_normalized=True divides by the discrete integral
+        # of the weight profile instead, making Σ_k α_k·dz = Cd·|V'| exactly
+        # on ANY vertical grid.  Default False = bit-identical to all prior
+        # runs (note: at nz=32 the historical effective column drag is
+        # 0.75 × the nominal bulk value).
         self._Cd    = float(Cd)
         self._H_bl  = float(H_bl)
         self._u_env = float(u_env)
         self._v_env = float(v_env)
+        self._column_normalized = bool(column_normalized)
 
     def compute_tendency(self, state, equation_set, staggering, base, dt):
         u  = state.u    # (nx, ny, nz)
@@ -1329,11 +1343,16 @@ class SurfaceDragComponent(TendencyComponent):
 
         # Bulk drag rate from the SURFACE perturbation speed: α₀ = Cd·|V'|/dz
         V_sfc     = np.sqrt(u_p[:, :, 0]**2 + v_p[:, :, 0]**2)   # (nx, ny)
-        alpha_sfc = self._Cd * V_sfc / dz                        # (nx, ny) [s⁻¹]
 
         # Vertical weight: 1 at surface → 0 at H_bl, 0 above.  Vectorised
         # over z (the old per-k Python loop was nz separate GPU kernels/step).
         weight = np.maximum(0.0, 1.0 - z / self._H_bl)           # (nz,)
+        if self._column_normalized:
+            # integral-preserving: Σ_k α_k·dz = Cd·|V'| on any vertical grid
+            denom     = float((weight * dz).sum()) or 1.0        # ∫weight dz
+            alpha_sfc = self._Cd * V_sfc / denom                 # (nx, ny) [s⁻¹]
+        else:
+            alpha_sfc = self._Cd * V_sfc / dz                    # historical
         alpha  = alpha_sfc[:, :, None] * weight[None, None, :]   # (nx, ny, nz)
 
         return Tendency(du_dt=-alpha * u_p, dv_dt=-alpha * v_p)
@@ -1713,7 +1732,8 @@ class DiabaticHeatingComponent(TendencyComponent):
                  z_peak: float, width_z: float,
                  nx: int, ny: int, nz: int,
                  Lx: float, Ly: float, Lz: float,
-                 x_c: float | None = None, y_c: float | None = None) -> None:
+                 x_c: float | None = None, y_c: float | None = None,
+                 z_sample_nz: int | None = None) -> None:
         dx, dy, dz = Lx / nx, Ly / ny, Lz / nz
         x_c = x_c if x_c is not None else Lx / 2.0
         y_c = y_c if y_c is not None else Ly / 2.0
@@ -1723,7 +1743,19 @@ class DiabaticHeatingComponent(TendencyComponent):
         X, Y = np.meshgrid(x, y, indexing="ij")
         r = np.sqrt((X - x_c) ** 2 + (Y - y_c) ** 2)             # (nx, ny)
         f_r = np.exp(-((r - r_eyewall) / width_r) ** 2)          # annular ring
-        f_z = np.exp(-((z - z_peak) / width_z) ** 2)             # mid-trop
+        if z_sample_nz is None:
+            f_z = np.exp(-((z - z_peak) / width_z) ** 2)         # mid-trop
+        else:
+            # Forcing-representation control (dz-sensitivity study, 2026-07):
+            # evaluate the vertical profile at a COARSER grid's cell centers
+            # and inject it piecewise-constant, so a fine-dz run receives the
+            # coarse grid's discrete heating exactly.  Default None is
+            # bit-identical to the historical profile.
+            dzc = Lz / z_sample_nz
+            zc  = (np.arange(z_sample_nz) + 0.5) * dzc
+            fzc = np.exp(-((zc - z_peak) / width_z) ** 2)
+            idx = np.minimum((z / dzc).astype(int), z_sample_nz - 1)
+            f_z = fzc[idx]
         # precompute the static source on the compute device
         self._Q = float(Q_max) * f_r[:, :, None] * f_z[None, None, :]
         self._Q_max = float(Q_max)

@@ -104,6 +104,8 @@ class HollandVortexInit:
         H_wind: float = 15_000.0,
         wind_taper: bool = False,
         taper_start_frac: float = 0.5,
+        taper_shape: str = "cos",
+        outer_envelope_m: float = None,
     ) -> None:
         """
         Parameters
@@ -136,6 +138,19 @@ class HollandVortexInit:
             e-folding height (m) for the WIND vertical structure.
             Separate from θ′: the Holland profile represents surface
             winds (S_wind(0) = 1.0), decaying upward.  Default 15 000 m.
+        taper_shape : str
+            Functional form of the wind-taper ramp (over-rotation Arm A).
+            "cos" (default, bit-identical to all prior runs), "linear"
+            (sharper ramp ends → sharper negative-ζ ring), or "smooth5"
+            (quintic smoothstep; zero 1st+2nd derivatives at both ends →
+            smoothest ring).  Only used when wind_taper=True.
+        outer_envelope_m : float, optional
+            Over-rotation Arm A, no-cutoff variant: when set, the outer
+            wind is bounded by a smooth Gaussian envelope
+            exp(−(r/outer_envelope_m)²) INSTEAD of the compact-support
+            taper (wind_taper is ignored).  No hard cutoff, no taper
+            ring — the profile decays smoothly through R_env.  Default
+            None = off (bit-identical to prior runs).
         """
         self.Vmax     = float(Vmax)
         self.Rmax     = float(Rmax)
@@ -158,6 +173,13 @@ class HollandVortexInit:
         # bit-identical to the validated runs (Hugo) until explicitly enabled.
         self.wind_taper       = bool(wind_taper)
         self.taper_start_frac = float(taper_start_frac)
+        if taper_shape not in ("cos", "linear", "smooth5"):
+            raise ValueError(
+                f"taper_shape must be 'cos', 'linear', or 'smooth5', "
+                f"got {taper_shape!r}")
+        self.taper_shape      = taper_shape
+        self.outer_envelope_m = (float(outer_envelope_m)
+                                 if outer_envelope_m is not None else None)
 
         # Pre-build 1-D radial grid (CPU, done once)
         self._r1d = np.linspace(0.0, self.R_env, self.n_radial)
@@ -179,13 +201,26 @@ class HollandVortexInit:
         x       = (self.Rmax / r_safe) ** self.B
         Vt      = self.Vmax * np.sqrt(x * np.exp(1.0 - x))
         Vt      = np.where(r > 0.0, Vt, 0.0)
-        if self.wind_taper:
-            # cosine taper: 1 inside r0, smoothly → 0 at R_env, 0 beyond.
-            # Radial (axisymmetric) ⇒ multiplies tangential flow → ~no divergence
-            # (the pre-balance projection mops up the small residual).
+        if self.outer_envelope_m is not None:
+            # No-cutoff variant (over-rotation Arm A): smooth Gaussian
+            # envelope, no compact support, no taper ring.  Decays through
+            # R_env; caller must pick outer_envelope_m small enough that the
+            # wind is negligible well inside the domain half-width.
+            Vt = Vt * np.exp(-(r / self.outer_envelope_m) ** 2)
+        elif self.wind_taper:
+            # compact-support taper: 1 inside r0, smoothly → 0 at R_env,
+            # 0 beyond.  Radial (axisymmetric) ⇒ multiplies tangential flow
+            # → ~no divergence (the pre-balance projection mops up the small
+            # residual).  Ramp form selected by taper_shape; "cos" is the
+            # historical default and is bit-identical to all prior runs.
             r0   = self.taper_start_frac * self.R_env
             frac = np.clip((r - r0) / max(self.R_env - r0, 1e-9), 0.0, 1.0)
-            Vt   = Vt * 0.5 * (1.0 + np.cos(np.pi * frac))
+            if self.taper_shape == "cos":
+                Vt = Vt * 0.5 * (1.0 + np.cos(np.pi * frac))
+            elif self.taper_shape == "linear":
+                Vt = Vt * (1.0 - frac)
+            else:                                   # "smooth5" quintic
+                Vt = Vt * (1.0 - frac ** 3 * (frac * (6.0 * frac - 15.0) + 10.0))
         return Vt
 
     def vertical_structure(self, z: np.ndarray) -> np.ndarray:

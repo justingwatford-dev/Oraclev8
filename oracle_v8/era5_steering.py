@@ -161,6 +161,74 @@ STORM_CONFIGS = {
             42.83:  (30.2, 87.9),   # landfall record, 16/0650Z (Gulf Shores)
         },
     ),
+    # ⚠ The fran/michael/laura entries below were RECONSTRUCTED 2026-07-03: the
+    # six-storm campaign ran with these three as uncommitted local edits that
+    # were later lost (the .nc files and run logs survived; era5_steering.py
+    # reverted).  Reconstruction sources: init datetimes + area boxes + time
+    # coverage read from the checked-in *_Agnostic log headers; obs_track fixes
+    # read from the HURDAT2 file via hurdat2.load_storm (not recalled).
+    "fran": dict(
+        init_year  = 1996,
+        init_month = 9,
+        init_day   = 5,
+        init_hour  = 0,
+        area       = [45, -92, 15, -62],   # log: lat 15-45°N, lon 62-92°W
+        year_str   = "1996",
+        month_str  = "09",
+        days       = ["04", "05", "06"],   # log coverage: -24h…+45h vs init
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "fran_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL061996, hurdat2-1851-2025 ed.).
+        obs_track  = {
+             0:     (28.6, 76.1),
+             6:     (29.8, 76.7),
+            12:     (31.0, 77.2),
+            18:     (32.3, 77.8),
+            24:     (33.7, 78.0),
+            24.50:  (33.9, 78.0),   # landfall record, 06/0030Z (Cape Fear NC)
+        },
+    ),
+    "michael": dict(
+        init_year  = 2018,
+        init_month = 10,
+        init_day   = 9,
+        init_hour  = 12,                   # 12Z init (like Ivan)
+        area       = [42, -95, 15, -75],   # log: lat 15-42°N, lon 75-95°W
+        year_str   = "2018",
+        month_str  = "10",
+        days       = ["09", "10", "11"],   # log coverage: -12h…+57h vs init
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "michael_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL142018, hurdat2-1851-2025 ed.).
+        obs_track  = {
+             0:     (24.6, 86.2),
+             6:     (25.6, 86.4),
+            12:     (26.6, 86.5),
+            18:     (27.7, 86.6),
+            24:     (29.0, 86.3),
+            29.50:  (30.0, 85.5),   # landfall record, 10/1730Z (Mexico Beach FL)
+        },
+    ),
+    "laura": dict(
+        init_year  = 2020,
+        init_month = 8,
+        init_day   = 26,
+        init_hour  = 6,                    # 06Z init
+        area       = [42, -102, 15, -82],  # log: lat 15-42°N, lon 82-102°W
+        year_str   = "2020",
+        month_str  = "08",
+        days       = ["25", "26", "27"],   # log coverage: -30h…+39h vs init
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "laura_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL132020, hurdat2-1851-2025 ed.).
+        obs_track  = {
+             0:     (25.6, 90.2),
+             6:     (26.4, 91.4),
+            12:     (27.3, 92.5),
+            18:     (28.5, 93.0),
+            24:     (29.8, 93.3),   # landfall record, 27/0600Z (Cameron LA)
+        },
+    ),
 }
 
 _DEFAULT_STORM = "hugo"
