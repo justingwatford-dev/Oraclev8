@@ -160,12 +160,17 @@ the derivation yet.
    discretization over-counts the column sink as the vertical grid refines
    (factor 0.75 at NZ=32 → 1.59 at NZ=64; fix = `column_normalized=True`,
    integral-preserving on any grid). The fix recovers part of the gap (48.1 →
-   54.7); the drag-matched residual (69.6 vs 54.7 with normalized drag on both
-   grids) is a genuine ~15 m/s dz-sensitivity of heated intensification —
-   suspects: vertical advection and heating-layer resolution; still open.
-   Phase 3B shows the *diagnostic ratios* are robust to all of this, but
-   updraft strength / intensification must be flagged if either ever becomes a
-   paper quantity.
+   54.7); the drag-matched residual was then **CLOSED by the dz-heated
+   sensitivity study (2026-07-07, DZ_HEATED_SENSITIVITY.md): nz=64 and nz=96
+   agree to 0.1 m/s — the fine side is converged and NZ=32 is the outlier,
+   over-producing the heated response (~+80 % max|w|, ~+27 % intensity)
+   because the 3-km heating layer spans only ~4.8 cells. Sign inversion:
+   there was never an NZ=64 spin-down.** This study's validity RATIOS are
+   unaffected (they shrink at fine dz — conservative); its coarse-grid w and
+   intensity magnitudes are upper-biased. Heated-work recipe: nz ≥ 64,
+   column-normalized drag, dt = 15. Phase 3B shows the *diagnostic ratios*
+   are robust to all of this, but updraft strength / intensification must be
+   flagged if either ever becomes a paper quantity.
 4. The ~10 % ceiling is numerical, not a proven physical limit: at dt=15 the
    undamped (ε=0) ceiling sits between Q=1.5e-2 and 2e-2, while ε=0.1 holds
    9.3 % in steady state. Finer grid / flux-form conservative advection would

@@ -56,6 +56,43 @@ $env:LH82_STEPS = "1000"
 python -m oracle_v8.measure_dz_heated     # 4 rows at 128², ~10 min GPU
 ```
 
-## Results
+## Results (appended 2026-07-07, GPU run by Justin; scored vs the frozen registrations)
 
-*(append after the GPU runs; predictions frozen)*
+| row | max\|u\| | max\|w\| |
+|---|---|---|
+| R1 nz=32 | 69.6 (ref exact) | 5.89 |
+| R2 nz=64 | 54.7 (ref exact) | 3.20 |
+| R3 nz=96 | **54.6** | 3.42 |
+| R4 nz=64, heating@nz32 | 55.1 | 3.41 |
+
+**Scorecard — all three registered predictions PASS (first clean sweep of the campaign):**
+- **P-D1 PASS, decisively:** Δ(64−32) = 14.9; Δ(96−64) = 0.1 — not a shrinking increment but
+  full convergence. The fine side is converged; nz=32 is the outlier. (Audit: the registered
+  monotone-shrinking rule passed by two orders of margin; the asymptote guess 50±3 was 1.6 m/s
+  low.)
+- **P-D2 PASS:** R4 within 0.4 of R2 — the coarse grid's exact discrete heating on fine
+  dynamics changes nothing. Forcing representation innocent; the dynamics own the gap.
+- **P-D3 PASS in substance:** the 15 m/s intensity gap rides on the ~2× w gap (5.89 vs
+  3.2–3.4); intra-cluster ±0.2 differences are noise-level and unordered.
+
+## VERDICT — the flag closes (sign inversion confirmed)
+
+**There was never an nz=64 spin-down; there is an nz=32 over-response.** A 3-km heating layer
+resolved by ~4.8 cells meets too little vertical opposition in the discrete anelastic response,
+and the production grid over-produces the heated secondary circulation (~+80% in max|w|, ~+27%
+in intensity) relative to the converged solution. Characterized limitation, not a bug:
+
+- **Recipe for any heated / buoyancy-on work: nz ≥ 64, column-normalized drag, dt = 15.**
+  The converged heated Phase-3B state is max|u| ≈ 54.7, max|w| ≈ 3.2–3.4.
+- Coarse-grid heated magnitudes in prior records (84.3, 69.6, w = 10.7/5.9) are upper-biased
+  by vertical under-resolution — flagged wherever quoted.
+- The LH82-validity conclusions are untouched and were conservative: the neglected-term ratios
+  *shrink* at fine dz (Phase 3B), and the equation-set verdict never rested on w magnitude.
+- Production track results (barotropic, unheated) are unaffected in full.
+
+**Confidence audit:** P-D1 55% ✓, P-D2 70% ✓, P-D3 75% ✓.
+
+**Study CLOSED 2026-07-07.** With it, the project's last open experimental flag is retired:
+every anomaly raised since the red-team arc — the over-rotation, the envelope delay, the drag
+column factor, and the dz-sensitivity — now has a measured mechanism, a validated fix, or a
+characterized limitation with a recipe.
