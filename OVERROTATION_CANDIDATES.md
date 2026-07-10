@@ -379,3 +379,34 @@ vertical structure ALSO move the aim," not "which candidate explains the bias."
 ### Arm C-v2 results
 
 *(append after the GPU run; predictions frozen)*
+
+### Arm C-v2 results (appended 2026-07-07, GPU run by Justin)
+
+| config | |drift| | hdg | west | Vmax_end | max|w| | θ′_max |
+|---|---|---|---|---|---|---|
+| dry control | 2.49 | 350 | +0.42 | 42.2 | 0.04 | 0.2 |
+| passive null v2 (held, buoy OFF) | 2.49 | 350 | +0.42 | 42.2 | 0.04 | 44.7 |
+| baroclinic HELD τ=30min | 1.76 | 356 | +0.13 | **79.9 (cap)** | 0.25 | 44.8 |
+| baroclinic HELD τ=6h | BLEW UP | | | | | |
+
+**Scorecard:** P-C2v1 **PASS exactly** (null ≡ control at 0.0° carrying the held core
+passively). P-C2v2 **PARTIAL** — the runaway is closed as designed (θ′ pinned at 44.8 K, w
+0.25) but the no-cap-pinning clause failed for a physical reason: **a maintained warm core is
+an energy source** — the relax-to-ref term restores the core against every erosion, a
+continuous input, and the vortex intensifies to the cap (42 → 80). The τ=6h blow-up brackets
+the other side: the anchoring window between "driven" and "runaway" is narrow. P-C2v3: the
+registered thresholds fired the "contributes" branch (Δwest −0.30, rot +5.7°), but the
+comparison is intensity-entangled (79.9 vs 42.2) — **and decidable by SIGN regardless: live
+maintained baroclinicity moved the aim POLEWARD (west 0.42 → 0.13), the wrong direction to
+explain the westward deficit. Candidate 2 is EXONERATED AS CAUSE of the bias**; only the
+magnitude of its wrong-way nudge remains intensity-entangled.
+
+**Confidence audit:** P-C2v1 90% ✓; P-C2v2 75% partial; P-C2v3's registered branches did not
+include the decisive one (sign-resolved) — lesson, again: register sign-resolved branches for
+directional quantities.
+
+**P-C2v4 (matched-intensity cleanup — registered 2026-07-07, optional, ZERO new code):** the
+existing `gate-beta` mode's second row (init 120 → cap 70) is a dry cap-pinned control. If its
+mature aim reads ≥354° with west ≤0.25, the baroclinic row's shift is intensity alone (the
+nudge evaporates); if it holds ~350–352/≈+0.4, the small poleward baroclinic nudge is real.
+~60% on the first branch. Either way the paper-level verdict above stands.

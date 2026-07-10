@@ -110,9 +110,17 @@ reproduced the dry control to the tracker's precision), but its live rungs were 
 designed: relaxing temperature perturbations toward zero cannot hold a *balanced* warm core, so
 weakening the relaxation produced not persistent baroclinicity but runaway adiabatic warming —
 95 K anomalies, far outside the anelastic core's validated regime, with the intensity cap
-engaged. The barotropic-configuration candidate is therefore unadjudicated at this writing; the
-corrected design (relaxation toward the initial balanced state rather than toward zero) is
-noted in section 6. [AUTHOR NOTE: Arm C-v2 is queued; update this paragraph when it runs.]
+engaged. The corrected design — relaxation toward the initial balanced core — closed the
+runaway: the held vortex carries a bounded 45-K warm core indefinitely, and a passive-core
+null reproduces the dry control exactly. It also revealed why this candidate resists clean
+adjudication: a maintained warm core is an energy source, and the held-baroclinic vortex
+intensifies to the cap, entangling the aim comparison with the known intensity dependence.
+The reading that survives the entanglement is directional. With live, maintained vertical
+structure, the drift moves *poleward* of the dry control (356° versus 350°; westward component
+0.13 versus 0.42 m s⁻¹) — the wrong direction to explain the westward deficit. Whatever
+maintained baroclinicity does to this core's β-gyres, it does not supply the missing westward
+propagation: the candidate is exonerated as the cause of the bias by sign, with only the
+magnitude of its wrong-way nudge left entangled with intensity (section 6).
 
 ## 3. The mechanism: phase-locking requires the outer flow
 
@@ -241,9 +249,11 @@ phase-lock. The diagnostic is an afternoon: quiescent β-plane, balanced vortex,
 drift vector, f-plane null; the signature is amplitude saturation with heading precession. The
 fix costs one profile change and one testbed calibration.
 
-**What remains open.** The barotropic-configuration candidate awaits the corrected Arm C
-design (relaxation toward the initial balanced core). [AUTHOR NOTE: slot Arm C-v2 here.] The
-steering-buffer measurement invites a bracketing experiment on the environmental sampling
+**What remains open.** The baroclinic nudge's magnitude awaits a matched-intensity control (a
+dry cap-pinned vortex — an existing testbed row); its sign already exonerates the candidate as
+cause (section 2.3). The anchoring window for a held warm core proved narrow — sixfold weaker
+relaxation ends in the adiabatic runaway — itself a datum on maintaining baroclinic structure
+in this core. The steering-buffer measurement invites a bracketing experiment on the environmental sampling
 itself — annulus width, storm-removed and lagged variants — since a deep-layer mean sampled
 near the storm may already contain part of its propagation; the buffer quantified here is the
 architecture's compensating response, and the two effects should be separated. [AUTHOR NOTE:
@@ -298,7 +308,11 @@ is better than it was, and we know exactly how much, in which respects, and at w
   ledger from OVERROTATION_CANDIDATES.md (P-A, P-E, P-S sets) and ENVELOPE_INTENSIFICATION.md
   (P-R3N, P-J2, P-M) + DZ (P-D) before submission, and decide whether Stage-level counts
   (predictions vs guards vs conditional branches) are in or out.
-- **Arm C-v2 hooks** in §2.3 and §6 — update both when it runs (queued next).
+- **Arm C-v2 hooks FILLED (2026-07-07):** §2.3 carries the bounded-core result + the
+  exoneration-by-sign; §6 carries the narrow-anchoring-window datum. Optional cleanup
+  registered as P-C2v4 (campaign doc): the dry cap-pinned `gate-beta` row separates the
+  nudge's magnitude from intensity — run it if a reviewer asks, or before submission for
+  completeness.
 - **DLM-bracket hook** in §6 — likewise.
 - **Scope call (yours):** the §6 "instrument findings" paragraph compresses the drag-column
   and dz-convergence results to four sentences. Alternatives: drop to a footnote, expand to an
