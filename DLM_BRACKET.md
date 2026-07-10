@@ -105,3 +105,41 @@ production choice is the physically correct one"); paper-2 §6's bracketing hook
 number-backed sentence; red-team hold item 2 is discharged with a stronger answer than the
 hold anticipated. Arm 2 (obs-anchored, at the production ring) is unaffected by this finding
 and remains the buffer-mechanism test.
+
+## Arm 2 results (appended 2026-07-07; logs `Katrina_Arm2.txt`, `Katrina_Arm2_No_outer_env.txt`)
+
+| run (anchor OBS, annulus 3–7°) | landfall-fix cross | same-lat | timing | Vmax'_end |
+|---|---|---|---|---|
+| envelope r_d=420 | +55.2 | +62.7 | −3.1 | 34.4 |
+| compact taper (ENV OVERRIDE) | +98.0 | +100.0 | −3.5 | 36.4 |
+| **A/B delta** | **−42.8** | −37.3 | +0.4 | (guards clean, ≤2 of production pair) |
+
+Model-anchored reference (Stage 3, production): Δ = −46.4 km.
+
+**Scorecard: P-DLM3's SECOND branch fired** (registered lean 60% on the first — the middle band,
+fifth time): |Δ| = 42.8 < 70, and severing the position-feedback loop moved the A/B delta by
+only ~3.6 km (<8%). **The attenuation is NOT position-feedback.** P-DLM4 guards pass (banners
+verified, Vmax within 2, identical forcing series in both runs by construction).
+
+**Re-attribution (the accounting that fits, stated as accounting, not proof):** under
+obs-anchoring both runs receive identical steering, so −42.8 km / 35 h ≈ 0.34 m s⁻¹ is the pure
+in-storm cross-track velocity delta of the profile change — 0.40 × the testbed-mature projection
+(0.85 m s⁻¹). Two in-situ factors reproduce that ratio without any steering contribution:
+(i) intensity scaling — Katrina runs at Vmax ≈ 35–50, where the envelope-family drift is weaker
+(Stage-2: west 0.92 at Vmax 35 vs 1.20 at 64; compact ≈ const) → Δ ≈ ×0.64; (ii) gyre
+maturation — the drift takes ~12–24 h to spin up, discounting the transit's first half-day →
+×~0.65. Product ≈ 0.42 ≈ observed 0.40. **The transmission ratio survives; its mechanism moves
+from steering-side to bias-side: a mature-testbed drift vector overstates what the drift does
+during a real transit.** Scope: one storm, one pair; the ≤8% feedback bound is Katrina-specific.
+
+**Paper-2 consequences (applied to PAPER2_draft.md this date):** §5.3 rewritten — the direct
+test overturns our registered H2 attribution while preserving the exportable number; abstract,
+§1, §5.2, §6, §7 adjusted in step; the prediction ledger gains an amendment on P-S3 (ratio
+clause confirmed, mechanism clause falsified by direct test). The community caution is
+unchanged and now better-founded: landfall error under-reads self-propagation bias by ~3×,
+for reasons intrinsic to how drift develops in a transit, not to any particular steering
+architecture — which makes the caution MORE general, not less.
+
+**BRACKET COMPLETE.** Both questions answered against their registered predictions (both
+against the registered leans — the instrument beat the forecaster twice, which is the point
+of the instrument).

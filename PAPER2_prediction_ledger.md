@@ -66,6 +66,15 @@ as designed** · **1 discriminator resolved against the stated lean.**
 - **Compliance slips, both minor, both recorded:** one prediction registered without a stated
   confidence (P-N2); one directional quantity registered without a sign-resolved branch
   (P-C2v3).
+- **Amendment (2026-07-07, DLM bracket Arm 2):** P-S3's *ratio* clause stands confirmed
+  (transmission ≈ 0.34, sign 6/6), but its *mechanism* clause ("the lockstep steering
+  relaxation partially absorbs…") was falsified by direct test: severing the position-feedback
+  loop moved the Katrina A/B delta by <8%. The attenuation is bias-side (intensity scaling ×
+  gyre maturation ≈ 0.42), not steering-side. The row's CONFIRMED verdict refers to the
+  registered numerical claim; the H2 label it carried does not survive. DLM-bracket
+  predictions (P-DLM1–4) are ledgered in DLM_BRACKET.md; folding them here (they would add:
+  1 confirmed-guards, 2 failed, 1 branch-resolved) is an author decision — they postdate the
+  campaign this ledger covers.
 
 ## Recommended manuscript wording (applied to PAPER2_draft.md this date)
 

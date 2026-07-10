@@ -23,9 +23,11 @@ set within twelve hours and held — and yields β-drift that is canonical in ma
 robust across envelope scale, intensity-invariant in direction, and null-clean on an f-plane.
 In a six-storm reanalysis-steered A/B test conducted under predictions registered before each
 run, the corrected drift shifted every storm's landfall cross-track westward with the predicted
-sign, at approximately one-third the linearly projected magnitude: the steering relaxation
-absorbs the remainder, quantifying why self-propagation biases are subdominant at landfall —
-and why landfall error is an unreliable instrument for reading them. The correction's own cost
+sign, at approximately one-third the linearly projected magnitude — an attenuation that a
+direct test attributes not to steering feedback but to the gap between mature-testbed drift
+and in-transit drift (intensity scaling and gyre spin-up) — quantifying why self-propagation
+biases are subdominant at landfall, and why landfall error is an unreliable instrument for
+reading them. The correction's own cost
 is characterized: the envelope delays dry barotropic re-intensification by 8–12 hours by
 weakening mid-radius Ekman inflow.
 
@@ -48,8 +50,8 @@ that bounds the vortex without truncating it restores canonical behavior entirel
 what the fix is worth on real tracks, in a six-storm A/B test against the companion paper's
 record, with per-storm predictions registered before any run; the answer — every storm moves
 the predicted direction, at a third of the predicted distance — measures a quantity of
-independent interest, the degree to which a relaxation-based steering architecture buffers
-self-propagation error. Finally, because no vortex boundary is free, we characterize the
+independent interest, the factor by which landfall displacement under-reads a self-propagation
+change, whose mechanism we then identify by direct test. Finally, because no vortex boundary is free, we characterize the
 envelope's own cost: it delays the model's dry barotropic re-intensification, and we measure
 the mechanism of the delay.
 
@@ -202,10 +204,10 @@ straight runners and recurvers alike:
 
 † Intensity guard exceeded (see below); excluded from the transmission estimate.
 
-The strong form failed; the buffered form is what the storms show. On the guard-clean storms
+The strong form failed; the attenuated form is what the storms show. On the guard-clean storms
 the transmission ratio — observed shift over linear projection — averages **0.34** (range
-0.20–0.46): the lockstep steering relaxation absorbs roughly two-thirds of a self-propagation
-change over a landfall transit. Along-track error improved on the poleward movers, where the
+0.20–0.46): landfall registered roughly one-third of the self-propagation change. Section 5.3
+tests, and overturns, our registered attribution of that attenuation. Along-track error improved on the poleward movers, where the
 companion paper's projection test had located the bias's real footprint (Katrina +76.5 → +61.4,
 Michael +123.8 → +93.4, Laura +37.4 → +30.0 km). The guards did their work: two storms — Hugo
 and Ivan, the two with strong re-intensification phases — ran 14 and 25 m s⁻¹ weaker under the
@@ -214,14 +216,25 @@ flagged, not claimed. The honest skill accounting is correspondingly modest: six
 cross-track RMS falls from 95 to 71 km in aggregate but only from 81 to 75 km on the
 guard-clean four; along-track RMS falls from 121 to 101 km.
 
-### 5.3 What the buffer means — and the correction's own cost
+### 5.3 What the attenuation is — and is not — and the correction's own cost
 
-The transmission ratio is this paper's most exportable number. It is the measured, mechanical
-reason the companion paper found the aim bias subdominant at landfall: in an architecture that
-relaxes the environment toward conditions sampled at the storm's own position, landfall error
-reads self-propagation error at one-third strength. The general caution follows: landfall
-verification cannot weigh self-propagation biases at face value, even when the bias vector is
-known exactly — a quantitative footing for the companion paper's convolution argument.
+The transmission ratio is this paper's most exportable number, and our first attribution of it
+was wrong. We registered the natural hypothesis (H2): the relaxation samples the environment at
+the storm's own position, so a displaced storm feels a restoring pull. The direct test severs
+that loop — steering sampled along the observed track, so that both profiles receive an
+identical forcing series — and the A/B delta barely moved: −43 km against −46 with the feedback
+live. Whatever attenuates the drift correction, it is not the position feedback (bounded below
+~8% for this pair). The accounting that fits is simpler and bias-side: the testbed
+characterizes the drift at mature equilibrium and full strength, while the real storm runs
+weaker (the envelope-family drift scales with intensity — a factor ≈0.64 at Katrina's) and
+spends its first half-day spinning the gyres up (≈0.65 of the transit) — the product, ≈0.42,
+is the observed ratio. Landfall reads self-propagation error at one-third strength not because
+the architecture pulls the storm back, but because a mature-testbed drift vector overstates
+what the drift does during a real transit. The caution for attribution studies survives
+unchanged and becomes more general, not less: landfall error under-reads self-propagation bias
+by roughly a factor of three for reasons intrinsic to how drift develops over a transit —
+intensity history and gyre spin-up — not to any particular steering architecture. The number
+should travel; our first attribution of it should not.
 
 The intensity-guard violations are not noise; they are the fix's price, and we measured it. In
 the model's emergent-intensification testbed (β-plane with a steering ramp, the configuration
@@ -257,11 +270,17 @@ compounded by genuine trochoidal wobble), so the nudge's size is recorded as unr
 its sign already exonerates the candidate as cause (section 2.3). The anchoring window for a
 held warm core proved narrow — sixfold weaker relaxation ends in the adiabatic runaway —
 itself a datum on maintaining baroclinic structure in this core. A wobble-robust
-center-tracker is the prerequisite for any future high-intensity drift measurement. The steering-buffer measurement invites a bracketing experiment on the environmental sampling
-itself — annulus width, storm-removed and lagged variants — since a deep-layer mean sampled
-near the storm may already contain part of its propagation; the buffer quantified here is the
-architecture's compensating response, and the two effects should be separated. [AUTHOR NOTE:
-DLM bracket is queued next; update if it lands before submission.]
+center-tracker is the prerequisite for any future high-intensity drift measurement. The environmental-sampling bracket has been run. An annulus sweep (5–9° and 7–11° against the
+production 3–7°) found no robustness to report but something better: the sampled poleward
+steering drains monotonically with ring radius — for one storm it reverses sign — and at the
+widest ring two of three storms never reach land. Combined with the structural point that a
+full-ring vector mean cancels storm-centered azimuthal structure by construction, the verdict
+is environmental heterogeneity rather than storm contamination: "the environment" is not a
+scale-free concept for these landfalls, and the production annulus is not one adequate choice
+among many but essentially the band containing the storm's actual advecting flow — a
+first-order physical choice, validated by skill. The double-counting suspicion raised in the
+companion paper is thereby bounded on both grounds, and the obs-anchored test of section 5.3
+completes the pair.
 
 **Instrument findings en route.** Two byproducts of the budget work merit brief record. The
 bulk-drag discretization over-counted the column-integrated momentum sink as the vertical grid
@@ -296,10 +315,12 @@ removes it, and prices both the removal and its side effect. The poleward β-dri
 cost of bounding a vortex with compact support: truncation removes the outer flow that
 phase-locks the β-gyres. A smooth envelope restores canonical, phase-locked, intensity-invariant
 self-propagation in the testbed, and on six historical storms moves every landfall the
-predicted direction — at one-third the projected distance, because the steering architecture
-absorbs the rest. That transmission ratio, measured under registered predictions, is the
-mechanical content of "subdominant to steering," and it generalizes as a caution: landfall
-error is a dull instrument for reading self-propagation. The envelope's own cost — an 8–12-h
+predicted direction — at one-third the projected distance, because a mature-testbed drift
+overstates what drift does during a real transit (intensity history and gyre spin-up; steering
+feedback contributes less than a tenth, by direct test). That transmission ratio, measured
+under registered predictions, is the mechanical content of "subdominant to steering," and it
+generalizes as a caution that no longer depends on any particular steering architecture:
+landfall error is a dull instrument for reading self-propagation. The envelope's own cost — an 8–12-h
 delay in dry re-intensification, traced to weakened mid-radius Ekman inflow — is characterized
 rather than hidden, in keeping with the discipline both papers exist to demonstrate. The model
 is better than it was, and we know exactly how much, in which respects, and at what price.
