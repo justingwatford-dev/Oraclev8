@@ -351,3 +351,76 @@ cutoff → no gyre phase-lock), fix (Gaussian envelope, r_d = 420 km frozen), ca
 (r_d-robust, intensity-invariant, artifact-free), and real-track validation (sign 6/6,
 transmission ratio ~1/3, guards caught the confounds) — every stage under registered
 predictions. Follow-on paper skeleton is all here.
+
+## Arm C-v2 — relax-to-θ′_ref (registered 2026-07-07, BEFORE any GPU run)
+
+The corrected baroclinicity test paper-2 §2.3 awaits: `NewtonianCoolingComponent` gains an
+optional `theta_ref`; `run_translation(cool_to_init=True)` holds θ′ at the post-prebalance
+balanced core, giving persistent BOUNDED baroclinicity with departures damped at τ — the design
+Arm C-v1's runaway demanded. Mode: `gate-beta-baroclinic-v2` (CLI 34; 4 rows × 48 h ≈ 1 h GPU).
+Context: with the cutoff mechanism established, this is a completeness check — "does live
+vertical structure ALSO move the aim," not "which candidate explains the bias."
+
+**Registered predictions (Claude, 2026-07-07):**
+- **P-C2v1 (integrity, ~90%):** passive null v2 (held core, buoyancy OFF) reproduces the dry
+  control's drift (Δheading < 1°, Δwest < 0.03) — θ′ is passive without buoyancy, whatever the
+  cooling target.
+- **P-C2v2 (boundedness, ~75%):** the held baroclinic rows stay bounded — max θ′ within ~2× the
+  balanced core (≈42 K), max|w| < 5 m/s, no cap-pinning — the runaway pathway is closed by
+  construction (departure equilibrium ≈ w·dθ̄/dz·τ ≈ 2 K at τ=30 min).
+- **P-C2v3 (the verdict, ~70% exonerate):** at bounded θ′, the compact-taper aim moves < 5° and
+  west changes < 0.15 m s⁻¹ vs the dry control ⇒ **candidate 2 EXONERATED** — the cutoff owns
+  the whole bias (the envelope already recovered canonical aim with zero baroclinicity, leaving
+  no residual to explain). Larger movement toward NW ⇒ vertical structure contributes
+  independently ⇒ paper-2 §2.3 and §6 get the richer sentence.
+- **Decision:** either branch closes paper-2's §2.3 hook; the τ=6h row checks the verdict is
+  not an artifact of hard anchoring.
+
+### Arm C-v2 results
+
+*(append after the GPU run; predictions frozen)*
+
+### Arm C-v2 results (appended 2026-07-07, GPU run by Justin)
+
+| config | |drift| | hdg | west | Vmax_end | max|w| | θ′_max |
+|---|---|---|---|---|---|---|
+| dry control | 2.49 | 350 | +0.42 | 42.2 | 0.04 | 0.2 |
+| passive null v2 (held, buoy OFF) | 2.49 | 350 | +0.42 | 42.2 | 0.04 | 44.7 |
+| baroclinic HELD τ=30min | 1.76 | 356 | +0.13 | **79.9 (cap)** | 0.25 | 44.8 |
+| baroclinic HELD τ=6h | BLEW UP | | | | | |
+
+**Scorecard:** P-C2v1 **PASS exactly** (null ≡ control at 0.0° carrying the held core
+passively). P-C2v2 **PARTIAL** — the runaway is closed as designed (θ′ pinned at 44.8 K, w
+0.25) but the no-cap-pinning clause failed for a physical reason: **a maintained warm core is
+an energy source** — the relax-to-ref term restores the core against every erosion, a
+continuous input, and the vortex intensifies to the cap (42 → 80). The τ=6h blow-up brackets
+the other side: the anchoring window between "driven" and "runaway" is narrow. P-C2v3: the
+registered thresholds fired the "contributes" branch (Δwest −0.30, rot +5.7°), but the
+comparison is intensity-entangled (79.9 vs 42.2) — **and decidable by SIGN regardless: live
+maintained baroclinicity moved the aim POLEWARD (west 0.42 → 0.13), the wrong direction to
+explain the westward deficit. Candidate 2 is EXONERATED AS CAUSE of the bias**; only the
+magnitude of its wrong-way nudge remains intensity-entangled.
+
+**Confidence audit:** P-C2v1 90% ✓; P-C2v2 75% partial; P-C2v3's registered branches did not
+include the decisive one (sign-resolved) — lesson, again: register sign-resolved branches for
+directional quantities.
+
+**P-C2v4 (matched-intensity cleanup — registered 2026-07-07, optional, ZERO new code):** the
+existing `gate-beta` mode's second row (init 120 → cap 70) is a dry cap-pinned control. If its
+mature aim reads ≥354° with west ≤0.25, the baroclinic row's shift is intensity alone (the
+nudge evaporates); if it holds ~350–352/≈+0.4, the small poleward baroclinic nudge is real.
+~60% on the first branch. Either way the paper-level verdict above stands.
+
+### P-C2v4 result (appended 2026-07-07, gate-beta rerun by Justin): UNREADABLE AS DESIGNED
+
+The dry cap-pinned row (init 120 → cap 70, Vmax_end 71.7 after riding 84–87) produced a
+non-steady track: per-window headings 50° (t18) → 359 → 355 → 347 → 335 → 296° (t48), with
+|drift| swinging 1.5 → 4.4 → 1.6 m s⁻¹ — the documented high-intensity center-finder fragility
+(gate-beta-longrun; Run-4 row G), possibly compounded by genuine trochoidal wobble. The
+mature-window mean (|2.30| @ 329°, west 1.18) is an average over that jitter, not an aim;
+neither registered branch fired. Config note: the legacy gate-beta mode runs taper-onset 250 km
+(pre-calibration default), a second mismatch to the C-v2 rows (onset 200). **Verdict: the
+matched-intensity control is not achievable with current tooling; the baroclinic nudge's
+MAGNITUDE is recorded as unresolved. The exoneration-by-sign (Arm C-v2) is unaffected — it
+never rested on this comparison.** Third instrument lesson of the campaign: high-intensity
+drift vectors need a wobble-robust tracker before they are load-bearing.

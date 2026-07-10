@@ -23,11 +23,48 @@ import sys as _sys
 if hasattr(_sys.stdout, "reconfigure"):
     _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import os
 import sys
 import time
 from dataclasses import replace as dc_replace
 
 import numpy as np
+
+# --- DLM-bracket experiment knobs (2026-07, DLM_BRACKET.md) -------------------
+# All default to production behavior (bit-identical when unset).  Env vars so
+# the storm-agnostic constant block stays untouched by a bracketing experiment.
+#   ORACLE_DLM_INNER / ORACLE_DLM_OUTER : DLM annulus bounds in degrees
+#                                         (production 3.0 / 7.0)
+#   ORACLE_STEER_ANCHOR = model|obs     : sample the DLM at the MODEL position
+#                                         (production) or interpolated along the
+#                                         OBSERVED track (severs the position-
+#                                         feedback loop — Arm 2)
+#   ORACLE_OUTER_ENVELOPE_M             : override the frozen profile; "none"/
+#                                         "taper" → compact taper; a number →
+#                                         Gaussian r_d in metres
+_DLM_INNER   = float(os.environ.get("ORACLE_DLM_INNER", "3.0"))
+_DLM_OUTER   = float(os.environ.get("ORACLE_DLM_OUTER", "7.0"))
+_STEER_ANCHOR = os.environ.get("ORACLE_STEER_ANCHOR", "model").lower()
+if _STEER_ANCHOR not in ("model", "obs"):
+    raise SystemExit(f"ORACLE_STEER_ANCHOR must be 'model' or 'obs', "
+                     f"got {_STEER_ANCHOR!r}")
+_OEM_RAW = os.environ.get("ORACLE_OUTER_ENVELOPE_M")
+
+
+def _obs_pos(obs_track, t_h):
+    """Interpolate the observed (lat, lon_signed) at t_h; clamp at the ends."""
+    ts = [f[0] for f in obs_track]
+    if t_h <= ts[0]:
+        return obs_track[0][1], obs_track[0][2]
+    if t_h >= ts[-1]:
+        return obs_track[-1][1], obs_track[-1][2]
+    for k in range(1, len(ts)):
+        if t_h <= ts[k]:
+            f0, f1 = obs_track[k - 1], obs_track[k]
+            w = (t_h - f0[0]) / (f1[0] - f0[0])
+            return (f0[1] + w * (f1[1] - f0[1]),
+                    f0[2] + w * (f1[2] - f0[2]))
+    return obs_track[-1][1], obs_track[-1][2]
 
 from oracle_v8.vortex_init import HollandVortexInit
 from oracle_v8.solver import IntensityCapComponent, RK3Integrator
@@ -85,12 +122,25 @@ def main(name: str, init_override: str | None = None) -> int:
     print(f"  Vmax:         {s['Vmax_ms']:.1f} m/s ({s['Vmax_kt']:.0f} kt)   P_min {s['P_min_mb']} mb")
     print(f"  Rmax run:     {RMAX_RUN_M/1000:.0f} km (5×dx)   B {s['B']} (frozen)")
     print(f"  Domain:       {Lx/1e3:.0f} km, nx={nx} (dx={dx/1e3:.3f} km) — geometry-derived")
-    if OUTER_ENVELOPE_M is not None:
-        print(f"  Outer profile: GAUSS ENVELOPE r_d={OUTER_ENVELOPE_M/1000:.0f} km "
-              f"(no cutoff; taper superseded — see OVERROTATION_CANDIDATES.md)")
+    if _OEM_RAW is None:
+        oem = OUTER_ENVELOPE_M
+    elif _OEM_RAW.strip().lower() in ("", "none", "taper"):
+        oem = None
+    else:
+        oem = float(_OEM_RAW)
+    if oem is not None:
+        print(f"  Outer profile: GAUSS ENVELOPE r_d={oem/1000:.0f} km "
+              f"(no cutoff; taper superseded — see OVERROTATION_CANDIDATES.md)"
+              + ("  [ENV OVERRIDE]" if _OEM_RAW is not None else ""))
     else:
         print(f"  Wind taper:   {'ON' if WIND_TAPER else 'OFF'}  R_env={R_ENV_M/1000:.0f} km  "
-              f"taper-start frac {TAPER_START_FRAC:.2f}")
+              f"taper-start frac {TAPER_START_FRAC:.2f}"
+              + ("  [ENV OVERRIDE]" if _OEM_RAW is not None else ""))
+    _nonprod = ((_DLM_INNER, _DLM_OUTER) != (3.0, 7.0)
+                or _STEER_ANCHOR != "model")
+    print(f"  DLM sampling: annulus {_DLM_INNER:.0f}–{_DLM_OUTER:.0f}°   "
+          f"anchor {_STEER_ANCHOR.upper()}"
+          + ("   ⚠ NON-PRODUCTION (DLM bracket)" if _nonprod else ""))
     print(f"  Run:          {N_STEPS} steps = {N_STEPS*DT/3600:.0f} h  (dt {DT:.0f}s, "
           f"CFL {s['Vmax_ms']*DT/dx:.3f})")
     print(f"  Obs landfall: {s['landfall_lat']}°N, {abs(s['landfall_lon'])}°W  "
@@ -103,7 +153,9 @@ def main(name: str, init_override: str | None = None) -> int:
         era5.print_summary()
         USE_ERA5 = True
         if TIME_VARYING_STEER:
-            u_env_t0, v_env_t0 = era5.get_dlm(0.0, s["lat0_deg"], abs(s["lon0_deg"]))
+            u_env_t0, v_env_t0 = era5.get_dlm(0.0, s["lat0_deg"], abs(s["lon0_deg"]),
+                                              inner_deg=_DLM_INNER,
+                                              outer_deg=_DLM_OUTER)
             print(f"  ERA5 steering: ACTIVE  (time-varying — init at t=0 DLM "
                   f"u={u_env_t0:+.2f} v={v_env_t0:+.2f}, relax τ={TAU_STEER/3600:.1f} h)")
         else:
@@ -126,7 +178,7 @@ def main(name: str, init_override: str | None = None) -> int:
     init = HollandVortexInit(
         Vmax=s["Vmax_ms"], Rmax=RMAX_RUN_M, B=s["B"], f=s["f"],
         R_env=R_ENV_M, wind_taper=WIND_TAPER, taper_start_frac=TAPER_START_FRAC,
-        outer_envelope_m=OUTER_ENVELOPE_M,
+        outer_envelope_m=oem,
         u_env=u_env_t0, v_env=v_env_t0,
     )
     state = init.build_state(nx, ny, nz, Lx, Ly, Base())
@@ -200,7 +252,17 @@ def main(name: str, init_override: str | None = None) -> int:
             track_lon.append(lon_c); track_phi.append(diag.surface_phi_min)
 
             if USE_ERA5:
-                u_tgt, v_tgt = era5.get_dlm(t_h, lat_c, abs(lon_c))
+                if _STEER_ANCHOR == "obs":
+                    # Arm 2 (DLM bracket): sever the position-feedback loop —
+                    # sample the environment along the OBSERVED track.  The
+                    # A/B delta is the measurand; absolute errors under this
+                    # anchoring are NOT comparable to production skill.
+                    lat_s, lon_s = _obs_pos(s["obs_track"], t_h)
+                else:
+                    lat_s, lon_s = lat_c, lon_c
+                u_tgt, v_tgt = era5.get_dlm(t_h, lat_s, abs(lon_s),
+                                            inner_deg=_DLM_INNER,
+                                            outer_deg=_DLM_OUTER)
                 if TIME_VARYING_STEER and n > 0:
                     du = (u_tgt - u_env) * alpha_steer
                     dv = (v_tgt - v_env) * alpha_steer
