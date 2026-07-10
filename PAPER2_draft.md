@@ -54,9 +54,10 @@ envelope's own cost: it delays the model's dry barotropic re-intensification, an
 the mechanism of the delay.
 
 Throughout, we follow the companion paper's discipline: predictions registered before runs,
-controls before claims, and failures reported with the successes. Roughly half of our
-registered predictions failed; every failure narrowed the search, and two of the failures
-(sections 2 and 5) taught us more than the confirmations did.
+controls before claims, and failures reported with the successes. Of thirty-one quantitative
+predictions registered across the campaign, fifteen were confirmed, ten failed, and six were
+partial, unscoreable, or resolved against our stated lean; every failure narrowed the search,
+and two of the failures (sections 2 and 5) taught us more than the confirmations did.
 
 ## 2. Candidate experiments
 
@@ -270,13 +271,19 @@ resolution agrees to 0.1 m s⁻¹ while the production grid over-produces the he
 track configuration is untouched). Both were found because registered predictions failed and
 the failures were pursued.
 
-**The method, briefly.** Fourteen predictions were registered across the campaign's stages;
-roughly half failed, all were reported, and the failures were the productive ones: a
-decaying-regime null taught that surface drag couples to intensity only through a driven
-secondary circulation; an endpoint prediction taught that threshold feedbacks must be
-registered as trajectories; an instrument taught that it, too, is part of the experiment. The
-companion paper argued that a model should never be granted the benefit of the doubt; this
-paper adds the corollary that neither should the experimenter.
+**The method, briefly.** Thirty-one quantitative predictions were registered across the
+campaign's seven experiment sets, each committed before the run it concerned; fifteen were
+confirmed, ten failed, three held in part, two were unscoreable as designed, and one two-branch
+discriminator resolved against our stated lean (the full ledger accompanies this paper). The
+calibration record is itself informative: the high-confidence bucket verified at seven of
+seven, while the middle band ran overconfident, its misses concentrated in precisely the two
+lessons recorded en route — that surface drag couples to intensity only through a driven
+secondary circulation, and that threshold feedbacks must be registered as trajectories, not
+endpoints. Most telling, the two deliberate long shots — the 20%-weighted cutoff branch and the
+35%-weighted steering-buffer branch — are this paper's two principal results: the headline
+findings entered the campaign as its least-favored registered hypotheses. The companion paper
+argued that a model should never be granted the benefit of the doubt; this paper adds the
+corollary that neither should the experimenter.
 
 ## 7. Conclusions
 
@@ -304,10 +311,11 @@ is better than it was, and we know exactly how much, in which respects, and at w
   ENVELOPE_INTENSIFICATION.md Runs 3–4; Ekman inflow ×2.5–3 (minBL300 t20: 4.2e7 vs 1.5e7) =
   Run 4; §6 drag column (0.75/1.594, 2.125×) + effective-Cd note = bird-2 analytic + Run 2;
   dz-convergence (54.7/54.6, +80% w) = DZ_HEATED_SENSITIVITY.md.
-- **"Fourteen predictions … roughly half failed":** placeholder arithmetic — compile the exact
-  ledger from OVERROTATION_CANDIDATES.md (P-A, P-E, P-S sets) and ENVELOPE_INTENSIFICATION.md
-  (P-R3N, P-J2, P-M) + DZ (P-D) before submission, and decide whether Stage-level counts
-  (predictions vs guards vs conditional branches) are in or out.
+- **Prediction ledger COMPILED (2026-07-07): PAPER2_prediction_ledger.md** — 31 scored items
+  (guard set, conditional, and the pending P-C2v4 counted separately), with the calibration
+  analysis. §1 and §6 now carry exact counts. Recommend the ledger as a supplementary exhibit
+  — it is the methodology section in table form. Update the tally if P-C2v4 lands before
+  submission (pending gate-beta rerun).
 - **Arm C-v2 hooks FILLED (2026-07-07):** §2.3 carries the bounded-core result + the
   exoneration-by-sign; §6 carries the narrow-anchoring-window datum. Optional cleanup
   registered as P-C2v4 (campaign doc): the dry cap-pinned `gate-beta` row separates the
