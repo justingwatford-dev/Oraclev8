@@ -65,3 +65,43 @@ paper.
 ## Results
 
 *(append after the GPU runs; predictions frozen)*
+
+## Arm 1 results (appended 2026-07-07; logs `*_Arm1.txt` / `*_Arm1-2nd.txt`)
+
+| storm | 3–7° (production) | 5–9° | 7–11° |
+|---|---|---|---|
+| Ivan (same-lat / timing) | +5.7 km / −7.1 h | +48.0 / −3.2 | +69.9 / **+5.3 (late)** |
+| Katrina | +78.2 / −2.4 | +140.4 / **+5.0 (late)** | **never crossed 29.1°N** |
+| Laura | −42.0 / −1.8 | −85.3 / **+2.9 (late)** | **never crossed 29.8°N** |
+| v(t=0) m s⁻¹: Ivan | +3.90 | +3.05 | +2.18 |
+| Katrina | **+1.14** | **−0.05** | **−0.65** |
+| Laura | +3.61 | +3.04 | +2.38 |
+
+**Scorecard:** **P-DLM1 FAILED decisively** (registered 65% — the middle band's overconfidence
+pattern, again): nothing is annulus-robust. The 5–9° ring alone shifts same-latitude cross-track
+by 42–62 km and timing by 4–7 h; at 7–11° two of three storms never reach their thresholds.
+**P-DLM2: the 15% branch fired** (Ivan +42 km / +3.9 h at the first step) — and the registered
+direction lean was right in form (poleward over-run reduces monotonically with ring radius:
+Ivan −7.1 → −3.2 → +5.3 h) but the trend does not stop at the truth; it drives straight through
+it into late-and-never. A contamination *correction* would converge toward the observed track;
+this diverges past it.
+
+**Verdict — heterogeneity, not contamination.** Two arguments, one empirical, one structural:
+(i) empirically, the initial poleward steering DRAINS monotonically with ring radius and for
+Katrina reverses sign — the flow that advects these storms is concentrated within ~5–7° of the
+center, and wider "more environmental" rings sample the subtropical ridge circulation instead,
+costing the storm its ride entirely; (ii) structurally, a full-annulus vector mean cancels all
+azimuthal harmonics (m ≥ 1) of storm-centered structure and the symmetric swirl with them, so
+the ring mean is largely insensitive to the storm's own circulation by construction (approximate
+— grid discretization and ring truncation break the cancellation only at second order). The
+double-counting suspicion is therefore bounded structurally, while the annulus choice is
+revealed as a first-order physical decision: **"the environment" is not a scale-free concept for
+these landfalls — the production 3–7° ring is not one adequate choice among many but essentially
+the band that contains the storm's actual advecting flow, validated by skill.**
+
+**Paper consequences:** paper-1 §5.3's deferred caveat resolves as the above (the honest
+sentence is not "the sampling is clean" but "the sampling radius is load-bearing and the
+production choice is the physically correct one"); paper-2 §6's bracketing hook gets the same
+number-backed sentence; red-team hold item 2 is discharged with a stronger answer than the
+hold anticipated. Arm 2 (obs-anchored, at the production ring) is unaffected by this finding
+and remains the buffer-mechanism test.
