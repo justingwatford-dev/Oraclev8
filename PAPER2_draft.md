@@ -54,8 +54,8 @@ envelope's own cost: it delays the model's dry barotropic re-intensification, an
 the mechanism of the delay.
 
 Throughout, we follow the companion paper's discipline: predictions registered before runs,
-controls before claims, and failures reported with the successes. Of thirty-one quantitative
-predictions registered across the campaign, fifteen were confirmed, ten failed, and six were
+controls before claims, and failures reported with the successes. Of thirty-two quantitative
+predictions registered across the campaign, fifteen were confirmed, ten failed, and seven were
 partial, unscoreable, or resolved against our stated lean; every failure narrowed the search,
 and two of the failures (sections 2 and 5) taught us more than the confirmations did.
 
@@ -250,11 +250,14 @@ phase-lock. The diagnostic is an afternoon: quiescent β-plane, balanced vortex,
 drift vector, f-plane null; the signature is amplitude saturation with heading precession. The
 fix costs one profile change and one testbed calibration.
 
-**What remains open.** The baroclinic nudge's magnitude awaits a matched-intensity control (a
-dry cap-pinned vortex — an existing testbed row); its sign already exonerates the candidate as
-cause (section 2.3). The anchoring window for a held warm core proved narrow — sixfold weaker
-relaxation ends in the adiabatic runaway — itself a datum on maintaining baroclinic structure
-in this core. The steering-buffer measurement invites a bracketing experiment on the environmental sampling
+**What remains open.** The baroclinic nudge's magnitude resists measurement: the natural
+matched-intensity control — a dry cap-pinned vortex — proved unreadable when run, its track
+non-steady at cap intensities (the center-finding fragility noted twice above, possibly
+compounded by genuine trochoidal wobble), so the nudge's size is recorded as unresolved while
+its sign already exonerates the candidate as cause (section 2.3). The anchoring window for a
+held warm core proved narrow — sixfold weaker relaxation ends in the adiabatic runaway —
+itself a datum on maintaining baroclinic structure in this core. A wobble-robust
+center-tracker is the prerequisite for any future high-intensity drift measurement. The steering-buffer measurement invites a bracketing experiment on the environmental sampling
 itself — annulus width, storm-removed and lagged variants — since a deep-layer mean sampled
 near the storm may already contain part of its propagation; the buffer quantified here is the
 architecture's compensating response, and the two effects should be separated. [AUTHOR NOTE:
@@ -271,10 +274,11 @@ resolution agrees to 0.1 m s⁻¹ while the production grid over-produces the he
 track configuration is untouched). Both were found because registered predictions failed and
 the failures were pursued.
 
-**The method, briefly.** Thirty-one quantitative predictions were registered across the
+**The method, briefly.** Thirty-two quantitative predictions were registered across the
 campaign's seven experiment sets, each committed before the run it concerned; fifteen were
-confirmed, ten failed, three held in part, two were unscoreable as designed, and one two-branch
-discriminator resolved against our stated lean (the full ledger accompanies this paper). The
+confirmed, ten failed, three held in part, three were unscoreable as designed, and one
+two-branch discriminator resolved against our stated lean (the full ledger accompanies this
+paper). The
 calibration record is itself informative: the high-confidence bucket verified at seven of
 seven, while the middle band ran overconfident, its misses concentrated in precisely the two
 lessons recorded en route — that surface drag couples to intensity only through a driven

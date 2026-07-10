@@ -43,12 +43,12 @@ supplementary exhibit — it is the methodology section, in table form.*
 | 29 | P-C2v1 | held-core null ≡ control | 90% | **CONFIRMED** (exact) |
 | 30 | P-C2v2 | bounded θ′/w, no cap-pinning | 75% | **PARTIAL** (bounded ✓; cap-pinned — maintained core is an energy source) |
 | 31 | P-C2v3 | flat < 5° / < 0.15 ⇒ exonerate | 70% | **FAILED as written**; verdict obtained by the unregistered SIGN branch (poleward ⇒ exonerated as cause) |
-| P | P-C2v4 | matched-intensity cleanup (dry cap-pinned row ≥354°, west ≤0.25) | 60% | **PENDING** (gate-beta rerun in progress) |
+| 32 | P-C2v4 | matched-intensity cleanup (dry cap-pinned row ≥354°, west ≤0.25) | 60% | **UNREADABLE** — the cap-pinned track is non-steady (headings 50°→296° across windows, \|drift\| spiking to 4.4 m s⁻¹; the documented high-intensity tracker fragility ± trochoidal wobble); neither branch fired; the C-v2 sign verdict never rested on it |
 
-## Tally (31 scored items; guard set, conditional, and pending item counted separately)
+## Tally (32 scored items; guard set and conditional counted separately)
 
-**15 confirmed** (one trivially) · **10 failed** · **3 partial** · **2 unscoreable as designed**
-· **1 discriminator resolved against the stated lean.**
+**15 confirmed** (one trivially) · **10 failed** · **3 partial** · **3 unscoreable/unreadable
+as designed** · **1 discriminator resolved against the stated lean.**
 
 ## Calibration analysis
 

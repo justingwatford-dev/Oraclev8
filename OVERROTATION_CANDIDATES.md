@@ -410,3 +410,17 @@ existing `gate-beta` mode's second row (init 120 → cap 70) is a dry cap-pinned
 mature aim reads ≥354° with west ≤0.25, the baroclinic row's shift is intensity alone (the
 nudge evaporates); if it holds ~350–352/≈+0.4, the small poleward baroclinic nudge is real.
 ~60% on the first branch. Either way the paper-level verdict above stands.
+
+### P-C2v4 result (appended 2026-07-07, gate-beta rerun by Justin): UNREADABLE AS DESIGNED
+
+The dry cap-pinned row (init 120 → cap 70, Vmax_end 71.7 after riding 84–87) produced a
+non-steady track: per-window headings 50° (t18) → 359 → 355 → 347 → 335 → 296° (t48), with
+|drift| swinging 1.5 → 4.4 → 1.6 m s⁻¹ — the documented high-intensity center-finder fragility
+(gate-beta-longrun; Run-4 row G), possibly compounded by genuine trochoidal wobble. The
+mature-window mean (|2.30| @ 329°, west 1.18) is an average over that jitter, not an aim;
+neither registered branch fired. Config note: the legacy gate-beta mode runs taper-onset 250 km
+(pre-calibration default), a second mismatch to the C-v2 rows (onset 200). **Verdict: the
+matched-intensity control is not achievable with current tooling; the baroclinic nudge's
+MAGNITUDE is recorded as unresolved. The exoneration-by-sign (Arm C-v2) is unaffected — it
+never rested on this comparison.** Third instrument lesson of the campaign: high-intensity
+drift vectors need a wobble-robust tracker before they are load-bearing.
