@@ -173,7 +173,7 @@ where the domain requires it (0.04 m s⁻¹ at 1000 km at storm intensity). The 
 discipline of the companion paper thus survives the model change that paper motivated: the new
 parameter, like the old, has never seen a landfall.
 
-## 5. Six storms, and the steering buffer
+## 5. Six storms, and the transit attenuation
 
 ### 5.1 The differential projection
 
@@ -303,7 +303,7 @@ seven, while the middle band ran overconfident, its misses concentrated in preci
 lessons recorded en route — that surface drag couples to intensity only through a driven
 secondary circulation, and that threshold feedbacks must be registered as trajectories, not
 endpoints. Most telling, the two deliberate long shots — the 20%-weighted cutoff branch and the
-35%-weighted steering-buffer branch — are this paper's two principal results: the headline
+35%-weighted attenuation branch — are this paper's two principal results: the headline
 findings entered the campaign as its least-favored registered hypotheses. The companion paper
 argued that a model should never be granted the benefit of the doubt; this paper adds the
 corollary that neither should the experimenter.
