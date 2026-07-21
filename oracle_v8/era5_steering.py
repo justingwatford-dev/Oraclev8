@@ -229,6 +229,74 @@ STORM_CONFIGS = {
             24:     (29.8, 93.3),   # landfall record, 27/0600Z (Cameron LA)
         },
     ),
+
+    # ── A/B expansion storms (PAPER2_EXPANSION_predictions.md, 2026-07-18) ──
+    "charley": dict(
+        init_year  = 2004,
+        init_month = 8,
+        init_day   = 12,
+        init_hour  = 18,                   # 18Z init, pre-Cuba (registered feature)
+        area       = [40, -95, 10, -70],
+        year_str   = "2004",
+        month_str  = "08",
+        days       = ["12", "13", "14"],
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "charley_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL032004). Cuba crossing at t~10.5 h is an
+        # unrepresented land feature — registered, not discovered.
+        obs_track  = {
+             0:     (20.5, 81.6),
+             6:     (21.7, 82.2),
+            12:     (23.0, 82.6),
+            18:     (24.4, 82.9),
+            24:     (26.1, 82.4),
+            25.75:  (26.6, 82.2),   # landfall record, 13/1945Z (Cayo Costa FL)
+        },
+    ),
+    "florence": dict(
+        init_year  = 2018,
+        init_month = 9,
+        init_day   = 13,
+        init_hour  = 0,                    # 00Z init
+        area       = [45, -92, 20, -60],
+        year_str   = "2018",
+        month_str  = "09",
+        days       = ["12", "13", "14", "15"],
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "florence_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL062018). Landfall motion is nearly zonal
+        # (westward) — the record's first zonal-mover geometry.
+        obs_track  = {
+             0:     (31.5, 73.2),
+             6:     (32.4, 74.2),
+            12:     (33.1, 75.1),
+            18:     (33.6, 76.0),
+            24:     (34.0, 76.5),
+            30:     (34.2, 77.2),
+            35.25:  (34.2, 77.8),   # landfall record, 14/1115Z (Wrightsville Beach NC)
+        },
+    ),
+    "ida": dict(
+        init_year  = 2021,
+        init_month = 8,
+        init_day   = 28,
+        init_hour  = 12,                   # 12Z init, post-Cuba, open Gulf
+        area       = [42, -105, 12, -75],
+        year_str   = "2021",
+        month_str  = "08",
+        days       = ["27", "28", "29", "30"],
+        nc_path    = os.path.join(os.path.dirname(__file__),
+                                  "ida_era5_steering.nc"),
+        # HURDAT2 best-track fixes (AL092021).
+        obs_track  = {
+             0:     (24.4, 85.7),
+             6:     (25.6, 86.6),
+            12:     (26.7, 87.6),
+            18:     (27.6, 88.7),
+            24:     (28.5, 89.6),
+            28.92:  (29.1, 90.2),   # landfall record, 29/1655Z (Port Fourchon LA)
+        },
+    ),
 }
 
 _DEFAULT_STORM = "hugo"
