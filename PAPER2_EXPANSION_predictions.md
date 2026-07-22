@@ -59,3 +59,47 @@ verification module's decomposition and each run's actual geometry.
 2. Control + envelope runs per storm (`run_storm` by name; envelope via the frozen production
    profile, control via `ORACLE_OUTER_ENVELOPE_M=taper`), logs checked in.
 3. Score P-N1..P-N5, append outcomes here, fold results into PAPER2 §5 and the ledger.
+
+---
+
+# OUTCOMES (scored 2026-07-21; runs on the GPU backend — woe_env cupy/RTX 5070, both arms
+# per storm on the same backend so the A/B is backend-consistent; scoring script
+# `oracle_v8/measure_expansion_score.py`; logs `oracle_v8/Logs/{Charley,Florence,Ida}/`)
+
+**Tally: 3 confirmed / 2 failed — and the P-N4 failure is the campaign's most valuable
+result.** All guards clean on all three storms (max A/B intensity divergence 2.6 m s⁻¹,
+A/B timing ≤ 0.8 h): every ratio below counts.
+
+| storm | cross c→e (km) | along c→e (km) | axis | obs shift | strong | obs ratio | decomp pred |
+|---|---:|---:|---|---:|---:|---:|---:|
+| Charley | −31.8 → −45.0 | −160.7 → −172.8 | cross | −13.2 | −59 | **0.22** | 0.42 |
+| Florence | +62.7 → +65.7 | −124.3 → −78.3 | along | +46.0 | +73 | **0.63** | 0.56 |
+| Ida | +36.1 → +13.1 | −14.0 → +0.6 | cross | −23.0 | −97 | **0.24** | 0.31 |
+
+- **P-N1 CONFIRMED** (3/3; every |cross| ≤ 150 both arms). The lean was wrong in the best
+  way: Charley's placement held (−32/−45 km cross) — its damage is along-track (−161/−173 km,
+  +4.4/+5.2 h late), the dry capped model unable to follow the observed rapid acceleration
+  and RI into landfall, compounded by the registered Cuba crossing. Ida's envelope landfall:
+  **13.1 km total error** (+2.6 km same-latitude) — the best landfall in the nine-storm record.
+- **P-N2 CONFIRMED — nine for nine on sign.** Charley west, Florence along-forward, Ida west.
+- **P-N3 FAILED, informatively** — Florence's along-axis ratio 0.63 exceeds the [0.15, 0.55]
+  band. The band was generalized from cross-axis experience; a long, slow transit spends more
+  of its time at mature drift, and the along axis evidently transmits harder. The band was
+  the wrong generalization, not the storm.
+- **P-N4 FAILED — 2/3 closed, and the miss is the discovery.** Florence within 0.07, Ida
+  within 0.07 — the §5.3 mechanism survives its first true out-of-sample test on both
+  quasi-straight/zonal movers. Charley misses by 0.20 (0.42 predicted, 0.22 observed) —
+  **the Michael shortfall (0.45 predicted, 0.20 observed) replicated, under frozen
+  predictions, on the record's only other sharply-recurving NNE landfall.** The residual is
+  a reproducible class (n = 2), not a one-off. Post-hoc note (labeled): Charley's along-axis
+  ratio is also low (≈0.19), so its attenuation is uniform rather than cross-specific —
+  the leading untested candidate is now the *fixed-heading projection itself*: for a track
+  that curves sharply into landfall, projecting the accumulated correction through the final
+  heading overstates what a transit-integrated correction can deliver. Michael and Charley
+  are the two curved-landfall geometries; every quasi-straight mover closes.
+- **P-N5 CONFIRMED, decisively** — Florence |along| 46.0 km vs |cross| 3.0 km: the zonal
+  mover reads the westward correction as timing, the transit-attenuation story's geometric
+  corollary, predicted and observed.
+
+**Running program tally: 48 registered predictions (32 campaign + 11 hardening + 5
+expansion): 24 confirmed, 17 failed, 7 partial/unscoreable/against-lean.**

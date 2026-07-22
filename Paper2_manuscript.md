@@ -25,9 +25,13 @@ mature-testbed drift and in-transit drift (intensity scaling and gyre
 spin-up)---quantifying why self-propagation biases are subdominant at
 landfall, and why landfall error is an unreliable instrument for
 reading them. A persistence baseline and a steering-only tracer, run
-under the same registered-prediction discipline, locate the skill:
-steering sets cross-track, the vortex's drift sets timing, and the
-model beats persistence on all six landfalls. The correction's own cost
+under the same registered-prediction discipline, locate the skill
+(steering sets cross-track, the vortex's drift sets timing, and the
+model beats persistence on all six landfalls), and a three-storm blind
+extension makes the sign record nine for nine while reproducing the
+mechanism's per-storm predictions on straight movers---the two storms
+that curve sharply into landfall under-transmit alike, a reproducible
+residual we characterize rather than explain. The correction's own cost
 is characterized: the envelope delays dry barotropic re-intensification
 by 8--12 hours by weakening mid-radius Ekman inflow.
 
@@ -417,6 +421,68 @@ capped equilibrium. (b) Boundary-layer mass inflow at 300 km: in the
 pre-onset window the Ekman inflow runs 2.5--3$\times$ stronger under
 the compact profile---the mechanism of the delay.
 
+## Three More Storms, Registered Blind
+
+Because six storms carried both the skill claim and the transmission
+ratio, we extended the A/B by three storms chosen for geometric
+stress---predictions, guards, and thresholds frozen before any
+reanalysis was downloaded. Charley (2004) lands moving
+north-northeast---Michael's axis---and so asks directly whether
+Michael's under-transmission is a class; its crossing of Cuba, which
+the model does not represent, was registered in advance as a known
+unrepresented feature. Florence (2018) lands moving nearly due west,
+the record's first zonal geometry, for which the westward drift
+correction should read as *timing* rather than placement. Ida (2021)
+is a near-pure cross-track case beside the Katrina--Laura falsifier
+pair. All guards came back clean (arm-to-arm intensity divergence
+$\leq 2.6$ m s$^{-1}$, timing $\leq 0.8$ h), so every number below
+counts.
+
+**Table 3.** The three-storm extension: landfall-fix decomposition
+under control and envelope, the dominant-axis shift, the strong-form
+projection through the registered heading, and the observed and
+decomposition-predicted transmission ratios.
+
+| Storm | Cross, c $\rightarrow$ e (km) | Along, c $\rightarrow$ e (km) | Axis | Obs shift (km) | Strong (km) | Obs ratio | Pred ratio |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Charley | $-31.8 \rightarrow -45.0$ | $-160.7 \rightarrow -172.8$ | cross | $-13.2$ | $-59$ | 0.22 | 0.42 |
+| Florence | $+62.7 \rightarrow +65.7$ | $-124.3 \rightarrow -78.3$ | along | $+46.0$ | $+73$ | 0.63 | 0.56 |
+| Ida | $+36.1 \rightarrow +13.1$ | $-14.0 \rightarrow +0.6$ | cross | $-23.0$ | $-97$ | 0.24 | 0.31 |
+
+The sign record is now nine for nine: Charley and Ida shift westward,
+and Florence shifts *forward*---its along-track shift (+46 km) dwarfs
+its cross-track shift (+3 km), confirming the registered geometric
+corollary that a zonal mover reads the westward correction as timing.
+The blind-skill record also extends: every landfall cross-track in
+the nine-storm record is within 150 km at the fix, and Ida's envelope
+run lands with 13 km total error, the best in the record. (Charley's
+placement holds while its timing does not---the model arrives 4--5 h
+late, unable to follow the observed rapid acceleration and
+intensification into landfall, with the registered Cuba crossing
+unrepresented; a dry, capped model's honest limit, visible on the
+axis the record says it should be visible on.)
+
+The mechanism's first out-of-sample test splits exactly along
+geometry. The per-storm decomposition, fed the new runs' intensity
+histories, closes on both quasi-straight movers---Florence within
+0.07, Ida within 0.07---and misses Charley by 0.20 (0.42 predicted,
+0.22 observed): Michael's shortfall (0.45 predicted, 0.20 observed),
+replicated under frozen predictions on the record's only other
+sharply-recurving landfall. The residual is therefore a reproducible
+class, not a one-off, and its membership is now legible: the
+decomposition closes on every quasi-straight or zonal mover and fails
+on both storms whose observed tracks curve sharply into landfall. A
+post-hoc reading, recorded as a candidate rather than a claim: for a
+sharply curving track, projecting the transit-accumulated correction
+through the single final-heading geometry---as both the strong form
+and the decomposition do---overstates what the correction can deliver,
+and the registered [0.15, 0.55] transmission band, generalized from
+cross-axis experience, likewise failed on Florence's along axis
+(0.63): a long, slow transit spends more of its time at mature drift
+and transmits harder. Both failures narrow the same thing---the
+geometry through which a drift correction becomes a landfall
+displacement---and both are recorded in the ledger.
+
 # Discussion
 
 **One model or a class, sharpened.** Any model that bounds its initial
@@ -437,11 +503,15 @@ as cause (Section 2.3). The anchoring window for a held warm core
 proved narrow---sixfold weaker relaxation ends in the adiabatic
 runaway---itself a datum on maintaining baroclinic structure in this
 core. A wobble-robust center-tracker is the prerequisite for any future
-high-intensity drift measurement. Michael's axis-specific
-under-transmission (0.20 observed against 0.45 predicted on
-cross-track, with along-track as predicted) is likewise recorded as
-unresolved; the candidates---east--west steering compensation on a slow
-mover, recurve-geometry projection---are untested. The environmental-sampling bracket
+high-intensity drift measurement. The curved-landfall
+under-transmission is now a reproducible class of two: Michael (0.20
+observed against 0.45 predicted) and, out of sample under frozen
+predictions, Charley (0.22 against 0.42)---while the decomposition
+closes on every quasi-straight or zonal mover in the record. The
+leading untested candidate is the fixed-heading projection itself,
+which for a sharply curving track overstates what a
+transit-accumulated correction delivers to the final landfall
+geometry; a curvature-following projection is a cheap next test. The environmental-sampling bracket
 has been run. An annulus sweep (5--9$^\circ$ and 7--11$^\circ$ against
 the production 3--7$^\circ$) found no robustness to report but
 something better: the sampled poleward steering drains monotonically
@@ -479,8 +549,12 @@ discriminator resolved against our stated lean (the full ledger
 accompanies this paper). A subsequent review-hardening round---the
 persistence baseline, the steering-only tracer, and the per-storm
 decomposition above---registered eleven further predictions under the
-same rules; six confirmed and five failed, the failures as instructive
-as the confirmations. The calibration record is itself informative:
+same rules (six confirmed, five failed), and the three-storm blind
+extension of Section 5.4 registered five more (three confirmed, two
+failed, both failures reported there). Across the program:
+forty-eight registered predictions, twenty-four confirmed, seventeen
+failed, seven partial or unscoreable---and the failures, throughout,
+as instructive as the confirmations. The calibration record is itself informative:
 the high-confidence bucket verified at seven of seven, while the middle
 band ran overconfident, its misses concentrated in precisely the two
 lessons recorded en route---that surface drag couples to intensity only
@@ -501,8 +575,10 @@ side effect. The poleward $\beta$-drift aim was the cost of bounding a
 vortex with compact support: truncation removes the outer flow that
 phase-locks the $\beta$-gyres. A smooth envelope restores canonical,
 phase-locked, intensity-invariant self-propagation in the testbed, and
-on six historical storms moves every landfall the predicted
-direction---at one-third the projected distance, because a
+on nine historical storms---three of them added blind, under
+predictions registered before their reanalysis was downloaded---moves
+every landfall the predicted direction---at roughly one-third the
+projected distance, because a
 mature-testbed drift overstates what drift does during a real transit
 (intensity history and gyre spin-up; steering feedback contributes less
 than a tenth, by direct test, and a vortex-free integration of the

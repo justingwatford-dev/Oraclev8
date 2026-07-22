@@ -148,7 +148,8 @@ def parse_hurdat2(path: str) -> dict[str, StormTrack]:
 
 def storm_init(track: StormTrack, init_date: datetime, *,
                B: float = 1.5, rmax_run_m: float = 75_000.0,
-               threshold_lat: float | None = None) -> dict:
+               threshold_lat: float | None = None,
+               landfall_after: datetime | None = None) -> dict:
     """Build the init/verification dict for one storm, all values read from the
     best track at `init_date`.  Mirrors the storm_data.py dict schema so the
     existing run pipeline and landfall_verify consume it unchanged."""
@@ -170,7 +171,9 @@ def storm_init(track: StormTrack, init_date: datetime, *,
     obs_track = [((fx.dt - init_date).total_seconds() / 3600.0, fx.lat, fx.lon)
                  for fx in track.fixes if fx.dt >= init_date]
 
-    lf = track.landfall_fix(init_date)
+    # `landfall_after` skips earlier 'L' records that are not the verification
+    # target (e.g. Charley's Cuba crossing before the Florida landfall).
+    lf = track.landfall_fix(landfall_after or init_date)
     if threshold_lat is None and lf is not None:
         threshold_lat = round(lf.lat, 1)
 
@@ -226,7 +229,22 @@ REGISTRY = {
     # crossing is ill-defined.  Use this for the QUALITATIVE track test (does the agnostic config
     # carry a low-latitude Cat 5 to south Florida) until track-PERPENDICULAR cross-track is wired in.
     "Andrew":  dict(id="AL041992", init="1992-08-23 00Z"),
-    # add storms here: "Michael": dict(id="AL142018", init="2018-10-09 12Z"),
+    # ── A/B expansion set (PAPER2_EXPANSION_predictions.md; predictions frozen pre-run) ──
+    # Charley (2004): fast NNE Florida mover, Cayo Costa landfall ~1945 UTC Aug 13 (26.6°N
+    # 82.2°W) — lands on Michael's axis (tests whether the axis-specific residual is a class).
+    # init = Aug 12 18Z (≈25.75 h to landfall).  ⚠ Cuba crossing at t≈10.5 h is an
+    # unrepresented land feature, REGISTERED in the expansion doc, not discovered later.
+    "Charley": dict(id="AL032004", init="2004-08-12 18Z", threshold_lat=26.4,
+                    landfall_after="2004-08-13 12Z"),   # skip the Cuba 'L'; target Cayo Costa
+    # Florence (2018): slow, decelerating NC approach, Wrightsville Beach landfall ~1115 UTC
+    # Sep 14 (34.2°N 77.8°W) moving nearly due WEST — the record's first zonal-mover geometry;
+    # the fix-decomposition is the primary metric (same-lat layer is the wrong axis here,
+    # exactly the Andrew caveat above).  init = Sep 13 00Z (≈35.25 h to landfall).
+    "Florence": dict(id="AL062018", init="2018-09-13 00Z", threshold_lat=34.0),
+    # Ida (2021): NW→N Gulf mover, Port Fourchon landfall ~1655 UTC Aug 29 (29.1°N 90.2°W) —
+    # near-twin of the Katrina/Laura falsifier pair, near-pure cross-track geometry.
+    # init = Aug 28 12Z (≈28.92 h to landfall), post-Cuba, open Gulf.
+    "Ida":     dict(id="AL092021", init="2021-08-28 12Z", threshold_lat=28.9),
 }
 
 
@@ -248,6 +266,8 @@ def load_storm(name_or_id: str, hurdat2_path: str = ATLANTIC_FILE,
         sid = entry["id"]
         init = _parse_init(entry["init"])
         kw.setdefault("threshold_lat", entry.get("threshold_lat"))
+        if "landfall_after" in entry:
+            kw.setdefault("landfall_after", _parse_init(entry["landfall_after"]))
     else:
         sid = name_or_id
         if init_date is None:
