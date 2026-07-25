@@ -157,6 +157,15 @@ not the storms," and §5.3 is rewritten accordingly.
   entanglement the decomposition now quantifies; the registered steering-path-divergence
   suspicion was unnecessary.
 - **P-D4 CONFIRMED** — guard-clean mean predicted 0.44 vs the aggregate accounting's 0.42.
+- **Amendment (2026-07-24, external review).** P-D4's registered target (0.42) was
+  mis-specified: it is the *all-six* aggregate (Σobs/Σstrong = 0.415), a population that
+  includes guard-excluded Ivan, and the §5.3 "0.42 product" is a Katrina-history quantity whose
+  honest comparator is Katrina's observed 0.43. Against the correct guard-clean targets, the
+  predicted mean 0.44 overshoots the observed mean of ratios (0.34) by +0.10 — at the
+  registered tolerance boundary, driven entirely by Michael; the guard-clean aggregate is 0.35.
+  The registered verdict stands as scored (no post-hoc threshold motion); the manuscripts now
+  carry the corrected comparison, and every population variant is computed in one place
+  (`oracle_v8/measure_transmission_summary.py`).
 - **POST-HOC (labeled, not registered):** along-axis transmissions where §5.2 commits the
   observed along shifts — Katrina obs 0.34 / pred 0.43; **Michael obs 0.46 / pred 0.38**;
   Laura obs 0.25 / pred 0.29. Michael's anomaly is therefore **axis-specific**: it transmits

@@ -25,7 +25,11 @@ magnitude aimed nearly due poleward, a bias that survives structure,
 diffusion, and resolution levers and an $f$-plane null. Second, blind
 track skill: six historical Atlantic landfalls---three never run during
 development---are reproduced with cross-track errors from a few tens of
-kilometers to roughly 125 km. The obvious bridge between the two
+kilometers to roughly 125 km. Baselines size that skill honestly: the
+model beats a persistence forecast on landfall position for all six
+storms, but a steering-only tracer---no vortex at all---already
+reproduces the cross-track record (105 km RMS against the model's 95);
+the model's own contribution is the timing. The obvious bridge between the two
 facts---that the bias causes the landfall errors---was drafted, tested
 by projecting the bias through each storm's landfall geometry, and
 falsified: steering controls landfall cross-track, and the bias is a
@@ -41,7 +45,10 @@ to observed tracks: it is initialized from the official hurricane
 database, and its one structural setting is calibrated against textbook
 vortex physics. Run on six historical hurricanes---three of them never
 used during development---it reproduced landfall positions without any
-storm-specific adjustment. Just as important, the discipline exposed a
+storm-specific adjustment. That skill has an honest shape, and we
+report it: the steering data alone place landfalls almost as well side
+to side; what the model itself adds is arriving on time. Just as
+important, the discipline exposed a
 specific, measurable error in how the model's storms steer themselves,
 and a chain of hidden, compensating errors in our own physics, data,
 and measurement tools that conventional tuning would have buried. We
@@ -251,8 +258,12 @@ parentheses).**
   pure gradient it adds exactly zero vorticity, leaving the balanced
   circulation untouched.
 
-- *Surface drag:* bulk-aerodynamic ($C_d = 1.5 \times 10^{-3}$),
-  decaying linearly to zero at $H_{bl} = 1\text{ km}$.
+- *Surface drag:* bulk-aerodynamic ($C_d = 1.5 \times 10^{-3}$
+  nominal), decaying linearly to zero at $H_{bl} = 1\text{ km}$. The
+  discrete column integral of this form over-counts the momentum sink
+  as the vertical grid refines; at the production spacing the
+  *effective* drag coefficient is 0.75$\times$ the nominal value---a
+  documentation correction quantified in the companion paper.
 
 - *Newtonian cooling:* $\theta'$ relaxation ($\tau = 30\text{ min}$)
   bounding adiabatic temperature anomalies, the standard dry-model
@@ -682,12 +693,17 @@ tested) and the time step fixed at 30 s (advective Courant number
 $\leq 0.27$ at the finest grid, bounded by the 70 m s$^{-1}$ intensity
 cap), we refined the horizontal grid by a factor of two, from
 $\Delta x = 15.6$ to 7.8 km. The mature $\beta$-drift heading is
-invariant to within 2$^\circ$ across the refinement, while the
-magnitude converges monotonically (Table 1). The aim residual is
-therefore not a discretization artifact: the $\beta$-gyre is adequately
-resolved at the operating resolution, the drift *magnitude* is
-grid-converged, and additional refinement does not rotate the aim
-toward the expected northwest orientation.
+invariant to within 2$^\circ$ across the refinement---moving, if
+anything, monotonically *away* from the canonical direction---while
+the magnitude decreases by $\approx 4$% per refinement level
+($\approx 8$% across the doubling) with successive differences of 0.10
+and 0.10 m s$^{-1}$: no asymptotic regime is demonstrated (Table 1).
+The *aim* claim is therefore not a discretization artifact---the
+heading, the quantity the claim rests on, is flat across a doubling of
+resolution, and additional refinement does not rotate it toward the
+expected northwest orientation. The drift *magnitude* carries an
+undemonstrated resolution dependence, and downstream quantities built
+from it inherit that caveat.
 
 **Table 1.** Mature (30--48 h) $\beta$-drift in the
 quiescent-environment testbed as a function of horizontal resolution,
@@ -760,14 +776,18 @@ The aim residual survives all three levers: it is insensitive to
 outer-vortex structure, it cannot be diffused away without loss of
 numerical stability, and it is invariant under a doubling of horizontal
 resolution. We therefore characterize it not as a tunable bias or a
-discretization error but as an intrinsic property of the model's
-$\beta$-gyre dynamics---a bounded, systematic poleward bias in
+discretization error but as a property not attributable to any lever
+tested here---a bounded, systematic poleward bias in
 self-propagation aim, expressed as a deficient westward component of
 the $\beta$-drift, arising because the simulated $\beta$-gyres
-over-rotate past their equilibrium orientation. This is a characterized
-*model property*, isolated in the testbed and independent of any storm;
-what it does to a real landfall is a separate, falsifiable question,
-addressed next.
+over-rotate past their equilibrium orientation. (Its cause, identified
+after this analysis was complete and reported in the companion paper,
+lies in the initialization profile's outer boundary condition---one of
+the three candidates named in Section 5.1.) This is a characterized
+*model property* in the operational sense---present under the
+production configuration, isolated in the testbed, independent of any
+storm; what it does to a real landfall is a separate, falsifiable
+question, addressed next.
 
 ## Landfall Track Errors Across Six Storms
 
@@ -1027,8 +1047,11 @@ over-rotate: in isolation its storms propel themselves with canonical
 $\beta$-drift magnitude but nearly poleward aim, a westward deficit that
 survives structure, diffusion, and resolution levers, an f-plane null,
 and a validated measurement instrument. It is a bounded, reproducible,
-mechanistically located model property, and we have left it in the
-model, characterized rather than concealed. Second, the same
+mechanistically located model property, characterized here before its
+cause was known: the cause---the compact-support outer boundary of the
+initial vortex---was subsequently identified and removed, and is
+reported in the companion paper. The characterization preceded the
+cure, and is what made it findable. Second, the same
 configuration---one set of coefficients, one structural parameter
 calibrated to idealized-vortex physics, nothing anywhere adjusted
 against a landfall---reproduces six historical landfalls, including

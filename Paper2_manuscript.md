@@ -105,10 +105,14 @@ smoothness---linear (slope discontinuities at both ends), the
 production cosine, and a quintic smoothstep (vanishing first and second
 derivatives)---plus two profiles with no compact support at all,
 Gaussian envelopes $\exp(-(r/r_d)^2)$ with $r_d$ = 420 km (matched to
-the production profile's wind at 350 km) and 560 km (Fig. 1). If the
-taper's *ring* of anticyclonic vorticity drives the bias, aim should
-track ramp sharpness; if the *cutoff itself* does, the envelopes should
-differ from all three ramps together. Arm C addresses the
+the production profile's wind at 350 km) and 560 km (Fig. 1). One
+limit of this design is stated up front: because compact support fixes
+the removed circulation, all three ramps carry an *identical
+integrated ring strength* and differ only in the sharpness of the
+ring's edges---so Arm A separates edge sharpness from the cutoff, not
+the ring's presence from it, and a ring-carrying profile that retains
+the outer tail is required to finish the attribution (Section 3). Arm
+C addresses the
 barotropic-configuration candidate with a baroclinicity ladder: the
 balanced warm core retained and buoyancy activated, with thermal
 relaxation at the production timescale, at a sixfold longer one, and
@@ -126,8 +130,10 @@ ramp band; the envelope spreads a weaker, broader negative lobe and
 retains far-field circulation.
 
 The honest metric, throughout, is the westward drift component---in the
-biased model it is the deficient quantity ($\approx 0.4$ m s$^{-1}$
-against a canonical $\sim 1.4$) and, unlike the heading, it is not
+biased model it is the deficient quantity: $\approx 0.4$ m s$^{-1}$
+against the $\sim 1$--2 m s$^{-1}$ implied by the canonical magnitude
+and direction bands (1--3 m s$^{-1}$ toward the northwest quadrant;
+Chan 2005)---and, unlike the heading, it is not
 confounded by intensity---and every reading is reported against the
 equilibrated maximum wind, because an earlier probe in the companion
 study found aim rotations that were artifacts of vortex collapse.
@@ -178,8 +184,14 @@ core indefinitely, and a passive-core null reproduces the dry control
 exactly. It also revealed why this candidate resists clean
 adjudication: a maintained warm core is an energy source, and the
 held-baroclinic vortex intensifies to the cap, entangling the aim
-comparison with the known intensity dependence. The reading that
-survives the entanglement is directional. With live, maintained
+comparison with the known intensity dependence. Two further
+compromises are named so the reading is discounted properly: the held
+45-K core sits at $\theta'/\bar{\theta} \approx 15$%, a factor of 1.7
+beyond the anelastic system's directly validated range
+($\approx 9$%), and the model's heated secondary circulation is not
+vertically converged at the production spacing (Section 6)---Arm C is
+the only buoyancy-active experiment in either paper and inherits
+both. The reading that survives all three is directional. With live, maintained
 vertical structure, the drift moves *poleward* of the dry control
 (356$^\circ$ versus 350$^\circ$; westward component 0.13 versus 0.42
 m s$^{-1}$)---the wrong direction to explain the westward deficit.
@@ -213,12 +225,36 @@ In the canonical picture, the gyres equilibrate where their generation
 by the $\beta$-effect balances their advection by the vortex
 circulation (Fiorino and Elsberry 1989; Chan and Williams 1987), and
 Fiorino and Elsberry located the controlling flow in the outer wind,
-roughly 300--1000 km from center. The compact taper amputates precisely
+roughly 300--800 km from center (Fiorino and Elsberry 1989; Smith et
+al. 1990). The compact taper amputates precisely
 that band's outer half. What remains cannot advect the gyre pair into
 its equilibrium orientation, and the asymmetry free-runs at something
 like a $\beta$-Rossby precession rate. The "over-rotation" of the
 companion paper was therefore never a rotation-rate error; it was the
 absence of the arresting flow.
+
+<!-- AUTHOR: the three citations below (Smith et al. 1990; Carr and
+Elsberry 1997; Smith 1997) are newly added on external-review advice
+and are UNVERIFIED — confirm titles/volumes/claims before print. -->
+What is new here should be stated against a literature that is not.
+That the outer wind controls $\beta$-drift is established: the
+symmetric tangential wind in the 300--800-km annulus sets the gyres'
+magnitude and orientation (Fiorino and Elsberry 1989; Smith et al.
+1990), an empirical law gives drift direction as a function of profile
+shape (Smith 1997), and Carr and Elsberry (1997) built an operational
+beta-and-advection propagation model on compactly supported vortices
+indexed by their cutoff radius. Prior work, that is, shows the
+*equilibrium orientation shifting* with outer profile. The compact
+family here shows something categorically different: no equilibrium at
+all---amplitude saturates while orientation precesses freely at
+$\approx 0.4^\circ$ h$^{-1}$, through due north and beyond, for as
+long as we have integrated (Fig. 2a). That is a failure mode, not a
+parameter dependence. How Carr and Elsberry's cutoff vortices
+nonetheless yield well-defined propagation is a comparison we flag
+rather than resolve---where their cutoff sits relative to the gyre
+annulus, and what their closure assumes about equilibration, are the
+candidate differences---and the afternoon diagnostic of Section 6
+applies to their configuration as written.
 
 The recovered drift also changes *kind*, in a way that identifies it as
 canonical structure rather than a retuned artifact. In the compact
@@ -247,7 +283,12 @@ vortex, plus the tail"), its drift magnitude (2.30 m s$^{-1}$) sits
 nearest the production control's 2.49, and its westward component
 (+1.20) lies nearest the canonical value. The envelope's far field is
 negligible where the domain requires it (0.04 m s$^{-1}$ at 1000 km at
-storm intensity). The no-landfall-tuning discipline of the companion
+storm intensity). How little far field the lock actually needs is
+worth recording: the narrowest calibrated envelope, $r_d$ = 350 km,
+locks at 330$^\circ$ while carrying 3.2 m s$^{-1}$ at 500 km and 0.4
+m s$^{-1}$ at 700---the arresting flow is bought with a few meters per
+second beyond the taper's own support, which sharpens the exported
+diagnostic considerably. The no-landfall-tuning discipline of the companion
 paper thus survives the model change that paper motivated: the new
 parameter, like the old, has never seen a landfall.
 
@@ -261,7 +302,11 @@ in an A/B of the *same model* under the *same* reanalysis steering
 (ERA5; Hersbach et al. 2020), the steering errors cancel, and the drift
 correction $\Delta = (-0.78, -0.49)$ m s$^{-1}$ (east, north),
 projected through each storm's landfall geometry and transit time,
-yields a per-storm predicted displacement. We registered those
+yields a per-storm predicted displacement. ($\Delta$ is a
+$\Delta x$ = 15.6-km quantity: the testbed drift magnitude decreases
+$\approx 8$% across a grid doubling with no demonstrated asymptote
+(companion paper), and the strong-form projections and every ratio
+built on them inherit that resolution dependence.) We registered those
 predictions, with two hypotheses for their amplitude: H1, linear
 accumulation (the strong form); H2, partial absorption by the steering
 relaxation, which samples the environment at the storm's actual
@@ -280,12 +325,12 @@ Fig. 3).
 **Table 2.** The six-storm A/B: cross-track error at the observed
 landfall fix under the control (compact-taper) and envelope
 configurations, the observed shift, the strong-form (linearly
-projected) shift, and their ratio. The dagger marks an intensity-guard
-exceedance, excluded from the transmission estimate.
+projected) shift, and their ratio. Daggers mark the two
+intensity-guard exceedances, excluded from the transmission estimate.
 
 | Storm | Cross-track, control $\rightarrow$ envelope (km) | Observed $\Delta$ (km) | Strong-form $\Delta$ (km) | Ratio |
 |---|:---:|:---:|:---:|:---:|
-| Hugo | +110.2 $\rightarrow$ +78.7 | $-31.5$ | $-93$ | 0.34 |
+| Hugo | +110.2 $\rightarrow$ +78.7 | $-31.5$ | $-93$ | 0.34$^\dagger$ |
 | Katrina | +124.6 $\rightarrow$ +78.2 | $-46.4$ | $-108$ | 0.43 |
 | Ivan | +126.3 $\rightarrow$ +40.2 | $-86.1$ | $-139$ | 0.62$^\dagger$ |
 | Fran | +7.7 $\rightarrow$ $-29.9$ | $-37.6$ | $-81$ | 0.46 |
@@ -330,9 +375,9 @@ which is the companion paper's attribution restated as a measurement.
 
 **Fig. 3.** Observed westward cross-track shift versus the strong-form
 (linear) projection for the six-storm A/B. Every storm moves west, as
-predicted; the fitted transmission is $\approx 0.34$ of the linear
-projection (dashed line: 1:1). Open symbols mark the two
-intensity-guard exceedances, excluded from the estimate.
+predicted; the drawn line is the guard-clean mean transmission, 0.34
+(a through-origin fit gives 0.37; dashed line: 1:1). Open symbols mark
+the two intensity-guard exceedances, excluded from the estimate.
 
 ## What the Attenuation Is---and Is Not---and the Correction's Own Cost
 
@@ -349,8 +394,8 @@ simpler and bias-side: the testbed characterizes the drift at mature
 equilibrium and full strength, while the real storm runs weaker (the
 envelope-family drift scales with intensity---a factor $\approx 0.64$
 at Katrina's) and spends its first half-day spinning the gyres up
-($\approx 0.65$ of the transit)---the product, $\approx 0.42$, is the
-observed ratio. Landfall reads self-propagation error at one-third
+($\approx 0.65$ of the transit)---the product, $\approx 0.42$, against
+Katrina's observed 0.43. Landfall reads self-propagation error at one-third
 strength not because the architecture pulls the storm back, but because
 a mature-testbed drift vector overstates what the drift does during a
 real transit. The caution for attribution studies survives unchanged
@@ -364,10 +409,17 @@ The accounting was then asked to do something harder than match a mean.
 Made per-storm---the family drift-versus-intensity laws evaluated on
 each run's own intensity history, under the testbed spin-up curve---it
 predicts a transmission ratio for each storm, registered before
-computation. It reproduces the guard-clean mean (0.44 predicted against
-the 0.42 aggregate) and three of the four guard-clean storms within
+computation. Three of the four guard-clean storms land within
 $\pm 0.11$ (Katrina 0.52 predicted, 0.43 observed; Fran 0.43, 0.46;
-Laura 0.38, 0.27). It also closes the books on a flagged storm: Ivan's
+Laura 0.38, 0.27); the guard-clean means, 0.44 predicted against 0.34
+observed, put the accounting 26% high in aggregate, an overshoot
+driven entirely by Michael. One bookkeeping rule is worth stating in a
+paper about compensating errors: a storm the guard excludes from an
+estimate never reappears in that estimate's validation target. Ivan is
+in no observed average above; the all-six aggregate (0.42) and the
+guard-clean aggregate (0.35) are reported in the record for
+completeness, and the number this paper exports is the guard-clean
+mean of ratios, 0.34. It also closes the books on a flagged storm: Ivan's
 outsized 0.62, which the intensity guard excluded, is predicted at 0.67
 by the same accounting---the weakened envelope run's poleward deficit
 projects into cross-track at Ivan's heading, so the guard removed
@@ -469,9 +521,17 @@ histories, closes on both quasi-straight movers---Florence within
 0.22 observed): Michael's shortfall (0.45 predicted, 0.20 observed),
 replicated under frozen predictions on the record's only other
 sharply-recurving landfall. The residual is therefore a reproducible
-class, not a one-off, and its membership is now legible: the
-decomposition closes on every quasi-straight or zonal mover and fails
-on both storms whose observed tracks curve sharply into landfall. A
+class, not a one-off. Two candidate axes describe its membership, and
+$n$ = 2 cannot separate them: both misses curve sharply into
+landfall, and both carry observed inner cores far smaller than the
+frozen 75-km initialization---they are the record's two most
+mis-sized cores. <!-- AUTHOR: verify Michael/Charley observed RMW
+against the TC reports / EBTRK before print --> One datum leans
+against core size alone: Ida's observed radius of maximum wind is
+19 km (HURDAT2), as mis-sized as either, and the decomposition closes
+on it. The decomposition closes on every quasi-straight or zonal
+mover and fails on both curved landfalls; whether curvature or
+initialization is doing the work is unresolved here. A
 post-hoc reading, recorded as a candidate rather than a claim: for a
 sharply curving track, projecting the transit-accumulated correction
 through the single final-heading geometry---as both the strong form
@@ -605,9 +665,21 @@ submission identity. -->
 - Chan, J. C. L., and R. T. Williams, 1987: Analytical and numerical
   studies of the beta-effect in tropical cyclone motion. Part I: Zero
   mean flow. *J. Atmos. Sci.*, **44**, 1257--1265.
+- Carr, L. E., III, and R. L. Elsberry, 1997: Models of tropical
+  cyclone wind distribution and beta-effect propagation for
+  application to tropical cyclone track forecasting. *Mon. Wea.
+  Rev.*, **125**, 3190--3209.
 - Fiorino, M., and R. L. Elsberry, 1989: Some aspects of vortex
   structure related to tropical cyclone motion. *J. Atmos. Sci.*,
   **46**, 975--990.
+- Smith, R. K., 1997: [AUTHOR: the *Tellus* scaling-law paper giving
+  $\beta$-drift direction as an empirical function of profile
+  parameters --- confirm exact title, authorship, volume, pages
+  before print.] *Tellus*, **49A**.
+- Smith, R. K., W. Ulrich, and G. Dietachmayer, 1990: A numerical
+  study of tropical cyclone motion using a barotropic model. Part I:
+  The role of vortex asymmetries. *Quart. J. Roy. Meteor. Soc.*,
+  **116**, 337--362.
 - Hersbach, H., and Coauthors, 2020: The ERA5 global reanalysis.
   *Quart. J. Roy. Meteor. Soc.*, **146**, 1999--2049.
 - Holland, G. J., 1980: An analytic model of the wind and pressure
