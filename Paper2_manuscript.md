@@ -11,7 +11,10 @@ its cause. Here we identify the cause, remove it, and measure what its
 removal is worth. The bias is produced by the compact-support taper
 used to bound the initial vortex: truncating the outer wind removes the
 ambient flow that phase-locks the $\beta$-gyres, leaving them in free
-cyclonic precession. Replacing the taper with a smooth Gaussian
+cyclonic precession. A single-variable control isolates the cause: a
+profile carrying the taper's compensating anticyclonic ring on a
+retained outer tail still locks, so the failure belongs to the absent
+far field, not the ring. Replacing the taper with a smooth Gaussian
 envelope restores the lock---the gyre orientation is set within twelve
 hours and held---and yields $\beta$-drift that is canonical in
 magnitude and aim, robust across envelope scale, intensity-invariant in
@@ -256,6 +259,27 @@ annulus, and what their closure assumes about equilibration, are the
 candidate differences---and the afternoon diagnostic of Section 6
 applies to their configuration as written.
 
+The attribution Arm A could not finish, a single-variable control
+does. Because compact support fixes the removed circulation, "the
+cutoff" and "the compensating anticyclonic ring" are two descriptions
+of the same modification everywhere in Arm A---so we built the profile
+that separates them: the taper's ring ($\approx$76% of its
+circulation, in the same 200--500-km band) superposed on the
+envelope's retained tail, registered before the run. It **locks**:
+heading steady to within 1$^\circ$ from $t$ = 24 h to 48 h at 335$^\circ$,
+westward component +1.28 m s$^{-1}$---fully canonical behavior with
+the ring present. The ring's whole effect is a few degrees of
+equilibrium offset (335$^\circ$ against the pure envelope's
+329$^\circ$)---the *parameter dependence* the prior literature
+describes, and we do not press even that, since the ring-carrying
+vortex equilibrates 4.8 m s$^{-1}$ hotter and the offset is
+intensity-entangled (the run's registered intensity guard failed, and
+is reported failed). What the guard cannot touch is the lock itself:
+an orientation held for 24 hours is not an intensity artifact. The
+unlock of the compact family is the absence of the arresting far
+field---the cutoff, not the ring---and the exported advice is
+correspondingly "keep the tail," not "relocate the ring."
+
 The recovered drift also changes *kind*, in a way that identifies it as
 canonical structure rather than a retuned artifact. In the compact
 family the westward component was fixed ($\approx 0.41$ m s$^{-1}$ at
@@ -288,7 +312,12 @@ worth recording: the narrowest calibrated envelope, $r_d$ = 350 km,
 locks at 330$^\circ$ while carrying 3.2 m s$^{-1}$ at 500 km and 0.4
 m s$^{-1}$ at 700---the arresting flow is bought with a few meters per
 second beyond the taper's own support, which sharpens the exported
-diagnostic considerably. The no-landfall-tuning discipline of the companion
+diagnostic considerably. And because the envelope places real
+circulation farther out than the taper, it owes the domain-geometry
+check the companion paper's cascade established: on a 7500-km domain
+at the same grid spacing, the envelope's drift vector moves by 0.04
+m s$^{-1}$ and 2$^\circ$ (registered null)---no domain-edge
+sensitivity. The no-landfall-tuning discipline of the companion
 paper thus survives the model change that paper motivated: the new
 parameter, like the old, has never seen a landfall.
 
@@ -633,7 +662,9 @@ The companion paper characterized a bias and declined to explain it;
 this paper explains it, removes it, and prices both the removal and its
 side effect. The poleward $\beta$-drift aim was the cost of bounding a
 vortex with compact support: truncation removes the outer flow that
-phase-locks the $\beta$-gyres. A smooth envelope restores canonical,
+phase-locks the $\beta$-gyres---and by direct single-variable control,
+it is the missing flow and not the taper's compensating vorticity ring
+that does it. A smooth envelope restores canonical,
 phase-locked, intensity-invariant self-propagation in the testbed, and
 on nine historical storms---three of them added blind, under
 predictions registered before their reanalysis was downloaded---moves

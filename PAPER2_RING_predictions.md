@@ -51,3 +51,32 @@ CONFIRMED/FAILED on the stated thresholds; no post-hoc motion; outcomes appended
 folded into Paper 2 §2.1/§3/§4 (the Arm A design limitation is already acknowledged in the
 manuscript text as of this commit, with the discriminator referenced as "reported in
 Section 3").
+
+---
+
+# OUTCOMES (scored 2026-07-24, same day; logs `oracle_v8/Logs/GATE_BETA_RINGTAIL.txt`,
+# `GATE_BETA_ENVDOMAIN.txt`; GPU backend, same-harness envelope control re-run)
+
+| profile | mature drift | heading trace t12/24/36/48 | west | Vmax_end |
+|---|---|---|---|---|
+| gauss r_d=420 control | 2.30 @ 329° | 328/327/328/329 | +1.20 | 39.7 |
+| **ring+tail** | 2.97 @ 335° | 332/335/334/335 | +1.28 | 44.5 |
+| envelope, 7500 km/480 | 2.26 @ 327° | — | +1.22 | 39.6 |
+
+- **P-R1 CONFIRMED — the CUTOFF, not the ring.** The ring+tail profile **locks**: heading span
+  t24→t48 is ≤1° (threshold ≤6°), mature heading 335° (threshold ≤340°), westward component
+  +1.28 — fully canonical behavior with the taper's ring present at ≈76% strength in the gyre
+  band. The ring's effect is a few degrees of equilibrium shift (335 vs the envelope's 329),
+  exactly the *parameter dependence* the prior literature describes; the unlock of the compact
+  family is the absence of the arresting far field. The exported advice stands: keep the tail.
+- **P-R2 FAILED (guard).** Equilibrated Vmax 44.5 vs the control's 39.7 — 4.8 m s⁻¹, beyond
+  the registered 3. The ring+tail profile carries more mid-radius wind and equilibrates
+  hotter. Consequence, stated precisely: the *few-degree equilibrium offset* (335 vs 329) is
+  intensity-entangled and not claimed; the **lock itself** — amplitude growing into a fixed
+  orientation over 24+ h — cannot be an intensity artifact (the envelope family's aim is
+  intensity-invariant across Vmax 17–40), and P-R1's verdict rests on the lock, not the offset.
+- **P-DN1 CONFIRMED.** 7500-km/480² envelope: deltas vs the committed control are
+  |drift| −0.04 m s⁻¹, heading −2°, west +0.02 — all inside ±0.15/±4°/±0.15. No domain-edge
+  sensitivity; the cascade-chapter-2 loop is closed for the envelope.
+
+**Running program tally: 51 registered / 26 confirmed / 18 failed / 7 other.**
