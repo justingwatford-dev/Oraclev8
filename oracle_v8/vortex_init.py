@@ -106,6 +106,7 @@ class HollandVortexInit:
         taper_start_frac: float = 0.5,
         taper_shape: str = "cos",
         outer_envelope_m: float = None,
+        ring_plus_tail: bool = False,
     ) -> None:
         """
         Parameters
@@ -180,6 +181,13 @@ class HollandVortexInit:
         self.taper_shape      = taper_shape
         self.outer_envelope_m = (float(outer_envelope_m)
                                  if outer_envelope_m is not None else None)
+        # ring+tail discriminator (review response, 2026-07-24): crossfade
+        # from the tapered profile to the envelope tail across the ramp band,
+        #     Vt = V_hol * [T(r) + G(r) * (1 - T(r))]
+        # so the band keeps the taper's anticyclonic ring (~76% of its
+        # circulation for r_d = 420 km) while the far field keeps the
+        # envelope tail.  Requires wind_taper params AND outer_envelope_m.
+        self.ring_plus_tail = bool(ring_plus_tail)
 
         # Pre-build 1-D radial grid (CPU, done once)
         self._r1d = np.linspace(0.0, self.R_env, self.n_radial)
@@ -201,7 +209,16 @@ class HollandVortexInit:
         x       = (self.Rmax / r_safe) ** self.B
         Vt      = self.Vmax * np.sqrt(x * np.exp(1.0 - x))
         Vt      = np.where(r > 0.0, Vt, 0.0)
-        if self.outer_envelope_m is not None:
+        if self.ring_plus_tail:
+            # ring+tail discriminator: taper's ring in the band, envelope
+            # tail beyond (see __init__ note).  Core below the taper onset
+            # is identical to both parent profiles.
+            r0   = self.taper_start_frac * self.R_env
+            frac = np.clip((r - r0) / max(self.R_env - r0, 1e-9), 0.0, 1.0)
+            T    = 0.5 * (1.0 + np.cos(np.pi * frac))
+            G    = np.exp(-(r / self.outer_envelope_m) ** 2)
+            Vt   = Vt * (T + G * (1.0 - T))
+        elif self.outer_envelope_m is not None:
             # No-cutoff variant (over-rotation Arm A): smooth Gaussian
             # envelope, no compact support, no taper ring.  Decays through
             # R_env; caller must pick outer_envelope_m small enough that the
