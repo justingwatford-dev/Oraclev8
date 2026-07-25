@@ -263,7 +263,7 @@ The attribution Arm A could not finish, a single-variable control
 does. Because compact support fixes the removed circulation, "the
 cutoff" and "the compensating anticyclonic ring" are two descriptions
 of the same modification everywhere in Arm A---so we built the profile
-that separates them: the taper's ring ($\approx$76% of its
+that separates them: the taper's ring ($\approx 76$% of its
 circulation, in the same 200--500-km band) superposed on the
 envelope's retained tail, registered before the run. It **locks**:
 heading steady to within 1$^\circ$ from $t$ = 24 h to 48 h at 335$^\circ$,
