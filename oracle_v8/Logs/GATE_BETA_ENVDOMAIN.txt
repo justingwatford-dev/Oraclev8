@@ -1,0 +1,37 @@
+C:\Users\itali\miniconda3\envs\woe_env\Lib\site-packages\cupy\_environment.py:596: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy, cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+[backend] cupy ACTIVE on NVIDIA GeForce RTX 5070
+==============================================================================
+GATE-BETA ENVELOPE DOMAIN NULL  (gauss r_d=420; 7500km/480 vs committed 5000km/320)
+==============================================================================
+
+  7500km/480: |drift| 2.26 m/s @ 327 deg   west +1.22   Vmax_end 39.6
+  committed 5000km/320 control: 2.30 @ 329, west +1.20, Vmax_end 39.7
+  deltas: |drift| -0.04   hdg -2 deg   west +0.02
+
+  [1915 s]

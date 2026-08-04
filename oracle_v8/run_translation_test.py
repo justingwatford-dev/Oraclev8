@@ -171,6 +171,7 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
                     Rmax=None, B=None, f_ref=None, snapshot_hours=None,
                     diff_form="hyper", nu_H=2.0e5,
                     taper_shape="cos", outer_envelope_m=None,
+                    ring_plus_tail=False,
                     buoyancy_on=False, tau_cool=1800.0, cool_to_init=False,
                     subcell=True, verbose=False):
     """One translation run. f-plane by default (beta=False, β OFF — eff≈1 ⇒
@@ -191,7 +192,8 @@ def run_translation(Vmax, u_env=0.0, v_env=5.0, epsilon=0.5,
                              wind_taper=wind_taper,
                              taper_start_frac=taper_start_frac,
                              taper_shape=taper_shape,
-                             outer_envelope_m=outer_envelope_m)
+                             outer_envelope_m=outer_envelope_m,
+                             ring_plus_tail=ring_plus_tail)
     state = init.build_state(nx, ny, nz, Lx, Ly, _Base())
     if not keep_theta:
         # historical default: kill the (passive) warm core so eff is pure advection
@@ -1741,6 +1743,81 @@ def gate_beta_baroclinic():
     print(f"\nWall time: {time.time()-t0:.0f}s")
 
 
+def gate_beta_ringtail():
+    """GATE-BETA RING+TAIL DISCRIMINATOR (review response, 2026-07-24) —
+    the single-variable test Arm A could not deliver: the taper's
+    anticyclonic ring (>~76% of its circulation, same 200-500 km band)
+    superposed on the r_d=420 envelope's retained tail.
+
+      lock breaks (precession >= 8 deg t24->t48 through >= 345) => RING
+      lock holds (span <= 6 deg, heading <= 340)                => CUTOFF
+
+    Registered: PAPER2_RING_predictions.md (P-R1, P-R2), committed before
+    this run.  Envelope-420 control re-run in-session for a same-harness
+    comparison.
+    Usage:  python -m oracle_v8.run_translation_test gate-beta-ringtail
+    """
+    t0 = time.time()
+    print("=" * 78)
+    print("GATE-BETA RING+TAIL  (taper ring x envelope tail; cap 70, "
+          "5000km/320, 48h, quiescent)")
+    print("=" * 78)
+    for lbl, kw in (
+            ("gauss r_d=420 control", dict(outer_envelope_m=420e3)),
+            ("RING+TAIL  (ring in 200-500, gauss-420 tail)",
+             dict(outer_envelope_m=420e3, wind_taper=True,
+                  taper_start_frac=0.40, ring_plus_tail=True)),
+    ):
+        d = run_translation(64, u_env=0.0, v_env=0.0, v_cap=70.0,
+                            beta=True, r_env=500e3, nx=320,
+                            dom=5_000_000.0, hours=48.0,
+                            f_ref=IVAN_F_REF, **kw)
+        track = d["track"]
+        tt, xs, ys, vmt = track
+        m_spd, m_hdg, m_w = _mature_drift(track, 30.0, 48.0)
+        print(f"\n  {lbl}:")
+        print(f"    mature 30-48h: |drift| {m_spd:.2f} m/s @ {m_hdg:.0f} deg"
+              f"   west {m_w:+.2f}   Vmax_end {d['vmax_end']:.1f}")
+        for th in (12, 24, 36, 48):
+            i = min(range(len(tt)), key=lambda k: abs(tt[k] - th * 3600.0))
+            j = max(0, i - max(1, len(tt) // 8))
+            w_spd, w_hdg, w_w = _mature_drift(
+                track, tt[j] / 3600.0, tt[i] / 3600.0)
+            print(f"      t{th:02d}: {w_spd:.2f} @ {w_hdg:.0f} deg"
+                  f"  west {w_w:+.2f}")
+    print(f"\n  [{time.time() - t0:.0f} s]")
+
+
+def gate_beta_envdomain():
+    """GATE-BETA ENVELOPE DOMAIN NULL (review response, 2026-07-24) —
+    the envelope places real circulation farther out than the taper, and
+    cascade chapter 2 established domain-edge sensitivity for this model;
+    verify the envelope's drift vector is domain-independent.
+
+    Committed 5000 km / nx=320 control (Stage 2): 2.30 m/s @ 329, west
+    +1.20, Vmax_end 39.7.  This run: 7500 km / nx=480, same dx.
+    Registered: PAPER2_RING_predictions.md (P-DN1).
+    Usage:  python -m oracle_v8.run_translation_test gate-beta-envdomain
+    """
+    t0 = time.time()
+    print("=" * 78)
+    print("GATE-BETA ENVELOPE DOMAIN NULL  (gauss r_d=420; 7500km/480 vs "
+          "committed 5000km/320)")
+    print("=" * 78)
+    d = run_translation(64, u_env=0.0, v_env=0.0, v_cap=70.0,
+                        beta=True, outer_envelope_m=420e3, r_env=500e3,
+                        nx=480, dom=7_500_000.0, hours=48.0,
+                        f_ref=IVAN_F_REF)
+    m_spd, m_hdg, m_w = _mature_drift(d["track"], 30.0, 48.0)
+    print(f"\n  7500km/480: |drift| {m_spd:.2f} m/s @ {m_hdg:.0f} deg"
+          f"   west {m_w:+.2f}   Vmax_end {d['vmax_end']:.1f}")
+    print(f"  committed 5000km/320 control: 2.30 @ 329, west +1.20, "
+          f"Vmax_end 39.7")
+    print(f"  deltas: |drift| {m_spd - 2.30:+.2f}   hdg {m_hdg - 329:+.0f} deg"
+          f"   west {m_w - 1.20:+.2f}")
+    print(f"\n  [{time.time() - t0:.0f} s]")
+
+
 def gate_beta_envelope():
     """GATE-BETA ENVELOPE CALIBRATION (over-rotation follow-up, 2026-07) —
     calibrate the Gaussian-envelope scale r_d and verify the recovered
@@ -2694,5 +2771,9 @@ if __name__ == "__main__":
         gate_j2_profile()
     elif arg in ("gate-beta-baroclinic-v2", "baro2", "34"):
         gate_beta_baroclinic_v2()
+    elif arg in ("gate-beta-ringtail", "ringtail", "35"):
+        gate_beta_ringtail()
+    elif arg in ("gate-beta-envdomain", "envdomain", "36"):
+        gate_beta_envdomain()
     else:
         main()

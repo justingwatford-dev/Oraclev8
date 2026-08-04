@@ -1,0 +1,47 @@
+C:\Users\itali\miniconda3\envs\woe_env\Lib\site-packages\cupy\_environment.py:596: UserWarning: 
+--------------------------------------------------------------------------------
+
+  CuPy may not function correctly because multiple CuPy packages are installed
+  in your environment:
+
+    cupy, cupy-cuda12x, cupy-cuda13x
+
+  Follow these steps to resolve this issue:
+
+    1. For all packages listed above, run the following command to remove all
+       existing CuPy installations:
+
+         $ pip uninstall <package_name>
+
+      If you previously installed CuPy via conda, also run the following:
+
+         $ conda uninstall cupy
+
+    2. Install the appropriate CuPy package.
+       Refer to the Installation Guide for detailed instructions.
+
+         https://docs.cupy.dev/en/stable/install.html
+
+--------------------------------------------------------------------------------
+
+  warnings.warn(f'''
+[backend] cupy ACTIVE on NVIDIA GeForce RTX 5070
+==============================================================================
+GATE-BETA RING+TAIL  (taper ring x envelope tail; cap 70, 5000km/320, 48h, quiescent)
+==============================================================================
+
+  gauss r_d=420 control:
+    mature 30-48h: |drift| 2.30 m/s @ 329 deg   west +1.20   Vmax_end 39.7
+      t12: 1.11 @ 328 deg  west +0.59
+      t24: 1.73 @ 327 deg  west +0.95
+      t36: 2.20 @ 328 deg  west +1.17
+      t48: 2.37 @ 329 deg  west +1.23
+
+  RING+TAIL  (ring in 200-500, gauss-420 tail):
+    mature 30-48h: |drift| 2.97 m/s @ 335 deg   west +1.28   Vmax_end 44.5
+      t12: 1.18 @ 332 deg  west +0.56
+      t24: 2.06 @ 335 deg  west +0.89
+      t36: 2.88 @ 334 deg  west +1.24
+      t48: 3.03 @ 335 deg  west +1.27
+
+  [1195 s]
